@@ -69,6 +69,21 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+    .hero-tower {
+      margin-top: 2.5rem;
+    }
+    .hero-tower img {
+      max-height: 520px;
+      width: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .hero-tower img:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 40px rgba(201,48,44,0.2);
+    }
+    .hero-tower a { display: inline-block; }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -637,6 +652,11 @@
       <span class="badge"><span class="dot green"></span> 7 Seals</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
     </div>
+    <div class="hero-tower">
+      <a href="index.svg" target="_blank" title="View full size">
+        <img src="index.svg" alt="Nakatomi Plaza Tower — cross-section illustration showing key floors, vault, seals, and characters" />
+      </a>
+    </div>
   </header>
 
   <!-- Navigation -->
@@ -1190,19 +1210,19 @@ flowchart LR
     <div class="container">
       <h2><span class="section-num">12</span> Design Documents</h2>
       <div class="docs-grid">
-        <a href="DESIGN.md" class="doc-link">
+        <a href="docs/DESIGN.md" class="doc-link">
           <h4>Design Document</h4>
           <p>Vision, game mechanics, puzzle design, technical architecture, and project roadmap.</p>
         </a>
-        <a href="STORY_AND_MYSTERIES.md" class="doc-link">
+        <a href="docs/STORY_AND_MYSTERIES.md" class="doc-link">
           <h4>Story &amp; Mysteries</h4>
           <p>Introduction narrative, Die Hard easter eggs, and the mystery/task catalogue.</p>
         </a>
-        <a href="TIMELINE_AND_FLOWS.md" class="doc-link">
+        <a href="docs/TIMELINE_AND_FLOWS.md" class="doc-link">
           <h4>Timeline &amp; Flows</h4>
           <p>Phase timeline, threat escalation, fail conditions, and McClane hint schedule.</p>
         </a>
-        <a href="flow.html" class="doc-link">
+        <a href="docs/flow.html" class="doc-link">
           <h4>Flow Diagrams (standalone)</h4>
           <p>Mermaid flow diagrams rendered in a minimal viewer.</p>
         </a>

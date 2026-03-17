@@ -40,15 +40,16 @@ This project is currently in the **design and planning** phase. The design docum
 
 ## Visual Project Overview
 
-Open **[docs/index.html](docs/index.html)** in a browser for a full visual overview of the project — game phases, architecture diagrams, seven seals, player roles, fail conditions, flow charts, easter eggs, and roadmap, all on one page.
+Open **[index.html](index.html)** in a browser for a full visual overview of the project — game phases, architecture diagrams, seven seals, player roles, fail conditions, flow charts, easter eggs, and roadmap, all on one page.
 
 ## Repository Structure
 
 ```
 splunk-escape-room/
 ├── README.md
+├── index.html                   # Visual project overview (open in browser)
+├── index.svg                    # Nakatomi Plaza tower illustration
 ├── docs/
-│   ├── index.html               # Visual project overview (open in browser)
 │   ├── DESIGN.md                # Full design document (mechanics, architecture, puzzles)
 │   ├── STORY_AND_MYSTERIES.md   # Narrative, easter eggs, mystery catalogue
 │   ├── TIMELINE_AND_FLOWS.md    # Phase timeline, fail conditions, flow diagrams
@@ -59,7 +60,7 @@ splunk-escape-room/
 
 | Document | Description |
 |----------|-------------|
-| [Visual Overview](docs/index.html) | Full project overview with diagrams, timelines, and architecture (open in browser) |
+| [Visual Overview](index.html) | Full project overview with diagrams, timelines, and architecture (open in browser) |
 | [Design Document](docs/DESIGN.md) | Vision, game mechanics, puzzle design, technical architecture, and project roadmap |
 | [Story & Mysteries](docs/STORY_AND_MYSTERIES.md) | Introduction narrative, Die Hard easter eggs, and the mystery/task catalogue |
 | [Timeline & Flows](docs/TIMELINE_AND_FLOWS.md) | Phase timeline, threat escalation, fail conditions, McClane hint schedule, and Mermaid flow diagrams |
