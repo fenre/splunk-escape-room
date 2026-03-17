@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nakatomi Heist — Flow & Timeline</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; margin-top: 2rem; }
+    .mermaid { margin: 1.5rem 0; }
+    .mermaid svg { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Success path (linear)</h1>
+  <div class="mermaid">
+flowchart TD
+  subgraph successPath [Success path]
+    A[Intro] --> B[Phase 1: Lobby]
+    B --> C[Phase 2: Recon]
+    C --> D[Phase 3: Access]
+    D --> E[Phase 4: Vault]
+    E --> F[Seal 1]
+    F --> G[Seal 2]
+    G --> H[Seal 3]
+    H --> I[Seal 4]
+    I --> J[Seal 5]
+    J --> K[Seal 6]
+    K --> L[Seal 7 meta]
+    L --> M[Vault open - Win]
+  end
+  </div>
+
+  <h1>Failure branches (all lead to game over)</h1>
+  <div class="mermaid">
+flowchart TD
+  P1[Phase 1]
+  P2[Phase 2]
+  P3[Phase 3]
+  P4[Phase 4]
+  S1[Seals 1-6]
+  HansFate["Game over: Hans's fate"]
+
+  P1 -->|Police: player triggers alert| HansFate
+  P2 -->|Police: player triggers alert| HansFate
+  P3 -->|Police: player triggers alert| HansFate
+  P4 -->|Police: player triggers alert| HansFate
+  P4 -->|McClane: 3 wrong codes| HansFate
+  P4 -->|Roof early: trap code| HansFate
+  P4 -->|Roof late: timer| HansFate
+  S1 -->|McClane: 3 wrong codes| HansFate
+  S1 -->|Roof late: timer| HansFate
+  </div>
+
+  <h1>Full flow (success + failures)</h1>
+  <div class="mermaid">
+flowchart TD
+  Intro[Intro] --> P1[Phase 1 Lobby]
+  P1 --> P2[Phase 2 Recon]
+  P2 --> P3[Phase 3 Access]
+  P3 --> P4[Phase 4 Vault]
+  P4 --> S1[Seal 1] --> S2[Seal 2] --> S3[Seal 3] --> S4[Seal 4] --> S5[Seal 5] --> S6[Seal 6] --> S7[Seal 7 meta] --> Win[Vault open - Win]
+
+  P1 -->|Police trigger| Hans
+  P2 -->|Police trigger| Hans
+  P3 -->|Police trigger| Hans
+  P4 -->|Police trigger| Hans
+  P4 -->|McClane / Roof early| Hans
+  P4 -->|Roof late| Hans
+  S1 -->|McClane / Roof late| Hans
+  S2 -->|McClane / Roof late| Hans
+  S3 -->|McClane / Roof late| Hans
+  S4 -->|McClane / Roof late| Hans
+  S5 -->|McClane / Roof late| Hans
+  S6 -->|McClane / Roof late| Hans
+
+  Hans["Game over: Hans's fate"]
+  </div>
+
+  <h1>Timeline (phases over 0–60 min)</h1>
+  <div class="mermaid">
+flowchart LR
+  subgraph timeline [0-60 min]
+    T0["0"] --- T8["8"] --- T18["18"] --- T28["28"] --- T50["50"] --- T60["60"]
+  end
+  subgraph phases [Phases]
+    Lobby[Lobby]
+    Recon[Recon]
+    Access[Access]
+    Vault[Vault + Seals 1-6]
+    S7[Seal 7]
+  end
+  T0 --> Lobby
+  T8 --> Recon
+  T18 --> Access
+  T28 --> Vault
+  T50 --> S7
+  T60 --> End[Vault open or Game over]
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</body>
+</html>
