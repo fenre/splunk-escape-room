@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nakatomi Plaza: Vault Heist — Project Overview</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-dim: #8b949e;
+      --accent: #c9302c;
+      --accent-glow: #ff4444;
+      --gold: #d4a843;
+      --green: #3fb950;
+      --blue: #58a6ff;
+      --orange: #d29922;
+      --purple: #bc8cff;
+      --cyan: #39c5cf;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: linear-gradient(180deg, #1a0a0a 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(201,48,44,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .tagline {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .hero .badges {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .badge .dot.red { background: var(--accent); }
+    .badge .dot.gold { background: var(--gold); }
+    .badge .dot.green { background: var(--green); }
+    .badge .dot.blue { background: var(--blue); }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    nav.toc {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,17,23,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0;
+    }
+    nav.toc .container {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    nav.toc .container::-webkit-scrollbar { display: none; }
+    nav.toc a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+    nav.toc a:hover { color: var(--text); }
+
+    section { padding: 4rem 0; border-bottom: 1px solid var(--border); }
+    section:last-child { border-bottom: none; }
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.01em;
+    }
+    h2 .section-num {
+      color: var(--accent);
+      font-weight: 800;
+      margin-right: 0.5rem;
+    }
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+      color: var(--gold);
+    }
+    p { margin-bottom: 1rem; color: var(--text-dim); }
+    p.lead { font-size: 1.1rem; color: var(--text); }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .concept-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+    .concept-card:hover { border-color: var(--accent); }
+    .concept-card .icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .concept-card h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .concept-card p { font-size: 0.9rem; margin-bottom: 0; }
+
+    /* Phase timeline */
+    .timeline {
+      position: relative;
+      margin: 2rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--gold), var(--green));
+    }
+    .timeline-item {
+      position: relative;
+      padding-left: 60px;
+      margin-bottom: 2rem;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-dot {
+      position: absolute;
+      left: 16px;
+      top: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: var(--bg);
+    }
+    .timeline-item:nth-child(2) .timeline-dot { border-color: var(--orange); }
+    .timeline-item:nth-child(3) .timeline-dot { border-color: var(--blue); }
+    .timeline-item:nth-child(4) .timeline-dot { border-color: var(--purple); }
+    .timeline-item:nth-child(5) .timeline-dot { border-color: var(--green); }
+    .timeline-time {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .timeline-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .timeline-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 0.35rem;
+    }
+    .timeline-hint {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    /* Seals */
+    .seals-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+    }
+    .seal {
+      width: 110px;
+      text-align: center;
+    }
+    .seal-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--surface);
+      transition: all 0.3s;
+      position: relative;
+    }
+    .seal:hover .seal-circle {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(212,168,67,0.3);
+    }
+    .seal:last-child .seal-circle {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--surface) 0%, #2a1515 100%);
+    }
+    .seal:last-child:hover .seal-circle {
+      border-color: var(--accent-glow);
+      box-shadow: 0 0 20px rgba(255,68,68,0.4);
+    }
+    .seal-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .seal-method {
+      font-size: 0.7rem;
+      color: var(--gold);
+      margin-top: 0.15rem;
+    }
+    .seal:last-child .seal-method { color: var(--accent); }
+    .seal-connectors {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .seal-connector {
+      display: flex;
+      align-items: center;
+    }
+    .seal-arrow {
+      width: 20px;
+      height: 2px;
+      background: var(--border);
+      position: relative;
+    }
+    @media (max-width: 900px) {
+      .seal-arrow { display: none; }
+      .seals-row { gap: 0.5rem; }
+      .seal { width: 90px; }
+      .seal-circle { width: 64px; height: 64px; font-size: 1.2rem; }
+    }
+
+    /* Roles */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .role-card .role-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .role-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .role-card p { font-size: 0.82rem; margin-bottom: 0; }
+
+    /* Architecture */
+    .arch-diagram {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+    @media (max-width: 750px) {
+      .arch-diagram { grid-template-columns: 1fr; }
+    }
+    .arch-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      position: relative;
+    }
+    .arch-box.span-full { grid-column: 1 / -1; }
+    .arch-box h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .arch-box .tag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .tag.ready { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .tag.planned { background: rgba(210,153,34,0.15); color: var(--orange); border: 1px solid rgba(210,153,34,0.3); }
+    .arch-box ul {
+      list-style: none;
+      padding: 0;
+    }
+    .arch-box li {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      padding: 0.25rem 0;
+      padding-left: 1rem;
+      position: relative;
+    }
+    .arch-box li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+      font-family: monospace;
+    }
+
+    /* Connection arrows between arch boxes */
+    .arch-arrows {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      padding: 0.5rem 0;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      align-items: center;
+    }
+    .arch-arrows .arrow-down {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .arch-arrows .arrow-line {
+      width: 2px;
+      height: 16px;
+      background: var(--border);
+    }
+
+    /* Data model */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600;
+      color: var(--text);
+    }
+    .data-table td {
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .data-table code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.8rem;
+      background: var(--surface2);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: var(--cyan);
+    }
+
+    /* Fail conditions */
+    .fail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .fail-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      border-left: 3px solid var(--accent);
+    }
+    .fail-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--accent-glow);
+    }
+    .fail-card .trigger {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-bottom: 0.35rem;
+    }
+    .fail-card .quote {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--text-dim);
+      opacity: 0.7;
+    }
+
+    /* Roadmap */
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .roadmap-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+    .roadmap-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .roadmap-card .status {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status.done { background: rgba(63,185,80,0.15); color: var(--green); }
+    .status.current { background: rgba(88,166,255,0.15); color: var(--blue); }
+    .status.next { background: rgba(210,153,34,0.15); color: var(--orange); }
+    .roadmap-card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .roadmap-card li {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      padding: 0.3rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+    .roadmap-card li::before {
+      position: absolute;
+      left: 0;
+      font-size: 0.85rem;
+    }
+    .roadmap-card li.done::before { content: '\2713'; color: var(--green); }
+    .roadmap-card li.pending::before { content: '\25CB'; color: var(--text-dim); }
+    .roadmap-card li.active::before { content: '\25C9'; color: var(--blue); }
+
+    /* Easter eggs */
+    .egg-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .egg {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+    }
+    .egg .egg-quote {
+      font-style: italic;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+    .egg .egg-source {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Mermaid */
+    .mermaid-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    .mermaid-wrap h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mermaid svg { max-width: 100%; }
+
+    /* SPL skills */
+    .spl-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .spl-tag {
+      padding: 0.4rem 0.85rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      color: var(--cyan);
+    }
+
+    /* Docs links */
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .doc-link {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .doc-link:hover {
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+    .doc-link h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--blue);
+    }
+    .doc-link p { font-size: 0.82rem; margin-bottom: 0; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+    }
+    footer .footer-quote {
+      font-style: italic;
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Splunk-style intro quote */
+    .intro-quote {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <h1>Nakatomi Plaza: Vault Heist</h1>
+    <div class="tagline">"Now I have a SPL. Ho-ho-ho."</div>
+    <div class="badges">
+      <span class="badge"><span class="dot red"></span> Splunk-Powered</span>
+      <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
+      <span class="badge"><span class="dot green"></span> 7 Seals</span>
+      <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="toc">
+    <div class="container">
+      <a href="#concept">Concept</a>
+      <a href="#phases">Game Phases</a>
+      <a href="#seals">Seven Seals</a>
+      <a href="#roles">Player Roles</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#data">Data Model</a>
+      <a href="#threats">Threats</a>
+      <a href="#flows">Flow Diagrams</a>
+      <a href="#skills">SPL Skills</a>
+      <a href="#easter-eggs">Easter Eggs</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#docs">Documents</a>
+    </div>
+  </nav>
+
+  <!-- 1. Concept -->
+  <section id="concept">
+    <div class="container">
+      <h2><span class="section-num">01</span> The Concept</h2>
+      <p class="lead">An inverse escape room where players break <em>in</em> instead of out. Use Splunk to crack a vault guarded by seven seals.</p>
+      <div class="intro-quote">
+        Christmas Eve. Nakatomi Plaza, Los Angeles. A tower of glass and steel, and tonight there's a party on the thirtieth floor. You're not here for the party. You're part of the team that just took the building. There's a vault. Seven locks. Bearer bonds inside &mdash; a fortune. The man who knew the codes isn't giving them up. So we crack it ourselves.
+      </div>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <span class="icon">&#x1F50D;</span>
+          <h4>Splunk Is the Room</h4>
+          <p>The "escape room" is a Splunk environment. Players investigate synthetic log data to discover codes, sequences, and procedures.</p>
+        </div>
+        <div class="concept-card">
+          <span class="icon">&#x1F3DB;</span>
+          <h4>Physical Vault Model</h4>
+          <p>A tangible Nakatomi Plaza model with 7 seal inputs. Codes from Splunk are entered on the physical vault to open each seal.</p>
+        </div>
+        <div class="concept-card">
+          <span class="icon">&#x1F3AC;</span>
+          <h4>Die Hard Theme</h4>
+          <p>Christmas Eve, 1988. Players are Hans Gruber's tech crew. Easter eggs, quotes, and characters from the film are woven throughout.</p>
+        </div>
+        <div class="concept-card">
+          <span class="icon">&#x26A1;</span>
+          <h4>The Seventh Seal</h4>
+          <p>Six seals open with codes. The seventh is a meta solution &mdash; a physical trick outside the system, just like in the movie.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Game Phases -->
+  <section id="phases">
+    <div class="container">
+      <h2><span class="section-num">02</span> Game Phases</h2>
+      <p>45&ndash;60 minutes. Four phases plus the final seal. Each phase builds on the last.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">0:00 &ndash; 0:08 &middot; ~8 min</div>
+          <div class="timeline-title">Phase 1 &mdash; Lobby (Infiltration)</div>
+          <div class="timeline-desc">Enter the building's data in Splunk. Prove you have access. Run your first search.</div>
+          <div class="timeline-hint">McClane hint: "Unaccounted for person in building"</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">0:08 &ndash; 0:18 &middot; ~10 min</div>
+          <div class="timeline-title">Phase 2 &mdash; Reconnaissance</div>
+          <div class="timeline-desc">Map the tower: floors, cameras, guards, restricted areas. Find the vault floor. Build a dashboard.</div>
+          <div class="timeline-hint">McClane hint: "Radio traffic &mdash; unknown unit"</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">0:18 &ndash; 0:28 &middot; ~10 min</div>
+          <div class="timeline-title">Phase 3 &mdash; Access Control</div>
+          <div class="timeline-desc">Find a bypass code, badge ID, or time window. Unlock the vault phase. Takagi won't help.</div>
+          <div class="timeline-hint">McClane hint: "Personnel down &mdash; we've lost contact"</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">0:28 &ndash; 0:50 &middot; ~22 min</div>
+          <div class="timeline-title">Phase 4 &mdash; The Vault (Seals 1&ndash;6)</div>
+          <div class="timeline-desc">Open six seals with codes found in Splunk. Use rex, transaction, lookups, and time ranges to extract them.</div>
+          <div class="timeline-hint">McClane hint: "Movement in HVAC" / "Just another American who saw too many movies"</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">0:50 &ndash; 1:00 &middot; ~10 min</div>
+          <div class="timeline-title">Seal 7 &mdash; The Meta Solution</div>
+          <div class="timeline-desc">No code in Splunk. The final seal requires a physical trick &mdash; unplug the power, flip a hidden switch, or cut the cable.</div>
+          <div class="timeline-hint">McClane hint: "He's here."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Seven Seals -->
+  <section id="seals">
+    <div class="container">
+      <h2><span class="section-num">03</span> The Seven Seals</h2>
+      <p>In the film, the Nakatomi vault has seven locks. Our game follows the same idea. Six are cracked with data; the seventh rewards thinking outside the system.</p>
+
+      <div class="seals-row">
+        <div class="seal">
+          <div class="seal-circle">1</div>
+          <div class="seal-label">Seal 1</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">2</div>
+          <div class="seal-label">Seal 2</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">3</div>
+          <div class="seal-label">Seal 3</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">4</div>
+          <div class="seal-label">Seal 4</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">5</div>
+          <div class="seal-label">Seal 5</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">6</div>
+          <div class="seal-label">Seal 6</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">?</div>
+          <div class="seal-label">Seal 7</div>
+          <div class="seal-method">Meta solution</div>
+        </div>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <h4>Seals 1&ndash;6: Data-Driven</h4>
+          <p>Each seal's code is hidden in vault logs, maintenance logs, or Takagi's memos. Players extract them with SPL commands like <code>rex</code>, <code>transaction</code>, <code>lookup</code>, and time-range searches. Codes are entered on the physical model's keypad, dials, or switches.</p>
+        </div>
+        <div class="concept-card">
+          <h4>Seal 7: The Movie Twist</h4>
+          <p>The system never tells you how to open the last seal. Options: unplug the vault's power cable (relay detects power loss), find a hidden switch on the model, or "cut" a prop cable. The data might hint: <em>"failsafe: secondary release on power loss"</em>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Player Roles -->
+  <section id="roles">
+    <div class="container">
+      <h2><span class="section-num">04</span> Player Roles</h2>
+      <p>2&ndash;4 players. Roles can be combined or rotated.</p>
+      <div class="roles-grid">
+        <div class="role-card">
+          <div class="role-icon">&#x2328;</div>
+          <h4>SPL Specialist</h4>
+          <p>Writes searches, builds reports, finds patterns in the data.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">&#x1F4CA;</div>
+          <h4>Dashboard Builder</h4>
+          <p>Turns findings into visual "intel boards" for the team.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">&#x1F514;</div>
+          <h4>Alert Hunter</h4>
+          <p>Uses alerts and timestamps to discover procedures and weaknesses.</p>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">&#x1F4D6;</div>
+          <h4>Storyteller</h4>
+          <p>Reads the narrative, directs the team to the next objective.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Architecture -->
+  <section id="architecture">
+    <div class="container">
+      <h2><span class="section-num">05</span> Technical Architecture</h2>
+      <p>Four components connect the digital investigation to the physical heist.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-box">
+          <h4>Splunk Instance <span class="tag planned">Planned</span></h4>
+          <ul>
+            <li>Index: <code>nakatomi_access</code></li>
+            <li>Index: <code>nakatomi_vault</code></li>
+            <li>Index: <code>nakatomi_building</code></li>
+            <li>App: "Nakatomi Heist" with dashboards</li>
+            <li>Saved searches, alerts, lookups</li>
+          </ul>
+        </div>
+        <div class="arch-box">
+          <h4>Data Generator <span class="tag planned">Planned</span></h4>
+          <ul>
+            <li>Python scripts</li>
+            <li>Synthetic access logs</li>
+            <li>Synthetic vault logs</li>
+            <li>Building sensor logs</li>
+            <li>Embedded codes &amp; sequences</li>
+          </ul>
+        </div>
+        <div class="arch-box">
+          <h4>Game Orchestration <span class="tag planned">Planned</span></h4>
+          <ul>
+            <li>Narrative presentation</li>
+            <li>Answer submission &amp; validation</li>
+            <li>Phase progression</li>
+            <li>Timer &amp; fail-condition tracking</li>
+          </ul>
+        </div>
+
+        <div class="arch-arrows">
+          <div class="arrow-down">
+            <div class="arrow-line"></div>
+            &#x25BC; Codes from Splunk
+          </div>
+          <div class="arrow-down">
+            <div class="arrow-line"></div>
+            &#x25B2; Seal status to narrative
+          </div>
+        </div>
+
+        <div class="arch-box span-full">
+          <h4>Physical Model (Nakatomi Plaza + Vault) <span class="tag planned">Planned</span></h4>
+          <ul>
+            <li>Microcontroller (Arduino / Raspberry Pi Pico)</li>
+            <li>7 seal inputs: keypad, dials, switches</li>
+            <li>LED / servo feedback per seal</li>
+            <li>Seal 7: power-loss detection or hidden switch</li>
+            <li>Reset procedure for replay</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Data Model -->
+  <section id="data">
+    <div class="container">
+      <h2><span class="section-num">06</span> Data Model</h2>
+      <p>Synthetic log data tells the story. Answers are embedded so correct SPL produces the intended solution.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Index</th>
+            <th>Key Fields</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Access Logs</td>
+            <td><code>nakatomi_access</code></td>
+            <td><code>timestamp</code>, <code>floor</code>, <code>room</code>, <code>badge_id</code>, <code>outcome</code></td>
+            <td>Badge events, guard patrols, access patterns</td>
+          </tr>
+          <tr>
+            <td>Vault Logs</td>
+            <td><code>nakatomi_vault</code></td>
+            <td><code>timestamp</code>, <code>action</code>, <code>detail</code>, <code>result</code></td>
+            <td>Code attempts, door status, seal protocols</td>
+          </tr>
+          <tr>
+            <td>Building / Sensor</td>
+            <td><code>nakatomi_building</code></td>
+            <td><code>timestamp</code>, <code>system</code>, <code>event</code>, <code>floor</code>, <code>value</code></td>
+            <td>Elevator, HVAC, power, camera events</td>
+          </tr>
+          <tr>
+            <td>Lookup</td>
+            <td>&mdash;</td>
+            <td><code>floor_id</code> &rarr; <code>name</code></td>
+            <td>Floor names: "Lobby", "Vault Floor", etc.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7. Threats & Fail Conditions -->
+  <section id="threats">
+    <div class="container">
+      <h2><span class="section-num">07</span> Threats &amp; Fail Conditions</h2>
+      <p>Multiple ways to lose &mdash; all lead to the same ending: Hans's fate.</p>
+
+      <div class="fail-grid">
+        <div class="fail-card">
+          <h4>Police Breach</h4>
+          <div class="trigger">Player triggers an external alert (wrong search, trap code, or milestone tied to the movie).</div>
+          <div class="quote">"SWAT has the building. You're arrested."</div>
+        </div>
+        <div class="fail-card">
+          <h4>McClane</h4>
+          <div class="trigger">3 wrong seal code attempts on the physical model.</div>
+          <div class="quote">"McClane got the drop on you."</div>
+        </div>
+        <div class="fail-card">
+          <h4>Roof Early</h4>
+          <div class="trigger">Player enters a decoy/trap code during Phase 4 that triggers the roof charges.</div>
+          <div class="quote">"You triggered the charges early."</div>
+        </div>
+        <div class="fail-card">
+          <h4>Roof Late</h4>
+          <div class="trigger">Timer expires (0:55&ndash;1:00) before all 7 seals are open.</div>
+          <div class="quote">"The charges blew. You never got the vault."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Flow Diagrams -->
+  <section id="flows">
+    <div class="container">
+      <h2><span class="section-num">08</span> Flow Diagrams</h2>
+
+      <div class="mermaid-wrap">
+        <h4>Full Game Flow (Success + Failures)</h4>
+        <div class="mermaid">
+flowchart TD
+  Intro[Intro] --> P1[Phase 1 Lobby]
+  P1 --> P2[Phase 2 Recon]
+  P2 --> P3[Phase 3 Access]
+  P3 --> P4[Phase 4 Vault]
+  P4 --> S1[Seal 1] --> S2[Seal 2] --> S3[Seal 3] --> S4[Seal 4] --> S5[Seal 5] --> S6[Seal 6] --> S7[Seal 7 meta] --> Win[Vault open - Win]
+
+  P1 -->|Police trigger| Hans
+  P2 -->|Police trigger| Hans
+  P3 -->|Police trigger| Hans
+  P4 -->|Police trigger| Hans
+  P4 -->|McClane / Roof early| Hans
+  P4 -->|Roof late| Hans
+  S1 -->|McClane / Roof late| Hans
+  S2 -->|McClane / Roof late| Hans
+  S3 -->|McClane / Roof late| Hans
+  S4 -->|McClane / Roof late| Hans
+  S5 -->|McClane / Roof late| Hans
+  S6 -->|McClane / Roof late| Hans
+
+  Hans["Game over: Hans's fate"]
+        </div>
+      </div>
+
+      <div class="mermaid-wrap">
+        <h4>Core Game Loop</h4>
+        <div class="mermaid">
+flowchart LR
+  A["Objective\n(narrative)"] --> B["Investigation\n(Splunk SPL)"]
+  B --> C["Discovery\n(code/sequence)"]
+  C --> D["Submission\n(physical model)"]
+  D --> E{"Correct?"}
+  E -->|Yes| F["Seal Opens\n+ Next Phase"]
+  E -->|No| G["Wrong Code\nCounter +1"]
+  G -->|"< 3 wrong"| A
+  G -->|"3 wrong"| H["Game Over"]
+  F --> A
+        </div>
+      </div>
+
+      <div class="mermaid-wrap">
+        <h4>System Architecture</h4>
+        <div class="mermaid">
+flowchart TD
+  subgraph digital [Digital Layer]
+    DG[Data Generator\nPython] -->|synthetic logs| SP[Splunk Instance]
+    SP -->|dashboards, searches| PL[Players]
+    PL -->|SPL queries| SP
+  end
+
+  subgraph physical [Physical Layer]
+    PL -->|enter codes| VM[Vault Model\nArduino/Pico]
+    VM -->|LED/servo feedback| PL
+  end
+
+  subgraph orchestration [Game Orchestration]
+    GO[Game Engine] -->|narrative, timer| PL
+    GO -->|phase control| SP
+    VM -->|seal status| GO
+  end
+        </div>
+      </div>
+
+      <div class="mermaid-wrap">
+        <h4>Timeline (Phases Over 0&ndash;60 min)</h4>
+        <div class="mermaid">
+flowchart LR
+  subgraph timeline [0-60 min]
+    T0["0"] --- T8["8"] --- T18["18"] --- T28["28"] --- T50["50"] --- T60["60"]
+  end
+  subgraph phases [Phases]
+    Lobby[Lobby]
+    Recon[Recon]
+    Access[Access]
+    Vault[Vault + Seals 1-6]
+    S7[Seal 7]
+  end
+  T0 --> Lobby
+  T8 --> Recon
+  T18 --> Access
+  T28 --> Vault
+  T50 --> S7
+  T60 --> End[Vault open or Game over]
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. SPL Skills -->
+  <section id="skills">
+    <div class="container">
+      <h2><span class="section-num">09</span> SPL Skills Covered</h2>
+      <p>Players will use these Splunk commands and concepts during the game.</p>
+
+      <h3>Search Commands</h3>
+      <div class="spl-grid">
+        <span class="spl-tag">search</span>
+        <span class="spl-tag">stats</span>
+        <span class="spl-tag">eval</span>
+        <span class="spl-tag">rex</span>
+        <span class="spl-tag">lookup</span>
+        <span class="spl-tag">transaction</span>
+        <span class="spl-tag">where</span>
+        <span class="spl-tag">sort</span>
+        <span class="spl-tag">table</span>
+        <span class="spl-tag">mvcombine</span>
+      </div>
+
+      <h3>Concepts</h3>
+      <div class="spl-grid">
+        <span class="spl-tag">time modifiers</span>
+        <span class="spl-tag">time-range searches</span>
+        <span class="spl-tag">dashboards &amp; panels</span>
+        <span class="spl-tag">saved searches</span>
+        <span class="spl-tag">alerts &amp; triggers</span>
+        <span class="spl-tag">drilldown</span>
+        <span class="spl-tag">lookups (CSV)</span>
+        <span class="spl-tag">field extraction</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Easter Eggs -->
+  <section id="easter-eggs">
+    <div class="container">
+      <h2><span class="section-num">10</span> Easter Eggs</h2>
+      <p>Die Hard quotes, characters, and moments woven into the game.</p>
+
+      <div class="egg-list">
+        <div class="egg">
+          <div class="egg-quote">"Now I have a SPL. Ho-ho-ho."</div>
+          <div class="egg-source">Hans (variant) &mdash; Tagline / UI</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Welcome to the party, pal."</div>
+          <div class="egg-source">McClane &mdash; Phase 2 transition</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
+          <div class="egg-source">McClane &mdash; Intro / facilitator</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Hans, bubby, I'm your white knight."</div>
+          <div class="egg-source">Ellis &mdash; Splunk log (user=Ellis)</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Just another American who saw too many movies."</div>
+          <div class="egg-source">Hans &mdash; Splunk log / Phase 4 hint</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Subject reportedly barefoot"</div>
+          <div class="egg-source">McClane &mdash; Incident log entry</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"Yippee-ki-yay"</div>
+          <div class="egg-source">McClane &mdash; Success ending</div>
+        </div>
+        <div class="egg">
+          <div class="egg-quote">"When they touch the vault, we're rich."</div>
+          <div class="egg-source">Hans &mdash; Facilitator / phase transition</div>
+        </div>
+      </div>
+
+      <h3>Characters in the Data</h3>
+      <p style="margin-top: 0.5rem;">
+        <strong>Hans</strong> &middot; <strong>Takagi</strong> &middot; <strong>Ellis</strong> &middot; <strong>Holly</strong> &middot;
+        <strong>McClane</strong> &middot; <strong>Argyle</strong> &middot; <strong>Powell</strong> &middot; <strong>Thornburg</strong> &middot;
+        <strong>Dwayne T. Robinson</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- 11. Roadmap -->
+  <section id="roadmap">
+    <div class="container">
+      <h2><span class="section-num">11</span> Project Roadmap</h2>
+
+      <div class="roadmap">
+        <div class="roadmap-card">
+          <h4>Design Phase <span class="status done">Complete</span></h4>
+          <ul>
+            <li class="done">Full design document</li>
+            <li class="done">Story &amp; narrative</li>
+            <li class="done">Easter egg catalogue</li>
+            <li class="done">Timeline &amp; fail conditions</li>
+            <li class="done">Flow diagrams</li>
+            <li class="done">Player roles &amp; personas</li>
+          </ul>
+        </div>
+        <div class="roadmap-card">
+          <h4>MVP <span class="status next">Next</span></h4>
+          <ul>
+            <li class="pending">Lock the narrative (final script)</li>
+            <li class="pending">Spec exact data fields &amp; seal codes</li>
+            <li class="pending">Build data generator (Python)</li>
+            <li class="pending">One Splunk index (access + vault)</li>
+            <li class="pending">Simple game UI (HTML or dashboard)</li>
+            <li class="pending">Facilitator runbook</li>
+          </ul>
+        </div>
+        <div class="roadmap-card">
+          <h4>V1 &mdash; Full Experience <span class="status next">Future</span></h4>
+          <ul>
+            <li class="pending">All 4 phases + 7-seal physical model</li>
+            <li class="pending">Dashboard per phase</li>
+            <li class="pending">Answer validation per seal</li>
+            <li class="pending">Physical build (Arduino/Pico)</li>
+            <li class="pending">Seal 7 meta implementation</li>
+            <li class="pending">Timer &amp; fail-condition engine</li>
+            <li class="pending">Answer key &amp; reset procedure</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. Documents -->
+  <section id="docs">
+    <div class="container">
+      <h2><span class="section-num">12</span> Design Documents</h2>
+      <div class="docs-grid">
+        <a href="DESIGN.md" class="doc-link">
+          <h4>Design Document</h4>
+          <p>Vision, game mechanics, puzzle design, technical architecture, and project roadmap.</p>
+        </a>
+        <a href="STORY_AND_MYSTERIES.md" class="doc-link">
+          <h4>Story &amp; Mysteries</h4>
+          <p>Introduction narrative, Die Hard easter eggs, and the mystery/task catalogue.</p>
+        </a>
+        <a href="TIMELINE_AND_FLOWS.md" class="doc-link">
+          <h4>Timeline &amp; Flows</h4>
+          <p>Phase timeline, threat escalation, fail conditions, and McClane hint schedule.</p>
+        </a>
+        <a href="flow.html" class="doc-link">
+          <h4>Flow Diagrams (standalone)</h4>
+          <p>Mermaid flow diagrams rendered in a minimal viewer.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
+    Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
+    Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.
+  </footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#2d333b',
+        primaryTextColor: '#e6edf3',
+        primaryBorderColor: '#444c56',
+        lineColor: '#8b949e',
+        secondaryColor: '#1c2333',
+        tertiaryColor: '#161b22',
+        edgeLabelBackground: '#161b22',
+        clusterBkg: '#1c2333',
+        clusterBorder: '#30363d'
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 15
+      }
+    });
+  </script>
+</body>
+</html>
