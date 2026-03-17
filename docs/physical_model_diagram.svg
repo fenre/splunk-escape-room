@@ -1,8 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1800" width="1400" height="1800">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 2400" width="1400" height="2400">
   <defs>
     <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3a3a3a"/>
-      <stop offset="100%" stop-color="#222"/>
+      <stop offset="0%" stop-color="#4a4a4a"/>
+      <stop offset="50%" stop-color="#3a3a3a"/>
+      <stop offset="100%" stop-color="#2a2a2a"/>
     </linearGradient>
     <linearGradient id="backGrad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#1a1a2a"/>
@@ -12,12 +13,31 @@
       <stop offset="0%" stop-color="#1a5c1a"/>
       <stop offset="100%" stop-color="#0f3f0f"/>
     </linearGradient>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0c18"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="towerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#555"/>
+      <stop offset="15%" stop-color="#666"/>
+      <stop offset="50%" stop-color="#6a6a6a"/>
+      <stop offset="85%" stop-color="#666"/>
+      <stop offset="100%" stop-color="#555"/>
+    </linearGradient>
+    <linearGradient id="crownGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#888"/>
+      <stop offset="100%" stop-color="#666"/>
+    </linearGradient>
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="2" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="glowStrong" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
     <filter id="shadow">
-      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+      <feDropShadow dx="3" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
     </filter>
     <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0,0 8,3 0,6" fill="#c9302c"/>
@@ -34,368 +54,456 @@
     <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
       <polygon points="0,0 8,3 0,6" fill="#8b949e"/>
     </marker>
+    <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#bc8cff"/>
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#39c5cf"/>
+    </marker>
+    <pattern id="windowPattern" width="30" height="20" patternUnits="userSpaceOnUse">
+      <rect width="10" height="8" x="5" y="6" fill="#1a2540" opacity="0.6" rx="1"/>
+      <rect width="10" height="8" x="20" y="6" fill="#1a2540" opacity="0.6" rx="1"/>
+    </pattern>
   </defs>
 
   <!-- Background -->
-  <rect width="1400" height="1800" fill="#0d1117"/>
+  <rect width="1400" height="2400" fill="#0d1117"/>
 
   <!-- ================================================================ -->
   <!-- TITLE -->
   <!-- ================================================================ -->
-  <text x="700" y="45" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="28" fill="#d4a843" font-weight="bold" letter-spacing="2">NAKATOMI VAULT  -  PHYSICAL MODEL</text>
-  <text x="700" y="72" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#8b949e">Component Placement, Wiring, and Assembly Diagram</text>
+  <text x="700" y="45" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="28" fill="#d4a843" font-weight="bold" letter-spacing="2">NAKATOMI VAULT - PHYSICAL MODEL</text>
+  <text x="700" y="72" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#8b949e">Tower-shaped panel with vertically aligned seals</text>
 
   <!-- ================================================================ -->
-  <!-- SECTION 1: FRONT VIEW -->
+  <!-- SECTION 1: FRONT VIEW - NAKATOMI TOWER -->
   <!-- ================================================================ -->
-  <text x="350" y="120" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#58a6ff" font-weight="bold">FRONT VIEW (Player Side)</text>
-  <text x="350" y="142" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">400mm x 300mm vault panel</text>
+  <text x="300" y="115" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#58a6ff" font-weight="bold">FRONT VIEW (Player Side)</text>
+  <text x="300" y="137" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">~200mm wide x ~700mm tall tower panel</text>
 
-  <!-- Vault panel front -->
-  <rect x="100" y="160" width="500" height="380" fill="url(#panelGrad)" stroke="#555" stroke-width="2" rx="8" filter="url(#shadow)"/>
+  <!-- Tower body -->
+  <g transform="translate(170, 155)" filter="url(#shadow)">
+    <!-- Main tower shaft -->
+    <rect x="0" y="80" width="260" height="650" fill="url(#towerGrad)" stroke="#777" stroke-width="2" rx="2"/>
 
-  <!-- Panel frame border (decorative) -->
-  <rect x="108" y="168" width="484" height="364" fill="none" stroke="#444" stroke-width="1" rx="4"/>
+    <!-- Crown / setback top (narrower upper section) -->
+    <rect x="20" y="30" width="220" height="55" fill="url(#crownGrad)" stroke="#777" stroke-width="2" rx="2"/>
+    <rect x="50" y="0" width="160" height="35" fill="#888" stroke="#777" stroke-width="2" rx="2"/>
 
-  <!-- === SEAL POSITIONS (front face) === -->
+    <!-- Antenna -->
+    <line x1="130" y1="0" x2="130" y2="-40" stroke="#999" stroke-width="3"/>
+    <line x1="130" y1="-40" x2="130" y2="-55" stroke="#aaa" stroke-width="2"/>
+    <circle cx="130" cy="-58" r="4" fill="#c9302c" filter="url(#glow)"/>
 
-  <!-- Seal 1 -->
-  <g transform="translate(155, 210)">
-    <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-    <circle cx="0" cy="0" r="20" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
-    <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">1</text>
-    <!-- NeoPixel LED above -->
-    <circle cx="0" cy="-38" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-48" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
+    <!-- NAKATOMI text on facade -->
+    <text x="130" y="18" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#d4a843" font-weight="bold" letter-spacing="3">NAKATOMI</text>
+    <text x="130" y="50" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="8" fill="#bbb" letter-spacing="2">PLAZA</text>
 
-  <!-- Seal 2 -->
-  <g transform="translate(235, 210)">
-    <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-    <circle cx="0" cy="0" r="20" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
-    <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">2</text>
-    <circle cx="0" cy="-38" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-48" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
+    <!-- Window grid (decorative) -->
+    <g opacity="0.3">
+      <!-- Windows on crown -->
+      <rect x="30" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="45" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="60" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="75" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="175" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="190" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="205" y="35" width="8" height="6" fill="#2a4070" rx="1"/>
 
-  <!-- Seal 3 -->
-  <g transform="translate(315, 210)">
-    <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-    <circle cx="0" cy="0" r="20" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-    <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">3</text>
-    <circle cx="0" cy="-38" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-48" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
+      <!-- Window columns left side -->
+      <rect x="10" y="95" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="115" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="135" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="215" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="235" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="315" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="335" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="415" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="435" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="515" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="535" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="615" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="10" y="635" width="8" height="6" fill="#2a4070" rx="1"/>
 
-  <!-- Seal 4 -->
-  <g transform="translate(395, 210)">
-    <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-    <circle cx="0" cy="0" r="20" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-    <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">4</text>
-    <circle cx="0" cy="-38" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-48" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
+      <rect x="30" y="95" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="115" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="135" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="215" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="235" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="315" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="335" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="415" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="435" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="515" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="535" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="615" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="30" y="635" width="8" height="6" fill="#2a4070" rx="1"/>
 
-  <!-- Seal 5 -->
-  <g transform="translate(475, 210)">
-    <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-    <circle cx="0" cy="0" r="20" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-    <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">5</text>
-    <circle cx="0" cy="-38" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-48" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
+      <!-- Window columns right side -->
+      <rect x="242" y="95" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="115" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="135" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="215" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="235" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="315" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="335" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="415" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="435" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="515" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="535" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="615" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="242" y="635" width="8" height="6" fill="#2a4070" rx="1"/>
 
-  <!-- Seal 6 (larger, mag lock) -->
-  <g transform="translate(235, 310)">
-    <circle cx="0" cy="0" r="34" fill="#2a2a2a" stroke="#777" stroke-width="3"/>
-    <circle cx="0" cy="0" r="24" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-    <text x="0" y="6" text-anchor="middle" font-family="monospace" font-size="16" fill="#d4a843" font-weight="bold">6</text>
-    <circle cx="0" cy="-44" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-54" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
-  </g>
-
-  <!-- Seal 7 (special, red accent) -->
-  <g transform="translate(395, 310)">
-    <circle cx="0" cy="0" r="34" fill="#2a1515" stroke="#c9302c" stroke-width="3"/>
-    <circle cx="0" cy="0" r="24" fill="#1a0a0a" stroke="#993333" stroke-width="1.5"/>
-    <text x="0" y="6" text-anchor="middle" font-family="monospace" font-size="16" fill="#c9302c" font-weight="bold">7</text>
-    <circle cx="0" cy="-44" r="5" fill="#c9302c" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="0" y="-54" text-anchor="middle" font-family="monospace" font-size="7" fill="#c9302c">LED</text>
-    <text x="0" y="50" text-anchor="middle" font-family="monospace" font-size="8" fill="#c9302c">META</text>
-  </g>
-
-  <!-- LCD Display -->
-  <g transform="translate(140, 400)">
-    <rect x="0" y="0" width="180" height="55" fill="#0a2a0a" stroke="#555" stroke-width="1.5" rx="3"/>
-    <rect x="5" y="5" width="170" height="45" fill="#1a3a1a" rx="2"/>
-    <text x="90" y="20" text-anchor="middle" font-family="monospace" font-size="8" fill="#33cc33">NAKATOMI VAULT</text>
-    <text x="90" y="30" text-anchor="middle" font-family="monospace" font-size="8" fill="#33cc33">SEAL 1: ENTER CODE</text>
-    <text x="90" y="40" text-anchor="middle" font-family="monospace" font-size="8" fill="#33cc33">CODE: ____</text>
-    <text x="90" y="60" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">LCD 20x4 (I2C)</text>
-  </g>
-
-  <!-- Keypad -->
-  <g transform="translate(365, 390)">
-    <rect x="0" y="0" width="100" height="120" fill="#333" stroke="#555" stroke-width="1.5" rx="4"/>
-    <!-- Key grid -->
-    <g fill="#444" stroke="#555" stroke-width="0.5">
-      <rect x="8" y="8" width="18" height="14" rx="2"/><rect x="30" y="8" width="18" height="14" rx="2"/>
-      <rect x="52" y="8" width="18" height="14" rx="2"/><rect x="74" y="8" width="18" height="14" rx="2"/>
-      <rect x="8" y="30" width="18" height="14" rx="2"/><rect x="30" y="30" width="18" height="14" rx="2"/>
-      <rect x="52" y="30" width="18" height="14" rx="2"/><rect x="74" y="30" width="18" height="14" rx="2"/>
-      <rect x="8" y="52" width="18" height="14" rx="2"/><rect x="30" y="52" width="18" height="14" rx="2"/>
-      <rect x="52" y="52" width="18" height="14" rx="2"/><rect x="74" y="52" width="18" height="14" rx="2"/>
-      <rect x="8" y="74" width="18" height="14" rx="2"/><rect x="30" y="74" width="18" height="14" rx="2"/>
-      <rect x="52" y="74" width="18" height="14" rx="2"/><rect x="74" y="74" width="18" height="14" rx="2"/>
+      <rect x="222" y="95" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="115" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="135" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="215" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="235" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="315" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="335" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="415" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="435" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="515" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="535" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="615" width="8" height="6" fill="#2a4070" rx="1"/>
+      <rect x="222" y="635" width="8" height="6" fill="#2a4070" rx="1"/>
     </g>
-    <!-- Key labels -->
-    <g font-family="monospace" font-size="7" fill="#aaa" text-anchor="middle">
-      <text x="17" y="19">1</text><text x="39" y="19">2</text><text x="61" y="19">3</text><text x="83" y="19">A</text>
-      <text x="17" y="41">4</text><text x="39" y="41">5</text><text x="61" y="41">6</text><text x="83" y="41">B</text>
-      <text x="17" y="63">7</text><text x="39" y="63">8</text><text x="61" y="63">9</text><text x="83" y="63">C</text>
-      <text x="17" y="85">*</text><text x="39" y="85">0</text><text x="61" y="85">#</text><text x="83" y="85">D</text>
+
+    <!-- Central seal column (vertical strip) -->
+    <rect x="95" y="85" width="70" height="640" fill="#3a3a3a" stroke="#555" stroke-width="1" rx="3" opacity="0.7"/>
+
+    <!-- ===== SEAL 1 (top - roof level) ===== -->
+    <g transform="translate(130, 120)">
+      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">1</text>
+      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <text x="55" y="3" text-anchor="start" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
     </g>
-    <text x="50" y="104" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaa">4x4 KEYPAD</text>
-    <text x="50" y="115" text-anchor="middle" font-family="monospace" font-size="6" fill="#666"># = SUBMIT  * = CLEAR</text>
-  </g>
 
-  <!-- Barrel jack (bottom right of panel) -->
-  <g transform="translate(530, 490)">
-    <circle cx="0" cy="0" r="10" fill="#333" stroke="#555" stroke-width="1.5"/>
-    <circle cx="0" cy="0" r="4" fill="#222" stroke="#444" stroke-width="1"/>
-    <text x="0" y="20" text-anchor="middle" font-family="monospace" font-size="7" fill="#c9302c">12V DC IN</text>
-    <text x="0" y="28" text-anchor="middle" font-family="monospace" font-size="6" fill="#8b949e">(barrel jack)</text>
-  </g>
+    <!-- ===== SEAL 2 ===== -->
+    <g transform="translate(130, 210)">
+      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">2</text>
+      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    </g>
 
-  <!-- Buzzer (small circle, bottom left) -->
-  <g transform="translate(130, 490)">
-    <circle cx="0" cy="0" r="8" fill="#333" stroke="#555" stroke-width="1"/>
-    <circle cx="0" cy="0" r="3" fill="#444"/>
-    <text x="0" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">BUZZER</text>
+    <!-- ===== SEAL 3 ===== -->
+    <g transform="translate(130, 300)">
+      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">3</text>
+      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    </g>
+
+    <!-- ===== SEAL 4 ===== -->
+    <g transform="translate(130, 390)">
+      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">4</text>
+      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    </g>
+
+    <!-- ===== SEAL 5 ===== -->
+    <g transform="translate(130, 480)">
+      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">5</text>
+      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    </g>
+
+    <!-- ===== SEAL 6 (larger, mag lock) ===== -->
+    <g transform="translate(130, 570)">
+      <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#777" stroke-width="3"/>
+      <circle cx="0" cy="0" r="19" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">6</text>
+      <circle cx="39" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    </g>
+
+    <!-- ===== SEAL 7 (special, vault level, red) ===== -->
+    <g transform="translate(130, 660)">
+      <circle cx="0" cy="0" r="30" fill="#2a1515" stroke="#c9302c" stroke-width="3"/>
+      <circle cx="0" cy="0" r="20" fill="#1a0a0a" stroke="#993333" stroke-width="1.5"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#c9302c" font-weight="bold">7</text>
+      <circle cx="41" cy="0" r="5" fill="#c9302c" stroke="#555" stroke-width="1" filter="url(#glowStrong)"/>
+      <text x="0" y="42" text-anchor="middle" font-family="monospace" font-size="8" fill="#c9302c">META</text>
+    </g>
+
+    <!-- Lobby entrance at ground level -->
+    <rect x="85" y="700" width="90" height="30" fill="#2a2a2a" stroke="#555" stroke-width="1" rx="2"/>
+    <text x="130" y="720" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">LOBBY</text>
+
+    <!-- LCD Display (lobby area, left side) -->
+    <g transform="translate(5, 690)">
+      <rect x="0" y="0" width="75" height="38" fill="#0a2a0a" stroke="#555" stroke-width="1.5" rx="3"/>
+      <rect x="3" y="3" width="69" height="32" fill="#1a3a1a" rx="2"/>
+      <text x="37" y="14" text-anchor="middle" font-family="monospace" font-size="5" fill="#33cc33">NAKATOMI VAULT</text>
+      <text x="37" y="22" text-anchor="middle" font-family="monospace" font-size="5" fill="#33cc33">SEAL 1: ENTER CODE</text>
+      <text x="37" y="30" text-anchor="middle" font-family="monospace" font-size="5" fill="#33cc33">CODE: ____</text>
+    </g>
+
+    <!-- Keypad (lobby area, right side) -->
+    <g transform="translate(185, 685)">
+      <rect x="0" y="0" width="65" height="44" fill="#333" stroke="#555" stroke-width="1.5" rx="3"/>
+      <g fill="#444" stroke="#555" stroke-width="0.3">
+        <rect x="4" y="4" width="11" height="7" rx="1"/><rect x="18" y="4" width="11" height="7" rx="1"/>
+        <rect x="32" y="4" width="11" height="7" rx="1"/><rect x="46" y="4" width="11" height="7" rx="1"/>
+        <rect x="4" y="14" width="11" height="7" rx="1"/><rect x="18" y="14" width="11" height="7" rx="1"/>
+        <rect x="32" y="14" width="11" height="7" rx="1"/><rect x="46" y="14" width="11" height="7" rx="1"/>
+        <rect x="4" y="24" width="11" height="7" rx="1"/><rect x="18" y="24" width="11" height="7" rx="1"/>
+        <rect x="32" y="24" width="11" height="7" rx="1"/><rect x="46" y="24" width="11" height="7" rx="1"/>
+        <rect x="4" y="34" width="11" height="7" rx="1"/><rect x="18" y="34" width="11" height="7" rx="1"/>
+        <rect x="32" y="34" width="11" height="7" rx="1"/><rect x="46" y="34" width="11" height="7" rx="1"/>
+      </g>
+    </g>
+
+    <!-- Buzzer (small, near lobby) -->
+    <g transform="translate(12, 660)">
+      <circle cx="0" cy="0" r="6" fill="#333" stroke="#555" stroke-width="1"/>
+      <circle cx="0" cy="0" r="2" fill="#444"/>
+      <text x="0" y="12" text-anchor="middle" font-family="monospace" font-size="5" fill="#8b949e">BZR</text>
+    </g>
+
+    <!-- Barrel jack (bottom edge) -->
+    <g transform="translate(247, 720)">
+      <circle cx="0" cy="0" r="8" fill="#333" stroke="#555" stroke-width="1.5"/>
+      <circle cx="0" cy="0" r="3" fill="#222" stroke="#444" stroke-width="1"/>
+      <text x="0" y="14" text-anchor="middle" font-family="monospace" font-size="5" fill="#c9302c">12V IN</text>
+    </g>
   </g>
 
   <!-- Front view annotations -->
-  <g font-family="monospace" font-size="9" fill="#58a6ff">
-    <!-- Seal type labels -->
-    <text x="195" y="252" text-anchor="middle">Servo locks</text>
-    <line x1="155" y1="242" x2="235" y2="242" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <text x="395" y="252" text-anchor="middle">Solenoid locks</text>
-    <line x1="315" y1="242" x2="475" y2="242" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <text x="235" y="360" text-anchor="middle" fill="#58a6ff">Mag lock</text>
-    <text x="395" y="375" text-anchor="middle" fill="#c9302c">Power-loss latch</text>
+  <g font-family="monospace" font-size="9">
+    <!-- Floor labels on right side -->
+    <text x="465" y="278" fill="#58a6ff">ROOF (Seal 1) - Servo</text>
+    <text x="465" y="368" fill="#58a6ff">30F (Seal 2) - Servo</text>
+    <text x="465" y="458" fill="#d29922">25F (Seal 3) - Solenoid</text>
+    <text x="465" y="548" fill="#d29922">20F (Seal 4) - Solenoid</text>
+    <text x="465" y="638" fill="#d29922">15F (Seal 5) - Solenoid</text>
+    <text x="465" y="728" fill="#ff6666">5F (Seal 6) - Mag lock</text>
+    <text x="465" y="818" fill="#c9302c">B1 VAULT (Seal 7) - Power latch</text>
+
+    <!-- Component labels on left side -->
+    <text x="140" y="852" fill="#0a2a0a">LCD 20x4</text>
+    <text x="140" y="865" fill="#8b949e" font-size="7">I2C display</text>
+    <text x="375" y="852" fill="#555">4x4 KEYPAD</text>
+    <text x="375" y="865" fill="#8b949e" font-size="7">membrane</text>
+
+    <!-- Connector lines to labels -->
+    <line x1="460" y1="275" x2="435" y2="275" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="365" x2="435" y2="365" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="455" x2="435" y2="455" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="545" x2="435" y2="545" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="635" x2="435" y2="635" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="725" x2="435" y2="725" stroke="#ff6666" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="460" y1="815" x2="435" y2="815" stroke="#c9302c" stroke-width="0.5" stroke-dasharray="3,3"/>
   </g>
 
   <!-- Dimensions -->
-  <g stroke="#555" stroke-width="0.8" fill="#555">
+  <g stroke="#555" stroke-width="0.8" fill="#555" font-family="monospace" font-size="10">
     <!-- Width -->
-    <line x1="100" y1="555" x2="600" y2="555"/>
-    <line x1="100" y1="550" x2="100" y2="560"/>
-    <line x1="600" y1="550" x2="600" y2="560"/>
-    <text x="350" y="570" text-anchor="middle" font-family="monospace" font-size="10">400 mm</text>
+    <line x1="170" y1="895" x2="430" y2="895"/>
+    <line x1="170" y1="890" x2="170" y2="900"/>
+    <line x1="430" y1="890" x2="430" y2="900"/>
+    <text x="300" y="912" text-anchor="middle">~200 mm</text>
     <!-- Height -->
-    <line x1="620" y1="160" x2="620" y2="540"/>
-    <line x1="615" y1="160" x2="625" y2="160"/>
-    <line x1="615" y1="540" x2="625" y2="540"/>
-    <text x="638" y="355" text-anchor="start" font-family="monospace" font-size="10" transform="rotate(90,638,355)">300 mm</text>
+    <line x1="120" y1="100" x2="120" y2="885"/>
+    <line x1="115" y1="100" x2="125" y2="100"/>
+    <line x1="115" y1="885" x2="125" y2="885"/>
+    <text x="105" y="500" text-anchor="end" transform="rotate(-90,105,500)">~700 mm</text>
   </g>
 
   <!-- ================================================================ -->
-  <!-- SECTION 2: BACK VIEW (Electronics Side) -->
+  <!-- SECTION 2: BACK VIEW (Electronics) -->
   <!-- ================================================================ -->
-  <text x="1050" y="120" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#3fb950" font-weight="bold">BACK VIEW (Electronics Side)</text>
-  <text x="1050" y="142" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">Component placement behind the panel</text>
+  <text x="850" y="115" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#3fb950" font-weight="bold">BACK VIEW (Electronics)</text>
+  <text x="850" y="137" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">Components mounted behind the tower panel</text>
 
-  <!-- Back panel -->
-  <rect x="800" y="160" width="500" height="380" fill="url(#backGrad)" stroke="#444" stroke-width="2" rx="8" filter="url(#shadow)"/>
+  <!-- Back panel outline -->
+  <g transform="translate(700, 155)" filter="url(#shadow)">
+    <rect x="0" y="80" width="260" height="650" fill="url(#backGrad)" stroke="#444" stroke-width="2" rx="2"/>
+    <rect x="20" y="30" width="220" height="55" fill="#151520" stroke="#444" stroke-width="2" rx="2"/>
+    <rect x="50" y="0" width="160" height="35" fill="#181825" stroke="#444" stroke-width="2" rx="2"/>
 
-  <!-- ESP32 DevKit -->
-  <g transform="translate(830, 180)">
-    <rect x="0" y="0" width="60" height="110" fill="url(#pcbGrad)" stroke="#2a7a2a" stroke-width="1.5" rx="3"/>
-    <rect x="20" y="-8" width="20" height="12" fill="#555" stroke="#666" stroke-width="1" rx="2"/>
-    <text x="30" y="20" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaffaa" font-weight="bold">ESP32</text>
-    <text x="30" y="32" text-anchor="middle" font-family="monospace" font-size="6" fill="#88cc88">DevKit V1</text>
-    <!-- Pin rows -->
-    <g fill="#d4a843" font-family="monospace" font-size="5">
-      <rect x="-4" y="42" width="8" height="3" rx="1"/><text x="-10" y="46" text-anchor="end" fill="#8b949e">3V3</text>
-      <rect x="-4" y="49" width="8" height="3" rx="1"/><text x="-10" y="53" text-anchor="end" fill="#8b949e">GND</text>
-      <rect x="-4" y="56" width="8" height="3" rx="1"/><text x="-10" y="60" text-anchor="end" fill="#8b949e">G15</text>
-      <rect x="-4" y="63" width="8" height="3" rx="1"/><text x="-10" y="67" text-anchor="end" fill="#8b949e">G13</text>
-      <rect x="-4" y="70" width="8" height="3" rx="1"/><text x="-10" y="74" text-anchor="end" fill="#8b949e">G12</text>
-      <rect x="-4" y="77" width="8" height="3" rx="1"/><text x="-10" y="81" text-anchor="end" fill="#8b949e">G14</text>
-      <rect x="-4" y="84" width="8" height="3" rx="1"/><text x="-10" y="88" text-anchor="end" fill="#8b949e">G27</text>
-      <rect x="-4" y="91" width="8" height="3" rx="1"/><text x="-10" y="95" text-anchor="end" fill="#8b949e">G26</text>
-      <rect x="56" y="42" width="8" height="3" rx="1"/><text x="70" y="46" fill="#8b949e">VIN</text>
-      <rect x="56" y="49" width="8" height="3" rx="1"/><text x="70" y="53" fill="#8b949e">GND</text>
-      <rect x="56" y="56" width="8" height="3" rx="1"/><text x="70" y="60" fill="#8b949e">G23</text>
-      <rect x="56" y="63" width="8" height="3" rx="1"/><text x="70" y="67" fill="#8b949e">G22</text>
-      <rect x="56" y="70" width="8" height="3" rx="1"/><text x="70" y="74" fill="#8b949e">G21</text>
-      <rect x="56" y="77" width="8" height="3" rx="1"/><text x="70" y="81" fill="#8b949e">G19</text>
-      <rect x="56" y="84" width="8" height="3" rx="1"/><text x="70" y="88" fill="#8b949e">G18</text>
-      <rect x="56" y="91" width="8" height="3" rx="1"/><text x="70" y="95" fill="#8b949e">G5</text>
+    <!-- ESP32 DevKit (upper area) -->
+    <g transform="translate(15, 100)">
+      <rect x="0" y="0" width="55" height="100" fill="url(#pcbGrad)" stroke="#2a7a2a" stroke-width="1.5" rx="3"/>
+      <rect x="17" y="-6" width="20" height="10" fill="#555" stroke="#666" stroke-width="1" rx="2"/>
+      <text x="27" y="18" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaffaa" font-weight="bold">ESP32</text>
+      <text x="27" y="30" text-anchor="middle" font-family="monospace" font-size="5" fill="#88cc88">DevKit V1</text>
+      <text x="27" y="90" text-anchor="middle" font-family="monospace" font-size="6" fill="#58a6ff">WiFi</text>
+      <!-- Simplified pin indicators -->
+      <g fill="#d4a843">
+        <rect x="-3" y="38" width="6" height="2" rx="1"/>
+        <rect x="-3" y="44" width="6" height="2" rx="1"/>
+        <rect x="-3" y="50" width="6" height="2" rx="1"/>
+        <rect x="-3" y="56" width="6" height="2" rx="1"/>
+        <rect x="-3" y="62" width="6" height="2" rx="1"/>
+        <rect x="-3" y="68" width="6" height="2" rx="1"/>
+        <rect x="-3" y="74" width="6" height="2" rx="1"/>
+        <rect x="52" y="38" width="6" height="2" rx="1"/>
+        <rect x="52" y="44" width="6" height="2" rx="1"/>
+        <rect x="52" y="50" width="6" height="2" rx="1"/>
+        <rect x="52" y="56" width="6" height="2" rx="1"/>
+        <rect x="52" y="62" width="6" height="2" rx="1"/>
+        <rect x="52" y="68" width="6" height="2" rx="1"/>
+        <rect x="52" y="74" width="6" height="2" rx="1"/>
+      </g>
     </g>
-    <!-- WiFi antenna symbol -->
-    <text x="30" y="108" text-anchor="middle" font-family="monospace" font-size="7" fill="#58a6ff">WiFi</text>
-  </g>
 
-  <!-- MOSFET Driver Board (Seals 3-5) -->
-  <g transform="translate(950, 180)">
-    <rect x="0" y="0" width="120" height="70" fill="#1a3a1a" stroke="#2a7a2a" stroke-width="1.5" rx="3"/>
-    <text x="60" y="16" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaffaa" font-weight="bold">MOSFET DRIVER</text>
-    <text x="60" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#88cc88">3x IRLZ44N</text>
-    <!-- MOSFETs -->
-    <rect x="10" y="35" width="25" height="20" fill="#222" stroke="#555" stroke-width="1" rx="2"/>
-    <text x="22" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa">Q1</text>
-    <rect x="45" y="35" width="25" height="20" fill="#222" stroke="#555" stroke-width="1" rx="2"/>
-    <text x="57" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa">Q2</text>
-    <rect x="80" y="35" width="25" height="20" fill="#222" stroke="#555" stroke-width="1" rx="2"/>
-    <text x="92" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa">Q3</text>
-    <!-- Flyback diodes -->
-    <text x="60" y="66" text-anchor="middle" font-family="monospace" font-size="6" fill="#d29922">+ 3x 1N4007 flyback</text>
-  </g>
+    <!-- MOSFET Driver Board -->
+    <g transform="translate(85, 100)">
+      <rect x="0" y="0" width="80" height="50" fill="#1a3a1a" stroke="#2a7a2a" stroke-width="1.5" rx="3"/>
+      <text x="40" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaffaa" font-weight="bold">MOSFET DRV</text>
+      <text x="40" y="26" text-anchor="middle" font-family="monospace" font-size="6" fill="#88cc88">3x IRLZ44N</text>
+      <rect x="8" y="32" width="18" height="12" fill="#222" stroke="#555" stroke-width="1" rx="1"/>
+      <rect x="30" y="32" width="18" height="12" fill="#222" stroke="#555" stroke-width="1" rx="1"/>
+      <rect x="52" y="32" width="18" height="12" fill="#222" stroke="#555" stroke-width="1" rx="1"/>
+      <text x="17" y="41" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">Q1</text>
+      <text x="39" y="41" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">Q2</text>
+      <text x="61" y="41" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">Q3</text>
+    </g>
 
-  <!-- Relay Modules (Seal 6 + Seal 7) -->
-  <g transform="translate(1100, 180)">
-    <rect x="0" y="0" width="80" height="70" fill="#1a1a3a" stroke="#4444aa" stroke-width="1.5" rx="3"/>
-    <text x="40" y="16" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaaaff" font-weight="bold">RELAYS</text>
-    <text x="40" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#8888cc">2x 5V module</text>
-    <!-- Relay boxes -->
-    <rect x="8" y="35" width="25" height="25" fill="#222" stroke="#4444aa" stroke-width="1" rx="2"/>
-    <text x="20" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa">S6</text>
-    <text x="20" y="56" text-anchor="middle" font-family="monospace" font-size="5" fill="#666">MAG</text>
-    <rect x="45" y="35" width="25" height="25" fill="#222" stroke="#c9302c" stroke-width="1.5" rx="2"/>
-    <text x="57" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#c9302c">S7</text>
-    <text x="57" y="56" text-anchor="middle" font-family="monospace" font-size="5" fill="#993333">PWR</text>
-  </g>
+    <!-- Relay Modules -->
+    <g transform="translate(180, 100)">
+      <rect x="0" y="0" width="65" height="50" fill="#1a1a3a" stroke="#4444aa" stroke-width="1.5" rx="3"/>
+      <text x="32" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaaaff" font-weight="bold">RELAYS</text>
+      <text x="32" y="26" text-anchor="middle" font-family="monospace" font-size="6" fill="#8888cc">2x 5V</text>
+      <rect x="6" y="32" width="22" height="14" fill="#222" stroke="#4444aa" stroke-width="1" rx="1"/>
+      <text x="17" y="42" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">S6</text>
+      <rect x="35" y="32" width="22" height="14" fill="#222" stroke="#c9302c" stroke-width="1.5" rx="1"/>
+      <text x="46" y="42" text-anchor="middle" font-family="monospace" font-size="5" fill="#c9302c">S7</text>
+    </g>
 
-  <!-- 5V Regulator -->
-  <g transform="translate(950, 280)">
-    <rect x="0" y="0" width="80" height="40" fill="#3a1a1a" stroke="#aa4444" stroke-width="1.5" rx="3"/>
-    <text x="40" y="16" text-anchor="middle" font-family="monospace" font-size="8" fill="#ffaaaa" font-weight="bold">5V REG</text>
-    <text x="40" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#cc8888">MP1584 buck</text>
-    <text x="40" y="38" text-anchor="middle" font-family="monospace" font-size="6" fill="#996666">12V  >  5V</text>
-  </g>
+    <!-- Servo 1 (behind Seal 1 position) -->
+    <g transform="translate(90, 175)">
+      <rect x="0" y="0" width="35" height="20" fill="#2a2a4a" stroke="#6666cc" stroke-width="1" rx="2"/>
+      <text x="17" y="10" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaaaff" font-weight="bold">SRV1</text>
+      <rect x="27" y="5" width="14" height="3" fill="#6666cc" rx="1"/>
+      <text x="17" y="18" text-anchor="middle" font-family="monospace" font-size="4" fill="#8888cc">SG90</text>
+    </g>
 
-  <!-- Inline Fuse -->
-  <g transform="translate(1070, 280)">
-    <rect x="0" y="0" width="60" height="40" fill="#3a3a1a" stroke="#aaaa44" stroke-width="1.5" rx="3"/>
-    <text x="30" y="16" text-anchor="middle" font-family="monospace" font-size="8" fill="#ffffaa" font-weight="bold">FUSE</text>
-    <text x="30" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#cccc88">2A blade</text>
-    <text x="30" y="38" text-anchor="middle" font-family="monospace" font-size="6" fill="#999966">inline</text>
-  </g>
+    <!-- Servo 2 (behind Seal 2 position) -->
+    <g transform="translate(140, 175)">
+      <rect x="0" y="0" width="35" height="20" fill="#2a2a4a" stroke="#6666cc" stroke-width="1" rx="2"/>
+      <text x="17" y="10" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaaaff" font-weight="bold">SRV2</text>
+      <rect x="27" y="5" width="14" height="3" fill="#6666cc" rx="1"/>
+      <text x="17" y="18" text-anchor="middle" font-family="monospace" font-size="4" fill="#8888cc">SG90</text>
+    </g>
 
-  <!-- 9V Battery backup -->
-  <g transform="translate(1160, 280)">
-    <rect x="0" y="0" width="55" height="40" fill="#1a2a1a" stroke="#44aa44" stroke-width="1.5" rx="3"/>
-    <text x="28" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaffaa" font-weight="bold">9V BAT</text>
-    <text x="28" y="28" text-anchor="middle" font-family="monospace" font-size="6" fill="#88cc88">backup</text>
-    <text x="28" y="38" text-anchor="middle" font-family="monospace" font-size="6" fill="#669966">+ diode</text>
-  </g>
+    <!-- Solenoid locks (vertically spaced behind seals 3-5) -->
+    <g transform="translate(90, 260)">
+      <rect x="0" y="0" width="35" height="45" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
+      <text x="17" y="12" text-anchor="middle" font-family="monospace" font-size="6" fill="#d29922" font-weight="bold">SOL3</text>
+      <rect x="2" y="18" width="31" height="6" fill="#555" rx="1"/>
+      <rect x="12" y="26" width="10" height="16" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
+    </g>
+    <g transform="translate(140, 260)">
+      <rect x="0" y="0" width="35" height="45" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
+      <text x="17" y="12" text-anchor="middle" font-family="monospace" font-size="6" fill="#d29922" font-weight="bold">SOL4</text>
+      <rect x="2" y="18" width="31" height="6" fill="#555" rx="1"/>
+      <rect x="12" y="26" width="10" height="16" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
+    </g>
+    <g transform="translate(190, 260)">
+      <rect x="0" y="0" width="35" height="45" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
+      <text x="17" y="12" text-anchor="middle" font-family="monospace" font-size="6" fill="#d29922" font-weight="bold">SOL5</text>
+      <rect x="2" y="18" width="31" height="6" fill="#555" rx="1"/>
+      <rect x="12" y="26" width="10" height="16" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
+    </g>
 
-  <!-- Solenoid positions (behind panel, top row corresponds to seals 3-5) -->
-  <g transform="translate(950, 345)">
-    <rect x="0" y="0" width="40" height="55" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
-    <text x="20" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#d29922" font-weight="bold">SOL 3</text>
-    <rect x="2" y="22" width="36" height="8" fill="#555" rx="1"/>
-    <rect x="14" y="32" width="12" height="20" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
-    <text x="20" y="46" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">bolt</text>
-  </g>
-  <g transform="translate(1000, 345)">
-    <rect x="0" y="0" width="40" height="55" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
-    <text x="20" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#d29922" font-weight="bold">SOL 4</text>
-    <rect x="2" y="22" width="36" height="8" fill="#555" rx="1"/>
-    <rect x="14" y="32" width="12" height="20" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
-    <text x="20" y="46" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">bolt</text>
-  </g>
-  <g transform="translate(1050, 345)">
-    <rect x="0" y="0" width="40" height="55" fill="#333" stroke="#666" stroke-width="1" rx="2"/>
-    <text x="20" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#d29922" font-weight="bold">SOL 5</text>
-    <rect x="2" y="22" width="36" height="8" fill="#555" rx="1"/>
-    <rect x="14" y="32" width="12" height="20" fill="#444" stroke="#666" stroke-width="1" rx="1"/>
-    <text x="20" y="46" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">bolt</text>
-  </g>
+    <!-- Mag lock (behind Seal 6) -->
+    <g transform="translate(90, 380)">
+      <rect x="0" y="0" width="45" height="45" fill="#2a2a2a" stroke="#777" stroke-width="2" rx="2"/>
+      <text x="22" y="14" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa" font-weight="bold">MAG 6</text>
+      <rect x="5" y="18" width="35" height="22" fill="#444" stroke="#666" stroke-width="1" rx="2"/>
+      <text x="22" y="33" text-anchor="middle" font-family="monospace" font-size="5" fill="#888">electro</text>
+    </g>
 
-  <!-- Servo positions (behind panel, seals 1-2) -->
-  <g transform="translate(830, 345)">
-    <rect x="0" y="0" width="40" height="30" fill="#2a2a4a" stroke="#6666cc" stroke-width="1" rx="2"/>
-    <text x="20" y="12" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaaaff" font-weight="bold">SRV 1</text>
-    <rect x="30" y="8" width="18" height="4" fill="#6666cc" rx="1"/>
-    <text x="20" y="26" text-anchor="middle" font-family="monospace" font-size="5" fill="#8888cc">SG90</text>
-  </g>
-  <g transform="translate(875, 345)">
-    <rect x="0" y="0" width="40" height="30" fill="#2a2a4a" stroke="#6666cc" stroke-width="1" rx="2"/>
-    <text x="20" y="12" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaaaff" font-weight="bold">SRV 2</text>
-    <rect x="30" y="8" width="18" height="4" fill="#6666cc" rx="1"/>
-    <text x="20" y="26" text-anchor="middle" font-family="monospace" font-size="5" fill="#8888cc">SG90</text>
-  </g>
+    <!-- Seal 7 solenoid + spring latch -->
+    <g transform="translate(160, 380)">
+      <rect x="0" y="0" width="55" height="45" fill="#2a1515" stroke="#c9302c" stroke-width="2" rx="2"/>
+      <text x="27" y="14" text-anchor="middle" font-family="monospace" font-size="6" fill="#ff6666" font-weight="bold">SOL 7</text>
+      <rect x="6" y="18" width="43" height="6" fill="#555" rx="1"/>
+      <text x="27" y="34" text-anchor="middle" font-family="monospace" font-size="5" fill="#cc8888">spring latch</text>
+      <text x="27" y="42" text-anchor="middle" font-family="monospace" font-size="5" fill="#993333">pwr sense</text>
+    </g>
 
-  <!-- Mag lock (Seal 6) -->
-  <g transform="translate(1120, 345)">
-    <rect x="0" y="0" width="50" height="55" fill="#2a2a2a" stroke="#777" stroke-width="2" rx="2"/>
-    <text x="25" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaa" font-weight="bold">MAG 6</text>
-    <rect x="5" y="22" width="40" height="28" fill="#444" stroke="#666" stroke-width="1" rx="2"/>
-    <text x="25" y="40" text-anchor="middle" font-family="monospace" font-size="6" fill="#888">electro</text>
-    <text x="25" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#888">magnet</text>
-  </g>
+    <!-- Power area (lower section) -->
+    <!-- 5V Regulator -->
+    <g transform="translate(15, 470)">
+      <rect x="0" y="0" width="70" height="35" fill="#3a1a1a" stroke="#aa4444" stroke-width="1.5" rx="3"/>
+      <text x="35" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#ffaaaa" font-weight="bold">5V REG</text>
+      <text x="35" y="26" text-anchor="middle" font-family="monospace" font-size="6" fill="#cc8888">MP1584</text>
+    </g>
 
-  <!-- Seal 7 solenoid (with spring) -->
-  <g transform="translate(1190, 345)">
-    <rect x="0" y="0" width="50" height="55" fill="#2a1515" stroke="#c9302c" stroke-width="2" rx="2"/>
-    <text x="25" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#ff6666" font-weight="bold">SOL 7</text>
-    <rect x="8" y="22" width="34" height="8" fill="#555" rx="1"/>
-    <text x="25" y="40" text-anchor="middle" font-family="monospace" font-size="6" fill="#cc8888">spring</text>
-    <text x="25" y="48" text-anchor="middle" font-family="monospace" font-size="6" fill="#cc8888">latch</text>
-  </g>
+    <!-- Fuse -->
+    <g transform="translate(100, 470)">
+      <rect x="0" y="0" width="50" height="35" fill="#3a3a1a" stroke="#aaaa44" stroke-width="1.5" rx="3"/>
+      <text x="25" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#ffffaa" font-weight="bold">FUSE</text>
+      <text x="25" y="26" text-anchor="middle" font-family="monospace" font-size="6" fill="#cccc88">2A blade</text>
+    </g>
 
-  <!-- GND and power bus bars -->
-  <g transform="translate(830, 420)">
-    <rect x="0" y="0" width="410" height="12" fill="#333" stroke="#555" stroke-width="1" rx="2"/>
-    <text x="205" y="9" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaa">GND BUS (common ground)</text>
-  </g>
-  <g transform="translate(830, 440)">
-    <rect x="0" y="0" width="200" height="12" fill="#3a1a1a" stroke="#cc3333" stroke-width="1" rx="2"/>
-    <text x="100" y="9" text-anchor="middle" font-family="monospace" font-size="7" fill="#ff6666">12V BUS</text>
-  </g>
-  <g transform="translate(1040, 440)">
-    <rect x="0" y="0" width="200" height="12" fill="#1a3a1a" stroke="#33cc33" stroke-width="1" rx="2"/>
-    <text x="100" y="9" text-anchor="middle" font-family="monospace" font-size="7" fill="#66ff66">5V BUS</text>
-  </g>
+    <!-- 9V Battery -->
+    <g transform="translate(165, 470)">
+      <rect x="0" y="0" width="50" height="35" fill="#1a2a1a" stroke="#44aa44" stroke-width="1.5" rx="3"/>
+      <text x="25" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaffaa" font-weight="bold">9V BAT</text>
+      <text x="25" y="26" text-anchor="middle" font-family="monospace" font-size="6" fill="#88cc88">backup</text>
+    </g>
 
-  <!-- Barrel jack (back side) -->
-  <g transform="translate(1210, 480)">
-    <circle cx="0" cy="0" r="12" fill="#333" stroke="#c9302c" stroke-width="2"/>
-    <circle cx="0" cy="0" r="5" fill="#222" stroke="#555" stroke-width="1"/>
-    <text x="0" y="22" text-anchor="middle" font-family="monospace" font-size="7" fill="#c9302c">12V IN</text>
-  </g>
+    <!-- GND bus bar -->
+    <g transform="translate(15, 440)">
+      <rect x="0" y="0" width="230" height="10" fill="#333" stroke="#555" stroke-width="1" rx="2"/>
+      <text x="115" y="8" text-anchor="middle" font-family="monospace" font-size="6" fill="#aaa">GND BUS</text>
+    </g>
 
-  <!-- NeoPixel strip routing note -->
-  <g transform="translate(830, 470)">
-    <rect x="0" y="0" width="140" height="22" fill="#2a1a2a" stroke="#bc8cff" stroke-width="1" rx="3"/>
-    <text x="70" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#bc8cff">NeoPixel strip (7 LEDs)</text>
-  </g>
+    <!-- Power bus bars -->
+    <g transform="translate(15, 520)">
+      <rect x="0" y="0" width="110" height="10" fill="#3a1a1a" stroke="#cc3333" stroke-width="1" rx="2"/>
+      <text x="55" y="8" text-anchor="middle" font-family="monospace" font-size="6" fill="#ff6666">12V</text>
+    </g>
+    <g transform="translate(135, 520)">
+      <rect x="0" y="0" width="110" height="10" fill="#1a3a1a" stroke="#33cc33" stroke-width="1" rx="2"/>
+      <text x="55" y="8" text-anchor="middle" font-family="monospace" font-size="6" fill="#66ff66">5V</text>
+    </g>
 
-  <!-- Keypad ribbon cable note -->
-  <g transform="translate(980, 470)">
-    <rect x="0" y="0" width="100" height="22" fill="#1a2a2a" stroke="#39c5cf" stroke-width="1" rx="3"/>
-    <text x="50" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#39c5cf">Keypad ribbon (8p)</text>
-  </g>
+    <!-- NeoPixel strip (runs vertically along seals) -->
+    <g transform="translate(55, 160)">
+      <rect x="0" y="0" width="8" height="380" fill="#2a1a2a" stroke="#bc8cff" stroke-width="1" rx="2" opacity="0.6"/>
+      <text x="-5" y="190" text-anchor="end" font-family="monospace" font-size="6" fill="#bc8cff" transform="rotate(-90,-5,190)">NEOPIXEL STRIP (7 LEDs)</text>
+    </g>
 
-  <!-- LCD cable note -->
-  <g transform="translate(1090, 470)">
-    <rect x="0" y="0" width="90" height="22" fill="#1a2a2a" stroke="#39c5cf" stroke-width="1" rx="3"/>
-    <text x="45" y="14" text-anchor="middle" font-family="monospace" font-size="7" fill="#39c5cf">LCD I2C (4p)</text>
+    <!-- Barrel jack -->
+    <g transform="translate(230, 600)">
+      <circle cx="0" cy="0" r="10" fill="#333" stroke="#c9302c" stroke-width="2"/>
+      <circle cx="0" cy="0" r="4" fill="#222" stroke="#555" stroke-width="1"/>
+      <text x="0" y="18" text-anchor="middle" font-family="monospace" font-size="6" fill="#c9302c">12V IN</text>
+    </g>
+
+    <!-- Keypad ribbon connector -->
+    <g transform="translate(15, 560)">
+      <rect x="0" y="0" width="60" height="16" fill="#1a2a2a" stroke="#39c5cf" stroke-width="1" rx="2"/>
+      <text x="30" y="11" text-anchor="middle" font-family="monospace" font-size="5" fill="#39c5cf">KEYPAD 8p</text>
+    </g>
+
+    <!-- LCD I2C connector -->
+    <g transform="translate(90, 560)">
+      <rect x="0" y="0" width="55" height="16" fill="#1a2a2a" stroke="#39c5cf" stroke-width="1" rx="2"/>
+      <text x="27" y="11" text-anchor="middle" font-family="monospace" font-size="5" fill="#39c5cf">LCD I2C 4p</text>
+    </g>
   </g>
 
   <!-- ================================================================ -->
   <!-- SECTION 3: WIRING SCHEMATIC -->
   <!-- ================================================================ -->
-  <text x="700" y="620" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#d4a843" font-weight="bold">WIRING SCHEMATIC</text>
-  <text x="700" y="642" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">All connections from ESP32 to components  -  color-coded by function</text>
+  <text x="700" y="960" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#d4a843" font-weight="bold">WIRING SCHEMATIC</text>
+  <text x="700" y="982" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">All connections from ESP32 to components - color-coded by function</text>
 
   <!-- Wiring background -->
-  <rect x="60" y="660" width="1280" height="520" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="8"/>
+  <rect x="60" y="1000" width="1280" height="520" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="8"/>
 
   <!-- Central ESP32 -->
-  <g transform="translate(550, 860)">
+  <g transform="translate(550, 1200)">
     <rect x="0" y="0" width="140" height="200" fill="url(#pcbGrad)" stroke="#2a7a2a" stroke-width="2" rx="5"/>
     <text x="70" y="25" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="14" fill="#aaffaa" font-weight="bold">ESP32</text>
     <text x="70" y="40" text-anchor="middle" font-family="monospace" font-size="9" fill="#88cc88">DevKit V1</text>
@@ -431,127 +539,127 @@
   </g>
 
   <!-- === WIRING: KEYPAD (left side, blue) === -->
-  <g transform="translate(130, 790)">
+  <g transform="translate(130, 1130)">
     <rect x="0" y="0" width="120" height="120" fill="#1a2a3a" stroke="#58a6ff" stroke-width="2" rx="5"/>
     <text x="60" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#58a6ff" font-weight="bold">4x4 KEYPAD</text>
     <text x="60" y="35" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">8-pin ribbon</text>
     <g font-family="monospace" font-size="7" fill="#8b949e">
-      <text x="15" y="52">R1  >  G4</text>
-      <text x="15" y="64">R2  >  G16</text>
-      <text x="15" y="76">R3  >  G17</text>
-      <text x="15" y="88">R4  >  G5</text>
-      <text x="15" y="100">C1  >  G18</text>
-      <text x="15" y="112">C2  >  G19</text>
+      <text x="15" y="52">R1 &gt; G4</text>
+      <text x="15" y="64">R2 &gt; G16</text>
+      <text x="15" y="76">R3 &gt; G17</text>
+      <text x="15" y="88">R4 &gt; G5</text>
+      <text x="15" y="100">C1 &gt; G18</text>
+      <text x="15" y="112">C2 &gt; G19</text>
     </g>
   </g>
   <!-- Keypad wires -->
-  <line x1="250" y1="850" x2="545" y2="920" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-  <line x1="250" y1="865" x2="545" y2="935" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-  <line x1="250" y1="880" x2="545" y2="950" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-  <line x1="250" y1="895" x2="545" y2="965" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="250" y1="1190" x2="545" y2="1260" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="250" y1="1205" x2="545" y2="1275" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="250" y1="1220" x2="545" y2="1290" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="250" y1="1235" x2="545" y2="1305" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
 
   <!-- === WIRING: LCD (right side, cyan) === -->
-  <g transform="translate(900, 920)">
+  <g transform="translate(900, 1260)">
     <rect x="0" y="0" width="130" height="70" fill="#1a2a2a" stroke="#39c5cf" stroke-width="2" rx="5"/>
     <text x="65" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#39c5cf" font-weight="bold">LCD 20x4</text>
     <text x="65" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">I2C (PCF8574)</text>
     <g font-family="monospace" font-size="7" fill="#8b949e">
-      <text x="10" y="48">SDA  >  G21</text>
-      <text x="10" y="60">SCL  >  G22</text>
+      <text x="10" y="48">SDA &gt; G21</text>
+      <text x="10" y="60">SCL &gt; G22</text>
     </g>
   </g>
   <!-- LCD wires -->
-  <line x1="900" y1="950" x2="695" y2="980" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arrowGray)"/>
-  <line x1="900" y1="962" x2="695" y2="995" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+  <line x1="900" y1="1290" x2="695" y2="1320" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arrowCyan)"/>
+  <line x1="900" y1="1302" x2="695" y2="1335" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arrowCyan)"/>
 
   <!-- === WIRING: NeoPixels (left, purple) === -->
-  <g transform="translate(130, 960)">
+  <g transform="translate(130, 1300)">
     <rect x="0" y="0" width="120" height="55" fill="#2a1a2a" stroke="#bc8cff" stroke-width="2" rx="5"/>
     <text x="60" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#bc8cff" font-weight="bold">NeoPixel</text>
     <text x="60" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">WS2812B x7</text>
-    <text x="60" y="46" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">Data  >  G13 (330ohm)</text>
+    <text x="60" y="46" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">Data &gt; G13 (330ohm)</text>
   </g>
   <!-- NeoPixel wire -->
-  <line x1="250" y1="985" x2="545" y2="980" stroke="#bc8cff" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <line x1="250" y1="1325" x2="545" y2="1320" stroke="#bc8cff" stroke-width="2" marker-end="url(#arrowPurple)"/>
 
   <!-- === WIRING: Buzzer (left, orange) === -->
-  <g transform="translate(130, 1040)">
+  <g transform="translate(130, 1380)">
     <rect x="0" y="0" width="120" height="40" fill="#2a2a1a" stroke="#d29922" stroke-width="2" rx="5"/>
     <text x="60" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#d29922" font-weight="bold">BUZZER</text>
-    <text x="60" y="32" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">Signal  >  G12 (100ohm)</text>
+    <text x="60" y="32" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">Signal &gt; G12 (100ohm)</text>
   </g>
   <!-- Buzzer wire -->
-  <line x1="250" y1="1058" x2="545" y2="995" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="250" y1="1398" x2="545" y2="1335" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
 
   <!-- === WIRING: Servos (left, green) === -->
-  <g transform="translate(130, 1100)">
+  <g transform="translate(130, 1440)">
     <rect x="0" y="0" width="120" height="55" fill="#1a2a1a" stroke="#3fb950" stroke-width="2" rx="5"/>
     <text x="60" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#3fb950" font-weight="bold">SERVOS</text>
     <text x="60" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">Seals 1-2 (SG90)</text>
     <g font-family="monospace" font-size="7" fill="#8b949e">
-      <text x="10" y="46">S1  >  G14  S2  >  G27</text>
+      <text x="10" y="46">S1 &gt; G14  S2 &gt; G27</text>
     </g>
   </g>
   <!-- Servo wires -->
-  <line x1="250" y1="1120" x2="545" y2="1010" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
-  <line x1="250" y1="1135" x2="545" y2="1025" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <line x1="250" y1="1460" x2="545" y2="1350" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <line x1="250" y1="1475" x2="545" y2="1365" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
 
   <!-- === WIRING: Solenoids via MOSFETs (right, orange) === -->
-  <g transform="translate(900, 700)">
+  <g transform="translate(900, 1040)">
     <rect x="0" y="0" width="180" height="100" fill="#2a2a1a" stroke="#d29922" stroke-width="2" rx="5"/>
     <text x="90" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#d29922" font-weight="bold">SOLENOID LOCKS</text>
     <text x="90" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">Seals 3-5 via MOSFET</text>
     <g font-family="monospace" font-size="7" fill="#8b949e">
-      <text x="10" y="50">Seal 3: G26  >  1kohm  >  MOSFET  >  SOL</text>
-      <text x="10" y="64">Seal 4: G25  >  1kohm  >  MOSFET  >  SOL</text>
-      <text x="10" y="78">Seal 5: G33  >  1kohm  >  MOSFET  >  SOL</text>
-      <text x="10" y="92">+ 10kohm pull-down + 1N4007 each</text>
+      <text x="10" y="50">Seal 3: G26 &gt; 1k &gt; MOSFET &gt; SOL</text>
+      <text x="10" y="64">Seal 4: G25 &gt; 1k &gt; MOSFET &gt; SOL</text>
+      <text x="10" y="78">Seal 5: G33 &gt; 1k &gt; MOSFET &gt; SOL</text>
+      <text x="10" y="92">+ 10k pull-down + 1N4007 each</text>
     </g>
   </g>
   <!-- Solenoid wires -->
-  <line x1="900" y1="748" x2="695" y2="1010" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
-  <line x1="900" y1="762" x2="695" y2="1025" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
-  <line x1="900" y1="776" x2="695" y2="1040" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="900" y1="1088" x2="695" y2="1350" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="900" y1="1102" x2="695" y2="1365" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
+  <line x1="900" y1="1116" x2="695" y2="1380" stroke="#d29922" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
 
   <!-- === WIRING: Relay (Seal 6, right, red) === -->
-  <g transform="translate(900, 820)">
+  <g transform="translate(900, 1160)">
     <rect x="0" y="0" width="180" height="55" fill="#2a1a1a" stroke="#ff6666" stroke-width="2" rx="5"/>
     <text x="90" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#ff6666" font-weight="bold">MAG LOCK (Seal 6)</text>
-    <text x="90" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">G32  >  Relay  >  12V mag lock</text>
+    <text x="90" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">G32 &gt; Relay &gt; 12V mag lock</text>
     <text x="90" y="46" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">Active LOW + 1N4007 flyback</text>
   </g>
   <!-- Relay wire -->
-  <line x1="900" y1="847" x2="695" y2="1055" stroke="#ff6666" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+  <line x1="900" y1="1187" x2="695" y2="1395" stroke="#ff6666" stroke-width="1.5" marker-end="url(#arrowRed)"/>
 
   <!-- === WIRING: Seal 7 power sense (right, red) === -->
-  <g transform="translate(900, 1020)">
+  <g transform="translate(900, 1360)">
     <rect x="0" y="0" width="180" height="70" fill="#1a0a0a" stroke="#c9302c" stroke-width="2" rx="5"/>
     <text x="90" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#c9302c" font-weight="bold">SEAL 7 (META)</text>
     <text x="90" y="32" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">Power-sense: G35 (input)</text>
-    <text x="90" y="46" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">12V  >  10kohm  >  G35  >  3.3kohm  >  GND</text>
+    <text x="90" y="46" text-anchor="middle" font-family="monospace" font-size="7" fill="#8b949e">12V - 10k - G35 - 3.3k - GND</text>
     <text x="90" y="60" text-anchor="middle" font-family="monospace" font-size="7" fill="#993333">Relay tied to 5V (not ESP32)</text>
   </g>
   <!-- Seal 7 wire -->
-  <line x1="900" y1="1055" x2="695" y2="1040" stroke="#c9302c" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <line x1="900" y1="1395" x2="695" y2="1380" stroke="#c9302c" stroke-width="2" marker-end="url(#arrowRed)"/>
 
   <!-- === POWER SUPPLY (bottom center) === -->
-  <g transform="translate(420, 1110)">
+  <g transform="translate(420, 1450)">
     <rect x="0" y="0" width="400" height="55" fill="#1a1a1a" stroke="#555" stroke-width="2" rx="5"/>
     <text x="200" y="18" text-anchor="middle" font-family="monospace" font-size="10" fill="#d4a843" font-weight="bold">POWER SUPPLY</text>
     <g font-family="monospace" font-size="8" fill="#8b949e">
       <text x="20" y="36">12V 2A DC Adapter</text>
-      <text x="20" y="48"> >  fuse  >  12V bus (solenoids, mag lock, Seal 7)</text>
-      <text x="220" y="36"> >  MP1584  >  5V bus (ESP32, servos, LEDs, LCD)</text>
-      <text x="220" y="48"> >  9V battery backup (via Schottky diode)</text>
+      <text x="20" y="48">&gt; fuse &gt; 12V bus (solenoids, mag lock)</text>
+      <text x="220" y="36">&gt; MP1584 &gt; 5V bus (ESP, servos, LEDs)</text>
+      <text x="220" y="48">&gt; 9V battery backup (Schottky diode)</text>
     </g>
   </g>
 
   <!-- ================================================================ -->
   <!-- SECTION 4: WIRE COLOR LEGEND -->
   <!-- ================================================================ -->
-  <text x="700" y="1230" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#e6edf3" font-weight="bold">WIRE COLOR LEGEND</text>
+  <text x="700" y="1570" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#e6edf3" font-weight="bold">WIRE COLOR LEGEND</text>
 
-  <g transform="translate(140, 1255)">
+  <g transform="translate(140, 1595)">
     <rect x="0" y="0" width="1120" height="50" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="5"/>
     <g font-family="monospace" font-size="10">
       <rect x="15" y="15" width="40" height="6" fill="#c9302c" rx="2"/><text x="60" y="22" fill="#c9302c">12V power</text>
@@ -567,39 +675,40 @@
   <!-- ================================================================ -->
   <!-- SECTION 5: SIDE CROSS-SECTION -->
   <!-- ================================================================ -->
-  <text x="700" y="1360" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#d29922" font-weight="bold">SIDE CROSS-SECTION</text>
-  <text x="700" y="1382" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">How components sit behind the panel  -  depth view</text>
+  <text x="700" y="1700" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#d29922" font-weight="bold">SIDE CROSS-SECTION</text>
+  <text x="700" y="1722" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">How components sit behind the tower panel - depth view</text>
 
-  <rect x="100" y="1400" width="1200" height="350" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="8"/>
+  <rect x="100" y="1740" width="1200" height="350" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="8"/>
 
   <!-- Panel face (thin vertical line) -->
-  <rect x="350" y="1420" width="8" height="310" fill="#555" stroke="#666" stroke-width="1"/>
-  <text x="354" y="1415" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">PANEL</text>
-  <text x="354" y="1745" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">(8mm)</text>
+  <rect x="350" y="1760" width="8" height="310" fill="#555" stroke="#666" stroke-width="1"/>
+  <text x="354" y="1755" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">PANEL</text>
+  <text x="354" y="2085" text-anchor="middle" font-family="monospace" font-size="8" fill="#8b949e">(8mm MDF)</text>
 
   <!-- Player side label -->
-  <text x="225" y="1440" text-anchor="middle" font-family="monospace" font-size="12" fill="#58a6ff">PLAYER SIDE</text>
-  <text x="225" y="1455" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">(front)</text>
+  <text x="225" y="1780" text-anchor="middle" font-family="monospace" font-size="12" fill="#58a6ff">PLAYER SIDE</text>
+  <text x="225" y="1795" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">(front)</text>
 
   <!-- Electronics side label -->
-  <text x="750" y="1440" text-anchor="middle" font-family="monospace" font-size="12" fill="#3fb950">ELECTRONICS SIDE</text>
-  <text x="750" y="1455" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">(back, ~200mm deep)</text>
+  <text x="750" y="1780" text-anchor="middle" font-family="monospace" font-size="12" fill="#3fb950">ELECTRONICS SIDE</text>
+  <text x="750" y="1795" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">(back, ~150mm deep)</text>
 
-  <!-- Seal face (visible from front) -->
-  <g transform="translate(310, 1485)">
-    <circle cx="0" cy="0" r="16" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
-    <text x="0" y="4" text-anchor="middle" font-family="monospace" font-size="8" fill="#d4a843">SEAL</text>
-    <text x="-35" y="4" text-anchor="end" font-family="monospace" font-size="8" fill="#8b949e">visible</text>
-  </g>
-
-  <!-- NeoPixel (in front of panel, near seal) -->
-  <g transform="translate(315, 1520)">
-    <circle cx="0" cy="0" r="5" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-    <text x="-30" y="3" text-anchor="end" font-family="monospace" font-size="7" fill="#bc8cff">LED</text>
+  <!-- Tower silhouette on player side -->
+  <g transform="translate(150, 1810)">
+    <rect x="0" y="20" width="80" height="200" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4,3" rx="2"/>
+    <rect x="10" y="0" width="60" height="25" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4,3" rx="2"/>
+    <text x="40" y="130" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">tower</text>
+    <text x="40" y="142" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">shape</text>
+    <!-- Seal visible from front -->
+    <circle cx="40" cy="60" r="10" fill="#2a2a2a" stroke="#555" stroke-width="1.5"/>
+    <text x="40" y="63" text-anchor="middle" font-family="monospace" font-size="6" fill="#d4a843">SEAL</text>
+    <text x="40" y="80" text-anchor="middle" font-family="monospace" font-size="6" fill="#8b949e">visible</text>
+    <!-- LED -->
+    <circle cx="55" cy="60" r="3" fill="#cc3333" stroke="#555" stroke-width="0.5" filter="url(#glow)"/>
   </g>
 
   <!-- Solenoid (behind panel) -->
-  <g transform="translate(430, 1475)">
+  <g transform="translate(430, 1820)">
     <rect x="0" y="0" width="80" height="30" fill="#333" stroke="#666" stroke-width="1.5" rx="2"/>
     <text x="40" y="13" text-anchor="middle" font-family="monospace" font-size="8" fill="#d29922">SOLENOID</text>
     <!-- Bolt going through panel -->
@@ -608,17 +717,16 @@
   </g>
 
   <!-- Servo (behind panel) -->
-  <g transform="translate(430, 1525)">
+  <g transform="translate(430, 1870)">
     <rect x="0" y="0" width="50" height="25" fill="#2a2a4a" stroke="#6666cc" stroke-width="1.5" rx="2"/>
     <text x="25" y="13" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaaaff">SERVO</text>
-    <!-- Arm going through panel -->
     <line x1="-2" y1="12" x2="-72" y2="12" stroke="#6666cc" stroke-width="2"/>
     <circle cx="-72" cy="12" r="4" fill="#6666cc"/>
     <text x="25" y="22" text-anchor="middle" font-family="monospace" font-size="6" fill="#8888cc">arm through slot</text>
   </g>
 
   <!-- ESP32 (deeper behind) -->
-  <g transform="translate(600, 1480)">
+  <g transform="translate(600, 1820)">
     <rect x="0" y="0" width="55" height="70" fill="url(#pcbGrad)" stroke="#2a7a2a" stroke-width="1.5" rx="3"/>
     <text x="28" y="20" text-anchor="middle" font-family="monospace" font-size="8" fill="#aaffaa" font-weight="bold">ESP32</text>
     <text x="28" y="35" text-anchor="middle" font-family="monospace" font-size="7" fill="#88cc88">on</text>
@@ -627,21 +735,21 @@
   </g>
 
   <!-- MOSFET board -->
-  <g transform="translate(700, 1490)">
+  <g transform="translate(700, 1830)">
     <rect x="0" y="0" width="60" height="40" fill="#1a3a1a" stroke="#2a7a2a" stroke-width="1" rx="2"/>
     <text x="30" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaffaa">MOSFET</text>
     <text x="30" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#88cc88">board</text>
   </g>
 
   <!-- Relay module -->
-  <g transform="translate(800, 1490)">
+  <g transform="translate(800, 1830)">
     <rect x="0" y="0" width="55" height="40" fill="#1a1a3a" stroke="#4444aa" stroke-width="1" rx="2"/>
     <text x="28" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#aaaaff">RELAY</text>
     <text x="28" y="28" text-anchor="middle" font-family="monospace" font-size="7" fill="#8888cc">module</text>
   </g>
 
   <!-- Power supply area -->
-  <g transform="translate(900, 1480)">
+  <g transform="translate(900, 1820)">
     <rect x="0" y="0" width="80" height="50" fill="#3a1a1a" stroke="#aa4444" stroke-width="1.5" rx="3"/>
     <text x="40" y="16" text-anchor="middle" font-family="monospace" font-size="7" fill="#ffaaaa">5V REG</text>
     <text x="40" y="30" text-anchor="middle" font-family="monospace" font-size="7" fill="#cc8888">+ fuse</text>
@@ -649,36 +757,36 @@
   </g>
 
   <!-- Barrel jack (at back edge) -->
-  <g transform="translate(1050, 1490)">
+  <g transform="translate(1050, 1840)">
     <circle cx="0" cy="0" r="12" fill="#333" stroke="#c9302c" stroke-width="2"/>
     <circle cx="0" cy="0" r="5" fill="#222"/>
     <text x="0" y="22" text-anchor="middle" font-family="monospace" font-size="8" fill="#c9302c">12V IN</text>
   </g>
 
-  <!-- Back panel / cover -->
-  <rect x="1100" y="1420" width="6" height="310" fill="#444" stroke="#555" stroke-width="1"/>
-  <text x="1103" y="1415" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">BACK</text>
+  <!-- Back cover -->
+  <rect x="1100" y="1760" width="6" height="310" fill="#444" stroke="#555" stroke-width="1"/>
+  <text x="1103" y="1755" text-anchor="middle" font-family="monospace" font-size="9" fill="#8b949e">BACK</text>
 
   <!-- Depth dimension -->
-  <line x1="358" y1="1700" x2="1100" y2="1700" stroke="#555" stroke-width="0.8"/>
-  <line x1="358" y1="1695" x2="358" y2="1705" stroke="#555" stroke-width="0.8"/>
-  <line x1="1100" y1="1695" x2="1100" y2="1705" stroke="#555" stroke-width="0.8"/>
-  <text x="729" y="1718" text-anchor="middle" font-family="monospace" font-size="10" fill="#555">~200 mm depth</text>
+  <line x1="358" y1="2040" x2="1100" y2="2040" stroke="#555" stroke-width="0.8"/>
+  <line x1="358" y1="2035" x2="358" y2="2045" stroke="#555" stroke-width="0.8"/>
+  <line x1="1100" y1="2035" x2="1100" y2="2045" stroke="#555" stroke-width="0.8"/>
+  <text x="729" y="2058" text-anchor="middle" font-family="monospace" font-size="10" fill="#555">~150 mm depth</text>
 
   <!-- Wire runs (behind panel) -->
   <g stroke="#444" stroke-width="1" stroke-dasharray="4,3" fill="none">
-    <path d="M 510,1497 L 600,1497"/>
-    <path d="M 510,1537 L 600,1537"/>
-    <path d="M 655,1510 L 700,1510"/>
-    <path d="M 760,1510 L 800,1510"/>
-    <path d="M 855,1510 L 900,1510"/>
-    <path d="M 980,1510 L 1050,1502"/>
+    <path d="M 510,1837 L 600,1837"/>
+    <path d="M 510,1882 L 600,1882"/>
+    <path d="M 655,1850 L 700,1850"/>
+    <path d="M 760,1850 L 800,1850"/>
+    <path d="M 855,1850 L 900,1850"/>
+    <path d="M 980,1850 L 1050,1842"/>
   </g>
-  <text x="730" y="1570" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">wire runs along base (zip tied)</text>
+  <text x="730" y="1910" text-anchor="middle" font-family="monospace" font-size="8" fill="#555">wire runs along base (zip tied)</text>
 
   <!-- ================================================================ -->
   <!-- FOOTER -->
   <!-- ================================================================ -->
-  <text x="700" y="1785" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#8b949e" font-style="italic">"Now I have a SPL. Ho-ho-ho."  -  Nakatomi Plaza: Vault Heist</text>
+  <text x="700" y="2130" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="11" fill="#8b949e" font-style="italic">"Now I have a SPL. Ho-ho-ho." - Nakatomi Plaza: Vault Heist</text>
 
 </svg>
