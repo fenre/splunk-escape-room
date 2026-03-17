@@ -53,6 +53,8 @@ splunk-escape-room/
 │   ├── DESIGN.md                # Full design document (mechanics, architecture, puzzles)
 │   ├── STORY_AND_MYSTERIES.md   # Narrative, easter eggs, mystery catalogue
 │   ├── TIMELINE_AND_FLOWS.md    # Phase timeline, fail conditions, flow diagrams
+│   ├── PHYSICAL_MODEL.md        # Electronics, locks, wiring, BOM, and build guide
+│   ├── physical_model_diagram.svg  # Visual wiring and component placement diagram
 │   └── flow.html                # Rendered Mermaid flow diagrams
 ```
 
@@ -64,6 +66,7 @@ splunk-escape-room/
 | [Design Document](docs/DESIGN.md) | Vision, game mechanics, puzzle design, technical architecture, and project roadmap |
 | [Story & Mysteries](docs/STORY_AND_MYSTERIES.md) | Introduction narrative, Die Hard easter eggs, and the mystery/task catalogue |
 | [Timeline & Flows](docs/TIMELINE_AND_FLOWS.md) | Phase timeline, threat escalation, fail conditions, McClane hint schedule, and Mermaid flow diagrams |
+| [Physical Model](docs/PHYSICAL_MODEL.md) | Electronics design, lock mechanisms, wiring, BOM, Seal 7 circuit, Splunk integration, and build guide |
 
 ## Tech Stack
 
@@ -72,7 +75,7 @@ splunk-escape-room/
 | Search & Analytics | Splunk Enterprise or Cloud |
 | Data Generation | Python (planned) |
 | Game UI | HTML/JS or Splunk app (planned) |
-| Physical Model | Arduino / Raspberry Pi Pico (planned) |
+| Physical Model | ESP32 + servo/solenoid/magnetic locks ([design doc](docs/PHYSICAL_MODEL.md)) |
 
 ## SPL Skills Covered
 
