@@ -103,11 +103,72 @@ Backup for Seal 7 victory sequence:
 
 ---
 
-## 2. Lock Mechanisms
+## 2. Hinged Compartment Doors
+
+Each seal level on the tower has a small **hinged door panel** on the front face. The lock mechanism (servo arm, solenoid bolt, or electromagnetic hold) physically latches that floor's door shut. When the seal is broken, the lock retracts and the door swings open — revealing a compartment behind it containing the clue or artifact needed for the next seal.
+
+### 2.1 Door Construction
+
+Each door is a section of the tower facade, approximately **150mm wide × 70mm tall**, cut from the same material as the tower panel and attached with small piano hinges (continuous hinges) or 3D-printed living hinges on the left edge.
+
+```
+                    TOWER FRONT (per floor)
+          ┌─────────────────────────────────────┐
+          │  ┌──────────────────────────────┐   │
+          │  │         HINGED DOOR          │←lock mechanism
+          │  │    (swings open to right)    │   holds door shut
+          │  │                              │   │
+          │  │   [SEAL n]  ◄── LED          │   │
+          │  │                              │   │
+          │  └─hinge──────────────────┘     │   │
+          │      ↑ left edge hinge          │   │
+          └─────────────────────────────────────┘
+```
+
+**Key design points**:
+
+- **Hinge placement**: Left edge of each door. The door swings outward to the right when the lock releases.
+- **Spring assist**: A small torsion spring on the hinge (or a compressed foam block behind the door) gently pushes the door open once the lock retracts. This creates a satisfying "pop" effect.
+- **Compartment depth**: Each compartment behind the door is ~40–60mm deep (enough to hold a folded clue card, a small prop, or a USB stick).
+- **Door stops**: Small foam bumpers prevent doors from swinging more than ~110° and slamming into adjacent levels.
+- **Seal indicator**: The seal number and its LED are mounted on the door face itself, so they move with the door. The LED wiring uses a small flex pigtail to accommodate the hinge movement.
+
+### 2.2 Compartment Contents (Clue Chain)
+
+Each compartment reveals something the team needs for the next seal. This creates a **physical dependency chain** — you literally cannot proceed without opening the previous floor.
+
+| Seal | Floor | Reveals | How it helps |
+|---|---|---|---|
+| 1 | Roof | Folded blueprint fragment | Shows a partial floor plan with Seal 2's code hidden in room numbers |
+| 2 | 30F | USB stick or SD card | Contains a log file that must be analyzed in Splunk to find Seal 3's code |
+| 3 | 25F | Printed cipher wheel or decoder ring | Physical decoder needed to translate an encrypted Splunk field into Seal 4's code |
+| 4 | 20F | Radio frequency card + small note | A frequency/channel number and callsign; the team must find the matching Splunk event |
+| 5 | 15F | Access badge prop (laminated card) | Has a barcode/QR or employee ID that maps to a Splunk lookup table for Seal 6's code |
+| 6 | 5F | A power cable or note saying *"Cut the power"* | The hint for Seal 7's meta-solution: unplug the barrel jack |
+| 7 | Vault (B1) | **The bearer bonds** (prop money / certificate) | The prize! Game complete. |
+
+**Design note**: The clue objects should be **physically distinct** (paper, plastic, metal, electronic) so each reveal feels different. Seal 6's compartment is the most important narratively — it must clearly hint at the power-cut solution without spelling it out.
+
+### 2.3 Door-to-Lock Integration
+
+Each lock type latches its door differently:
+
+| Seals | Lock type | How it latches the door |
+|---|---|---|
+| 1–2 | Servo | Servo arm rotates through a slot in the door edge; acts as a latch bolt |
+| 3–5 | Solenoid | Solenoid bolt extends through the panel frame into a strike plate on the door edge |
+| 6 | Mag lock | Electromagnet on frame, steel armature plate on door; magnetic hold |
+| 7 | Power-loss latch | Spring-loaded solenoid bolt; releases when power is cut |
+
+The lock mechanisms are described in detail in Section 3 below.
+
+---
+
+## 3. Lock Mechanisms
 
 The seven seals use a deliberate mix of lock types. Early seals are simple and quiet; later seals are louder and more dramatic. This escalation builds tension as the team progresses.
 
-### 2.1 Seals 1–2: Servo Locks
+### 3.1 Seals 1–2: Servo Locks
 
 **Type**: SG90 micro servo (180°) rotating a 3D-printed or bent-wire latch arm.
 
@@ -121,11 +182,11 @@ The seven seals use a deliberate mix of lock types. Early seals are simple and q
 - Power → 5V rail (not ESP32 3.3V pin — servos draw too much current)
 - GND → common ground
 
-**Mounting**: Servo body behind the vault panel; latch arm protrudes through a slot. A small indicator tab or flag can be visible to players.
+**Mounting**: Servo body mounted on the tower frame behind the door's hinge edge. The latch arm protrudes through a slot in the door edge, acting as a bolt that prevents the door from swinging open. When the servo rotates to 90°, the arm clears the slot and the spring-assist pushes the door open.
 
 **Reset**: Servo returns to 0° (locked) on reset command.
 
-### 2.2 Seals 3–5: Solenoid Locks
+### 3.2 Seals 3–5: Solenoid Locks
 
 **Type**: 12V DC push-pull solenoid bolt lock (JF-0530B or similar).
 
@@ -154,11 +215,11 @@ ESP32 GPIO ──► 1kΩ resistor ──► IRLZ44N gate
 - **Flyback diode**: 1N4007 across solenoid terminals. Protects MOSFET from back-EMF when the solenoid de-energizes. **Do not omit.**
 - **Gate resistor**: 1kΩ limits inrush to the gate.
 
-**Mounting**: Solenoid body behind panel; bolt protrudes through a hole into a striker plate.
+**Mounting**: Solenoid body mounted on the tower frame beside the door. The bolt extends through the frame into a strike plate (small metal loop or drilled hole) on the door's latch edge. When the solenoid retracts the bolt, the strike plate is freed and the door swings open.
 
-**Reset**: ESP32 drives GPIO LOW → solenoid de-energizes → bolt extends (re-locks).
+**Reset**: ESP32 drives GPIO LOW → solenoid de-energizes → bolt extends into strike plate (re-locks the door). The facilitator must manually push each door closed before resetting.
 
-### 2.3 Seal 6: Magnetic Lock
+### 3.3 Seal 6: Magnetic Lock
 
 **Type**: 12V DC electromagnetic lock (small form factor, 60–100 kg holding force).
 
@@ -183,11 +244,11 @@ ESP32 GPIO ──► relay module IN
 - Default state: relay energized (COM→NO connected) → mag lock powered → locked.
 - To unlock: ESP32 drives relay GPIO LOW → relay de-energizes → COM disconnects from NO → mag lock loses power → releases.
 
-**Mounting**: Electromagnet on the vault panel frame; armature plate on the vault door or a sliding bolt.
+**Mounting**: Electromagnet mounted on the tower frame at the Seal 6 level; a steel armature plate is bonded to the door's latch edge. The magnetic hold keeps the door firmly shut. When the mag lock de-powers, the armature releases and the spring-assist pushes the door open with a heavy, satisfying "clunk."
 
-**Reset**: ESP32 re-energizes the relay → mag lock re-powers → holds again.
+**Reset**: ESP32 re-energizes the relay → mag lock re-powers. The facilitator pushes the door closed; the magnet grabs the armature plate and holds.
 
-### 2.4 Seal 7: Power-Loss Latch (Meta Solution)
+### 3.4 Seal 7: Power-Loss Latch (Meta Solution)
 
 **Type**: Normally-closed (NC) relay holding a spring-loaded mechanical latch.
 
@@ -196,13 +257,13 @@ ESP32 GPIO ──► relay module IN
 - When players unplug the barrel jack: relay de-energizes → NC contacts close (or, if using NC wiring, the relay's rest state releases the latch) → spring pushes latch open.
 - No code required. The system never tells the player this; it's the "movie twist."
 
-**Detailed in Section 5 below.**
+**Detailed in Section 6 below.**
 
 ---
 
-## 3. Input System
+## 4. Input System
 
-### 3.1 Keypad
+### 4.1 Keypad
 
 **Part**: 4x4 membrane matrix keypad (16 keys: 0–9, A, B, C, D, *, #).
 
@@ -228,7 +289,7 @@ D  = (reserved / reset combo)
 
 **Pins**: Use GPIOs that are safe for input (avoid strapping pins GPIO0, GPIO2, GPIO12, GPIO15 on ESP32).
 
-### 3.2 LCD Display
+### 4.2 LCD Display
 
 **Part**: I2C 20x4 character LCD with PCF8574 backpack (or 16x2 for compact builds).
 
@@ -245,7 +306,7 @@ D  = (reserved / reset combo)
 | Game over | `GAME OVER` | `McCLANE GOT YOU` | | |
 | Victory | `VAULT OPEN` | `$640 MILLION` | `IN BEARER BONDS` | `Yippee-ki-yay` |
 
-### 3.3 Optional: Rotary Encoder (for one seal)
+### 4.3 Optional: Rotary Encoder (for one seal)
 
 For variety, one seal (e.g., Seal 2) could require turning a dial to a specific number instead of typing a code. A rotary encoder with a push button provides a "safe-cracking" feel.
 
@@ -254,9 +315,9 @@ For variety, one seal (e.g., Seal 2) could require turning a dial to a specific 
 
 ---
 
-## 4. Feedback Systems
+## 5. Feedback Systems
 
-### 4.1 NeoPixel LEDs
+### 5.1 NeoPixel LEDs
 
 **Part**: WS2812B NeoPixel strip or 7 individual NeoPixel modules.
 
@@ -279,7 +340,7 @@ For variety, one seal (e.g., Seal 2) could require turning a dial to a specific 
 
 **Library**: FastLED or Adafruit_NeoPixel (Arduino).
 
-### 4.2 Buzzer / Speaker
+### 5.2 Buzzer / Speaker
 
 **Part**: Passive piezo buzzer (for tones) or small 8Ω speaker with PAM8403 amplifier.
 
@@ -298,11 +359,11 @@ For variety, one seal (e.g., Seal 2) could require turning a dial to a specific 
 
 ---
 
-## 5. Seal 7 — Meta Solution Circuit (Detailed)
+## 6. Seal 7 — Meta Solution Circuit (Detailed)
 
-This is the most important mechanical design: the "movie twist" where unplugging power opens the final seal.
+This is the most important mechanical design: the "movie twist" where unplugging power opens the final seal. When Seal 7's door swings open, it reveals the final compartment containing the bearer bonds.
 
-### 5.1 Option A — Power-Loss Detection (Recommended)
+### 6.1 Option A — Power-Loss Detection (Recommended)
 
 **Principle**: Seal 7's lock is held closed by a relay that is powered from the main 12V supply. When the player unplugs the barrel jack, the relay de-energizes, and a spring-loaded latch releases.
 
@@ -383,7 +444,7 @@ Main 5V ──► Schottky diode (anode) ──┬──► ESP32 Vin
 
 Whichever diode has the higher voltage wins; when main power is cut, the 9V battery seamlessly takes over.
 
-### 5.2 Option B — Hidden Switch
+### 6.2 Option B — Hidden Switch
 
 A simpler alternative: an SPDT toggle switch mounted out of sight (back of the model, under the table, behind a removable panel).
 
@@ -397,7 +458,7 @@ Switch closed (player finds and flips it): GPIO reads LOW → seal 7 opens
 
 The ESP32 detects the state change, fires the Seal 7 solenoid/servo, and plays the victory sequence. No power-loss detection needed.
 
-### 5.3 Option C — Magnetic Breakaway Cable
+### 6.3 Option C — Magnetic Breakaway Cable
 
 A prop "power cable" that uses a magnetic pogo-pin connector (like old MagSafe). When disconnected, it breaks a circuit that the ESP32 monitors — same logic as the hidden switch, but the physical action is "cutting" or "unplugging" a visible cable.
 
@@ -405,9 +466,9 @@ A prop "power cable" that uses a magnetic pogo-pin connector (like old MagSafe).
 
 ---
 
-## 6. Splunk / Game Orchestrator Integration
+## 7. Splunk / Game Orchestrator Integration
 
-### 6.1 Connectivity Modes
+### 7.1 Connectivity Modes
 
 | Mode | Network | Use case |
 |---|---|---|
@@ -415,7 +476,7 @@ A prop "power cable" that uses a magnetic pogo-pin connector (like old MagSafe).
 | **Connected** | WiFi (local) | ESP32 serves a REST API; Splunk or a game UI polls/controls the vault |
 | **Full integration** | WiFi + HEC | ESP32 sends events to Splunk via HTTP Event Collector; Splunk alerts can trigger seal opens |
 
-### 6.2 REST API (ESP32 as HTTP Server)
+### 7.2 REST API (ESP32 as HTTP Server)
 
 The ESP32 runs a lightweight HTTP server (using the `ESPAsyncWebServer` library).
 
@@ -431,7 +492,7 @@ The ESP32 runs a lightweight HTTP server (using the `ESPAsyncWebServer` library)
 
 **Authentication**: For a local game network, a simple shared token in the `Authorization` header is sufficient. The ESP32 checks `Bearer <token>` on POST requests.
 
-### 6.3 Splunk HEC Integration
+### 7.3 Splunk HEC Integration
 
 The ESP32 can push events to Splunk's HTTP Event Collector for real-time logging of game actions.
 
@@ -453,7 +514,7 @@ The ESP32 can push events to Splunk's HTTP Event Collector for real-time logging
 
 Events to log: seal opens, wrong codes, game start, game over, reset, Seal 7 power-loss detected.
 
-### 6.4 Standalone Mode
+### 7.4 Standalone Mode
 
 If no WiFi is available, the ESP32 runs entirely offline:
 
@@ -463,9 +524,9 @@ If no WiFi is available, the ESP32 runs entirely offline:
 
 ---
 
-## 7. Wiring Reference
+## 8. Wiring Reference
 
-### 7.1 ESP32 Pin Assignment
+### 8.1 ESP32 Pin Assignment
 
 | GPIO | Function | Component | Notes |
 |---|---|---|---|
@@ -495,7 +556,7 @@ If no WiFi is available, the ESP32 runs entirely offline:
 - GPIO6–11: connected to internal flash. **Never use.**
 - GPIO34–39: input only (no internal pull-up). Fine for power-sense (GPIO35).
 
-### 7.2 Power Distribution
+### 8.2 Power Distribution
 
 ```
 12V DC Adapter (2A, center-positive barrel jack)
@@ -524,7 +585,7 @@ Backup: 9V battery ──► Schottky diode ──► ESP32 Vin
         (takes over when main power is cut)
 ```
 
-### 7.3 MOSFET Driver (Solenoid Seals 3–5)
+### 8.3 MOSFET Driver (Solenoid Seals 3–5)
 
 One circuit per solenoid:
 
@@ -557,9 +618,9 @@ Gate circuit:
 
 ---
 
-## 8. Bill of Materials
+## 9. Bill of Materials
 
-### 8.1 Controller and Core
+### 9.1 Controller and Core
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
@@ -568,7 +629,7 @@ Gate circuit:
 | 1 | Breadboard or PCB | Prototype board (half-size) | $3 | — |
 | 1 | Terminal blocks | Screw terminals for wire connections | $3 | — |
 
-### 8.2 Power
+### 9.2 Power
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
@@ -581,7 +642,7 @@ Gate circuit:
 | 1 | 100µF electrolytic cap | Across 5V bus (decoupling) | $0.50 | — |
 | 1 | 100µF electrolytic cap | Across 12V bus (decoupling) | $0.50 | — |
 
-### 8.3 Locks
+### 9.3 Locks
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
@@ -590,7 +651,7 @@ Gate circuit:
 | 1 | 12V electromagnetic lock | Small mag lock (60–100kg), for Seal 6 | $8 | AliExpress |
 | 1 | 12V solenoid (pull type) | For Seal 7 latch (spring-return) | $5 | AliExpress |
 
-### 8.4 Electronics
+### 9.4 Electronics
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
@@ -604,7 +665,7 @@ Gate circuit:
 | 1 | 330Ω resistor | NeoPixel data line | $0.25 | — |
 | 1 | 100Ω resistor | Buzzer | $0.25 | — |
 
-### 8.5 Input and Feedback
+### 9.5 Input and Feedback
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
@@ -613,18 +674,22 @@ Gate circuit:
 | 1 | WS2812B NeoPixel strip | 7+ LEDs (cut to length), or 7 individual modules | $4 | Adafruit / AliExpress |
 | 1 | Passive piezo buzzer | 5V, through-hole or panel-mount | $1 | — |
 
-### 8.6 Enclosure and Hardware
+### 9.6 Enclosure, Doors, and Hardware
 
 | Qty | Part | Description | Est. price | Source |
 |---|---|---|---|---|
-| 1 | Project enclosure or vault panel | Wood, acrylic, or 3D-printed; sized for locks + electronics | $10–30 | Hardware store / custom |
-| — | M3 screws, nuts, standoffs | Mounting hardware for servos, solenoids, PCB | $5 | — |
+| 1 | Tower enclosure / panel | MDF, plywood, or acrylic; ~200mm wide x ~700mm tall tower shape | $15–35 | Hardware store / custom |
+| 7 | Piano hinges (small) | 30–40mm continuous hinges for compartment doors, or 14 small butt hinges | $8 | Hardware store |
+| 7 | Torsion springs or foam blocks | Spring-assist to push doors open when locks release | $5 | Hardware store / Amazon |
+| 7 | Door panels (cut to size) | ~150mm x 70mm panels matching tower material; pre-cut from same sheet | incl. | — |
+| — | M3 screws, nuts, standoffs | Mounting hardware for servos, solenoids, PCB, hinges | $5 | — |
 | — | Wire (22 AWG, various colors) | Hookup wire for internal wiring | $5 | — |
 | — | Dupont connectors / JST connectors | For removable connections | $3 | — |
 | — | Heat shrink tubing | Insulation for solder joints | $3 | — |
 | — | Zip ties | Cable management | $2 | — |
+| — | Foam bumper pads | Door stops to prevent over-swing | $2 | — |
 
-### 8.7 Total Estimated Cost
+### 9.7 Total Estimated Cost
 
 | Category | Subtotal |
 |---|---|
@@ -633,33 +698,39 @@ Gate circuit:
 | Locks (all 7) | ~$32 |
 | Electronics (drivers, resistors) | ~$10 |
 | Input + feedback | ~$14 |
-| Enclosure + hardware | ~$25–50 |
-| **Total** | **~$118–143** |
+| Enclosure, doors + hardware | ~$40–65 |
+| **Total** | **~$133–158** |
 
 Prices are approximate (2025 AliExpress/Amazon). Buying in bulk or using parts on hand will reduce cost.
 
 ---
 
-## 9. Build Procedure
+## 10. Build Procedure
 
-### Step 1: Prepare the Enclosure
+### Step 1: Build the Tower Shell
 
-1. Choose or build a vault panel / enclosure. A flat panel (plywood, MDF, or thick acrylic) works well for a first build.
-2. Mark and drill/cut holes for:
-   - 7 lock positions (2 servo slots, 3 solenoid holes, 1 mag lock mount, 1 Seal 7 latch)
-   - Keypad mounting area
-   - LCD cutout
-   - Barrel jack panel mount
-   - NeoPixel positions (above or beside each seal)
-3. Label each seal position (1–7) on the front face.
+1. Cut the tower shape from MDF, plywood, or thick acrylic (~200mm wide × ~700mm tall). Include the setback crown at the top.
+2. Cut 7 door panels (~150mm × 70mm each) from the same material sheet. These will become the hinged compartment doors at each seal level.
+3. Mark and cut the tower face to create the 7 door openings, leaving the frame (side columns and horizontal dividers between floors) intact. Leave ~25mm of frame material on each side.
+4. Cut or build 7 shallow compartment boxes (~150mm × 70mm × 50mm) from thin MDF/foam board to create the spaces behind each door. These can be open-backed (the electronics panel closes them from behind).
+5. Attach piano hinges to the left edge of each door panel. Mount doors into their openings; verify they swing freely outward.
+6. Add torsion springs or compressed foam blocks behind each door for spring-assist opening.
+7. Add foam bumper pads to limit door swing to ~110°.
+8. Mark and cut holes/slots for:
+   - Keypad mounting area (lobby level)
+   - LCD cutout (lobby level)
+   - Barrel jack panel mount (base)
+   - NeoPixel wiring pass-through (small holes beside each seal)
+9. Label each seal position (1–7) and floor designation on the front face.
 
 ### Step 2: Mount the Locks
 
-1. Mount servos (Seals 1–2) with screws; attach latch arms.
-2. Mount solenoids (Seals 3–5) behind the panel with bolts protruding through.
-3. Mount the magnetic lock (Seal 6) and its armature plate.
-4. Mount the Seal 7 solenoid with its spring-return latch mechanism.
-5. Test each lock mechanically (push/pull bolts, rotate latch arms) before wiring.
+1. Mount servos (Seals 1–2) on the tower frame beside their door openings. Attach latch arms that extend through a slot in each door's latch edge.
+2. Mount solenoids (Seals 3–5) on the frame with bolts that extend into strike plates on each door's latch edge. Verify bolt alignment with door closed.
+3. Mount the electromagnetic lock (Seal 6) on the frame. Bond the steel armature plate to the Seal 6 door's latch edge.
+4. Mount the Seal 7 solenoid with its spring-return latch mechanism on the frame at the vault level.
+5. Close each door and test each lock mechanically: push/pull bolts, rotate latch arms, verify the spring-assist opens the door when the lock releases.
+6. Adjust spring tension so doors open smoothly but don't fly open violently.
 
 ### Step 3: Wire Power Distribution
 
@@ -704,7 +775,20 @@ Prices are approximate (2025 AliExpress/Amazon). Buying in bulk or using parts o
    - Power sense: read GPIO35 value with/without 12V.
 4. Test WiFi connectivity (if using connected mode).
 
-### Step 8: Integration Test
+### Step 8: Load Compartments
+
+1. Place clue items into each compartment (see Section 2.2 for the clue chain):
+   - Seal 1: Blueprint fragment
+   - Seal 2: USB stick / SD card
+   - Seal 3: Cipher wheel / decoder ring
+   - Seal 4: Radio frequency card
+   - Seal 5: Access badge prop
+   - Seal 6: Power cable hint / note
+   - Seal 7: Bearer bonds (prop money or certificate)
+2. Close all doors and verify each lock engages. Ensure clue items don't interfere with door closure or lock mechanisms.
+3. Check that items are retrievable when the door opens — nothing should be wedged or stuck.
+
+### Step 9: Integration Test
 
 1. Run a full game sequence:
    - Enter correct codes for Seals 1–6 in order. Verify each lock opens and LEDs turn green.
@@ -717,7 +801,7 @@ Prices are approximate (2025 AliExpress/Amazon). Buying in bulk or using parts o
 
 ---
 
-## 10. Reset and Replay Procedure
+## 11. Reset and Replay Procedure
 
 ### Facilitator Reset Checklist
 
@@ -726,15 +810,17 @@ Prices are approximate (2025 AliExpress/Amazon). Buying in bulk or using parts o
    - Keypad: hold `A` + `D` + `#` for 3 seconds.
    - REST API: `POST /reset` (connected mode).
    - Hardware: press the reset button on the ESP32 (last resort).
-3. **Verify all seals re-lock**:
-   - Servos (1–2) rotate back to locked position.
-   - Solenoids (3–5) de-energize → bolts extend.
-   - Mag lock (6) re-energizes → holds armature.
-   - Seal 7 relay re-energizes → holds latch.
-4. **Verify LCD shows** `NAKATOMI VAULT / SEAL 1: ENTER CODE`.
-5. **Verify all NeoPixels show dim red** (all locked).
-6. **Verify wrong-code counter is 0**.
-7. **Ready for next team.**
+3. **Close all doors**: Push each door shut (starting from Seal 7 up to Seal 1). Replace any clue items that the previous team removed.
+4. **Issue reset command** to re-engage locks:
+   - Servos (1–2) rotate back to locked position → latch arms engage doors.
+   - Solenoids (3–5) de-energize → bolts extend into strike plates.
+   - Mag lock (6) re-energizes → holds armature plate on door.
+   - Seal 7 relay re-energizes → holds spring latch.
+5. **Verify each door is latched** — gently tug each one to confirm it holds.
+6. **Verify LCD shows** `NAKATOMI VAULT / SEAL 1: ENTER CODE`.
+7. **Verify all NeoPixels show dim red** (all locked).
+8. **Verify wrong-code counter is 0**.
+9. **Ready for next team.**
 
 ### Code Update (Between Sessions)
 
@@ -746,7 +832,7 @@ Seal codes are stored in firmware or in a config file on ESP32's LittleFS filesy
 
 ---
 
-## 11. Safety Notes
+## 12. Safety Notes
 
 1. **All voltages are 12V DC or below.** No mains voltage anywhere in the build. The only mains-connected component is the 12V DC adapter, which is a sealed unit.
 2. **Flyback diodes on every inductive load.** Solenoids and relays produce voltage spikes when de-energized. Every solenoid and relay coil must have a 1N4007 diode across its terminals (cathode to positive). Omitting this will destroy MOSFETs and the ESP32.
@@ -782,19 +868,27 @@ Seal codes are stored in firmware or in a config file on ESP32's LittleFS filesy
 
 ---
 
-## Appendix B — Enclosure Ideas
+## Appendix B — Enclosure Construction Notes
 
-### Minimal: Vault Panel
+### Recommended: Nakatomi Tower with Compartment Doors
 
-A flat panel (400×300mm) mounted vertically or on a stand. Locks, LEDs, keypad, and LCD mounted on the front face. Electronics on the back (covered by a back panel). Cheap, fast to build, easy to transport.
+The primary design is a tall tower (~200mm × 700mm) with 7 hinged compartment doors, one per seal level. The front face resembles Nakatomi Plaza; each floor opens to reveal a clue compartment.
 
-### Medium: Vault Box
+**Materials by build level**:
 
-A wooden or acrylic box (roughly 400×300×200mm) that looks like a vault door. The front face has the seals, keypad, and LCD. When the last seal opens, a compartment inside the box is revealed (containing the "bearer bonds" — printed prop money or a certificate).
+| Level | Material | Pros | Cons |
+|---|---|---|---|
+| Quick prototype | Foam board + hot glue | Fast, cheap, lightweight | Fragile, can't take repeated use |
+| Standard build | 6mm MDF + wood glue | Sturdy, easy to cut/drill, paintable | Heavier, needs sealing/paint |
+| Premium | 3mm acrylic (laser cut) | Precise, professional look, can be translucent | Requires laser cutter, more expensive |
+| Mixed | MDF frame + acrylic doors | Doors look great, frame is sturdy | More complex assembly |
 
-### Full: Nakatomi Tower Model
+**Tips for door reliability**:
 
-A physical tower model (foam core, cardboard, or 3D-printed) with the vault at the base. LEDs in the tower windows for atmosphere. The vault panel is integrated into the base of the model. Most impressive, most work.
+- Use **flush-mount piano hinges** so the door face sits level with the frame.
+- Add a thin **felt strip** around each door opening to reduce rattle and provide a clean seal.
+- If doors tend to stick, lightly sand the edges and apply a dry lubricant (wax or PTFE spray).
+- For the spring-assist, **compressed foam blocks** (cut from packing foam) are the easiest option. Torsion springs give a snappier "pop" but require more precise mounting.
 
 ---
 

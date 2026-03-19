@@ -78,8 +78,8 @@
   <!-- ================================================================ -->
   <!-- SECTION 1: FRONT VIEW - NAKATOMI TOWER -->
   <!-- ================================================================ -->
-  <text x="300" y="115" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#58a6ff" font-weight="bold">FRONT VIEW (Player Side)</text>
-  <text x="300" y="137" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">~200mm wide x ~700mm tall tower panel</text>
+  <text x="350" y="115" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="20" fill="#58a6ff" font-weight="bold">FRONT VIEW (Player Side)</text>
+  <text x="350" y="137" text-anchor="middle" font-family="monospace" font-size="11" fill="#8b949e">~200mm wide x ~700mm tall tower panel with hinged compartment doors</text>
 
   <!-- Tower body -->
   <g transform="translate(170, 155)" filter="url(#shadow)">
@@ -169,65 +169,106 @@
       <rect x="222" y="635" width="8" height="6" fill="#2a4070" rx="1"/>
     </g>
 
-    <!-- Central seal column (vertical strip) -->
-    <rect x="95" y="85" width="70" height="640" fill="#3a3a3a" stroke="#555" stroke-width="1" rx="3" opacity="0.7"/>
-
-    <!-- ===== SEAL 1 (top - roof level) ===== -->
-    <g transform="translate(130, 120)">
-      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">1</text>
-      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
-      <text x="55" y="3" text-anchor="start" font-family="monospace" font-size="7" fill="#8b949e">LED</text>
+    <!-- ===== DOOR + SEAL 1 (Roof) ===== -->
+    <g transform="translate(50, 88)">
+      <rect x="0" y="0" width="160" height="70" fill="#4a4a4a" stroke="#666" stroke-width="1.5" rx="2"/>
+      <!-- Hinge indicators (left edge) -->
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <!-- Seal on door face -->
+      <circle cx="80" cy="35" r="22" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+      <circle cx="80" cy="35" r="14" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#d4a843" font-weight="bold">1</text>
+      <!-- LED -->
+      <circle cx="115" cy="35" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <!-- Lock indicator (right edge) -->
+      <rect x="155" y="28" width="8" height="14" fill="#555" stroke="#666" stroke-width="0.5" rx="1"/>
+      <text x="159" y="37" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">&#x25C0;</text>
     </g>
 
-    <!-- ===== SEAL 2 ===== -->
-    <g transform="translate(130, 210)">
-      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
-      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">2</text>
-      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    <!-- ===== DOOR + SEAL 2 (30F) ===== -->
+    <g transform="translate(50, 168)">
+      <rect x="0" y="0" width="160" height="70" fill="#4a4a4a" stroke="#666" stroke-width="1.5" rx="2"/>
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <circle cx="80" cy="35" r="22" fill="#2a2a2a" stroke="#555" stroke-width="2"/>
+      <circle cx="80" cy="35" r="14" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#d4a843" font-weight="bold">2</text>
+      <circle cx="115" cy="35" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <rect x="155" y="28" width="8" height="14" fill="#555" stroke="#666" stroke-width="0.5" rx="1"/>
     </g>
 
-    <!-- ===== SEAL 3 ===== -->
-    <g transform="translate(130, 300)">
-      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">3</text>
-      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    <!-- ===== DOOR + SEAL 3 (25F) ===== -->
+    <g transform="translate(50, 258)">
+      <rect x="0" y="0" width="160" height="70" fill="#4a4a4a" stroke="#666" stroke-width="1.5" rx="2"/>
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <circle cx="80" cy="35" r="22" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
+      <circle cx="80" cy="35" r="14" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#d4a843" font-weight="bold">3</text>
+      <circle cx="115" cy="35" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <rect x="155" y="28" width="8" height="14" fill="#555" stroke="#666" stroke-width="0.5" rx="1"/>
     </g>
 
-    <!-- ===== SEAL 4 ===== -->
-    <g transform="translate(130, 390)">
-      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">4</text>
-      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    <!-- ===== DOOR + SEAL 4 (20F) - SHOWN OPEN ===== -->
+    <g transform="translate(50, 348)">
+      <!-- Empty compartment (visible when door open) -->
+      <rect x="0" y="0" width="160" height="70" fill="#1a1a1a" stroke="#444" stroke-width="1" rx="2"/>
+      <text x="80" y="30" text-anchor="middle" font-family="monospace" font-size="7" fill="#3fb950">COMPARTMENT</text>
+      <!-- Clue item inside -->
+      <rect x="40" y="36" width="60" height="22" fill="#2a2a1a" stroke="#d29922" stroke-width="1" rx="3" stroke-dasharray="3,2"/>
+      <text x="70" y="50" text-anchor="middle" font-family="monospace" font-size="6" fill="#d29922">FREQ CARD</text>
+
+      <!-- Door swung open (rotated, perspective) -->
+      <g transform="translate(0, 0)">
+        <polygon points="160,0 230,12 230,58 160,70" fill="#4a4a4a" stroke="#666" stroke-width="1.5" opacity="0.85"/>
+        <!-- Seal on open door -->
+        <ellipse cx="195" cy="35" rx="12" ry="14" fill="#2a2a2a" stroke="#666" stroke-width="2"/>
+        <text x="195" y="39" text-anchor="middle" font-family="monospace" font-size="10" fill="#3fb950" font-weight="bold">4</text>
+        <!-- Green LED (unlocked) -->
+        <circle cx="215" cy="35" r="3" fill="#3fb950" stroke="#555" stroke-width="0.5" filter="url(#glow)"/>
+      </g>
+      <!-- Hinge (stays on frame) -->
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
     </g>
 
-    <!-- ===== SEAL 5 ===== -->
-    <g transform="translate(130, 480)">
-      <circle cx="0" cy="0" r="24" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
-      <circle cx="0" cy="0" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">5</text>
-      <circle cx="35" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    <!-- ===== DOOR + SEAL 5 (15F) ===== -->
+    <g transform="translate(50, 438)">
+      <rect x="0" y="0" width="160" height="70" fill="#4a4a4a" stroke="#666" stroke-width="1.5" rx="2"/>
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <circle cx="80" cy="35" r="22" fill="#2a2a2a" stroke="#666" stroke-width="2.5"/>
+      <circle cx="80" cy="35" r="14" fill="#1a1a1a" stroke="#555" stroke-width="1"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#d4a843" font-weight="bold">5</text>
+      <circle cx="115" cy="35" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <rect x="155" y="28" width="8" height="14" fill="#555" stroke="#666" stroke-width="0.5" rx="1"/>
     </g>
 
-    <!-- ===== SEAL 6 (larger, mag lock) ===== -->
-    <g transform="translate(130, 570)">
-      <circle cx="0" cy="0" r="28" fill="#2a2a2a" stroke="#777" stroke-width="3"/>
-      <circle cx="0" cy="0" r="19" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#d4a843" font-weight="bold">6</text>
-      <circle cx="39" cy="0" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+    <!-- ===== DOOR + SEAL 6 (5F, mag lock) ===== -->
+    <g transform="translate(50, 528)">
+      <rect x="0" y="0" width="160" height="70" fill="#4a4a4a" stroke="#777" stroke-width="1.5" rx="2"/>
+      <rect x="-3" y="8" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="54" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <circle cx="80" cy="35" r="25" fill="#2a2a2a" stroke="#777" stroke-width="3"/>
+      <circle cx="80" cy="35" r="16" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#d4a843" font-weight="bold">6</text>
+      <circle cx="118" cy="35" r="4" fill="#cc3333" stroke="#555" stroke-width="1" filter="url(#glow)"/>
+      <!-- Mag lock indicator -->
+      <rect x="152" y="20" width="12" height="30" fill="#555" stroke="#777" stroke-width="0.5" rx="1"/>
+      <text x="158" y="38" text-anchor="middle" font-family="monospace" font-size="5" fill="#aaa">MAG</text>
     </g>
 
-    <!-- ===== SEAL 7 (special, vault level, red) ===== -->
-    <g transform="translate(130, 660)">
-      <circle cx="0" cy="0" r="30" fill="#2a1515" stroke="#c9302c" stroke-width="3"/>
-      <circle cx="0" cy="0" r="20" fill="#1a0a0a" stroke="#993333" stroke-width="1.5"/>
-      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="14" fill="#c9302c" font-weight="bold">7</text>
-      <circle cx="41" cy="0" r="5" fill="#c9302c" stroke="#555" stroke-width="1" filter="url(#glowStrong)"/>
-      <text x="0" y="42" text-anchor="middle" font-family="monospace" font-size="8" fill="#c9302c">META</text>
+    <!-- ===== DOOR + SEAL 7 (Vault B1, red, special) ===== -->
+    <g transform="translate(50, 618)">
+      <rect x="0" y="0" width="160" height="75" fill="#3a2020" stroke="#c9302c" stroke-width="2" rx="2"/>
+      <rect x="-3" y="10" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <rect x="-3" y="57" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+      <circle cx="80" cy="35" r="27" fill="#2a1515" stroke="#c9302c" stroke-width="3"/>
+      <circle cx="80" cy="35" r="18" fill="#1a0a0a" stroke="#993333" stroke-width="1.5"/>
+      <text x="80" y="40" text-anchor="middle" font-family="monospace" font-size="13" fill="#c9302c" font-weight="bold">7</text>
+      <circle cx="120" cy="35" r="5" fill="#c9302c" stroke="#555" stroke-width="1" filter="url(#glowStrong)"/>
+      <text x="80" y="65" text-anchor="middle" font-family="monospace" font-size="7" fill="#c9302c">VAULT</text>
     </g>
 
     <!-- Lobby entrance at ground level -->
@@ -274,30 +315,52 @@
   </g>
 
   <!-- Front view annotations -->
-  <g font-family="monospace" font-size="9">
-    <!-- Floor labels on right side -->
-    <text x="465" y="278" fill="#58a6ff">ROOF (Seal 1) - Servo</text>
-    <text x="465" y="368" fill="#58a6ff">30F (Seal 2) - Servo</text>
-    <text x="465" y="458" fill="#d29922">25F (Seal 3) - Solenoid</text>
-    <text x="465" y="548" fill="#d29922">20F (Seal 4) - Solenoid</text>
-    <text x="465" y="638" fill="#d29922">15F (Seal 5) - Solenoid</text>
-    <text x="465" y="728" fill="#ff6666">5F (Seal 6) - Mag lock</text>
-    <text x="465" y="818" fill="#c9302c">B1 VAULT (Seal 7) - Power latch</text>
+  <g font-family="monospace" font-size="8">
+    <!-- Floor labels with clue contents -->
+    <text x="470" y="272" fill="#58a6ff">ROOF - Servo lock</text>
+    <text x="470" y="283" fill="#8b949e" font-size="7">Contains: blueprint fragment</text>
 
-    <!-- Component labels on left side -->
-    <text x="140" y="852" fill="#0a2a0a">LCD 20x4</text>
+    <text x="470" y="352" fill="#58a6ff">30F - Servo lock</text>
+    <text x="470" y="363" fill="#8b949e" font-size="7">Contains: USB stick / log file</text>
+
+    <text x="470" y="442" fill="#d29922">25F - Solenoid lock</text>
+    <text x="470" y="453" fill="#8b949e" font-size="7">Contains: cipher wheel</text>
+
+    <text x="470" y="532" fill="#3fb950">20F - OPEN (shown)</text>
+    <text x="470" y="543" fill="#8b949e" font-size="7">Contains: frequency card</text>
+
+    <text x="470" y="622" fill="#d29922">15F - Solenoid lock</text>
+    <text x="470" y="633" fill="#8b949e" font-size="7">Contains: access badge</text>
+
+    <text x="470" y="712" fill="#ff6666">5F - Mag lock</text>
+    <text x="470" y="723" fill="#8b949e" font-size="7">Contains: "cut the power" hint</text>
+
+    <text x="470" y="802" fill="#c9302c">VAULT - Power-loss latch</text>
+    <text x="470" y="813" fill="#8b949e" font-size="7">Contains: $640M bearer bonds!</text>
+
+    <!-- Connector lines -->
+    <line x1="465" y1="269" x2="435" y2="278" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="349" x2="435" y2="358" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="439" x2="435" y2="448" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="529" x2="435" y2="538" stroke="#3fb950" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="619" x2="435" y2="628" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="709" x2="435" y2="718" stroke="#ff6666" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <line x1="465" y1="799" x2="435" y2="808" stroke="#c9302c" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+    <!-- Component labels -->
+    <text x="140" y="852" fill="#0a2a0a" font-size="9">LCD 20x4</text>
     <text x="140" y="865" fill="#8b949e" font-size="7">I2C display</text>
-    <text x="375" y="852" fill="#555">4x4 KEYPAD</text>
+    <text x="375" y="852" fill="#555" font-size="9">4x4 KEYPAD</text>
     <text x="375" y="865" fill="#8b949e" font-size="7">membrane</text>
+  </g>
 
-    <!-- Connector lines to labels -->
-    <line x1="460" y1="275" x2="435" y2="275" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="365" x2="435" y2="365" stroke="#58a6ff" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="455" x2="435" y2="455" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="545" x2="435" y2="545" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="635" x2="435" y2="635" stroke="#d29922" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="725" x2="435" y2="725" stroke="#ff6666" stroke-width="0.5" stroke-dasharray="3,3"/>
-    <line x1="460" y1="815" x2="435" y2="815" stroke="#c9302c" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <!-- Door legend -->
+  <g transform="translate(470, 840)">
+    <rect x="0" y="0" width="150" height="44" fill="#0a0e14" stroke="#1a2035" stroke-width="1" rx="4"/>
+    <rect x="8" y="8" width="20" height="10" fill="#4a4a4a" stroke="#666" stroke-width="1" rx="1"/>
+    <text x="34" y="17" font-family="monospace" font-size="7" fill="#8b949e">= door (closed)</text>
+    <rect x="8" y="25" width="6" height="8" fill="#888" stroke="#666" stroke-width="0.5" rx="1"/>
+    <text x="20" y="32" font-family="monospace" font-size="7" fill="#8b949e">= piano hinge (left edge)</text>
   </g>
 
   <!-- Dimensions -->
