@@ -795,6 +795,132 @@
     }
     .hero h1 { animation: flicker 8s infinite; }
 
+    /* Release notes modal */
+    .rn-trigger {
+      font-family: 'Share Tech Mono', monospace;
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.35rem 1rem;
+      font-size: 0.72rem;
+      color: var(--cyan);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .rn-trigger:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,240,255,0.15);
+      color: #fff;
+    }
+    .rn-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(5,5,12,0.88);
+      backdrop-filter: blur(6px);
+      animation: rnFadeIn 0.2s ease-out;
+    }
+    .rn-overlay.hidden { display: none; }
+    @keyframes rnFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .rn-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      max-width: 640px; width: 92%;
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 60px rgba(255,42,109,0.05);
+    }
+    .rn-modal::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--neon-pink), var(--cyan), var(--neon-pink));
+    }
+    .rn-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .rn-header h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--text); margin: 0;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .rn-close {
+      background: none; border: none;
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--text-dim); font-size: 0.8rem;
+      cursor: pointer; padding: 0.2rem 0.4rem;
+      transition: color 0.2s;
+    }
+    .rn-close:hover { color: var(--neon-pink); }
+    .rn-body {
+      flex: 1; overflow-y: auto; padding: 1.25rem;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) var(--bg);
+    }
+    .rn-body::-webkit-scrollbar { width: 6px; }
+    .rn-body::-webkit-scrollbar-track { background: var(--bg); }
+    .rn-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .rn-version {
+      margin-bottom: 1.5rem;
+    }
+    .rn-version:last-child { margin-bottom: 0; }
+    .rn-version-header {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+    .rn-version-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem; font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 6px rgba(0,240,255,0.3);
+    }
+    .rn-version-date {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .rn-version-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .rn-tag-latest { background: rgba(51,255,136,0.1); color: var(--green); border: 1px solid rgba(51,255,136,0.3); }
+    .rn-version ul {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .rn-version li {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 0.2rem 0 0.2rem 1.2rem;
+      position: relative;
+    }
+    .rn-version li::before {
+      content: '>';
+      position: absolute; left: 0;
+      color: var(--neon-pink); font-weight: 700;
+    }
+    .rn-cat {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.5rem; margin-bottom: 0.15rem;
+      text-shadow: 0 0 4px rgba(212,168,67,0.2);
+    }
+
     .year-tag {
       font-family: 'Share Tech Mono', monospace;
       display: inline-block;
@@ -1463,8 +1589,120 @@ flowchart LR
   <footer>
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
-    Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.
+    Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v1.1.0</button>
   </footer>
+
+  <!-- Release Notes Modal -->
+  <div id="rn-overlay" class="rn-overlay hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="rn-modal">
+      <div class="rn-header">
+        <h3>Release Notes</h3>
+        <button class="rn-close" onclick="document.getElementById('rn-overlay').classList.add('hidden')">[ESC]</button>
+      </div>
+      <div class="rn-body">
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v1.1.0</span>
+            <span class="rn-version-date">24 Mar 2026</span>
+            <span class="rn-version-tag rn-tag-latest">Latest</span>
+          </div>
+          <div class="rn-cat">Game UI</div>
+          <ul>
+            <li>Real Fox Plaza photo on welcome screen with synthwave color wash and edge fade</li>
+            <li>Clue popups now render inside CRT screen as terminal-native overlay</li>
+            <li>All clue content types restyled to green phosphor monochrome</li>
+            <li>Physical mode hides side keypad; monitor sizes match across modes</li>
+            <li>Boot sequence now plays for both physical and digital modes</li>
+            <li>Removed palm tree silhouettes for cleaner composition</li>
+          </ul>
+          <div class="rn-cat">Splunk App</div>
+          <ul>
+            <li>App version bumped to 1.1.0 (build 8)</li>
+            <li>Terminal dashboard, React components, and webpack build added</li>
+            <li>Custom CSS for in-app CRT terminal view</li>
+            <li>Modular inputs config for data replay</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v1.0.0</span>
+            <span class="rn-version-date">23 Mar 2026</span>
+          </div>
+          <div class="rn-cat">Deployment</div>
+          <ul>
+            <li>App deployed to distributed Splunk (search head + indexer)</li>
+            <li>3 indexes created, 833 events loaded via HEC</li>
+            <li>3 lookup tables populated (73 rows)</li>
+            <li>Mission Brief dashboard live</li>
+            <li>All 7 sourcetypes parsing correctly</li>
+          </ul>
+          <div class="rn-cat">Game UI</div>
+          <ul>
+            <li>Photorealistic CRT terminal with 4:3 aspect ratio</li>
+            <li>Side-mounted keypad panel with mechanical key styling</li>
+            <li>Monitor housing with screws, vents, knobs, floppy slot, and power LED</li>
+            <li>Over-the-top 80s synthwave welcome screen (sunset, grid, chrome text)</li>
+            <li>Retro boot sequence with DOS-style text animation</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v0.9.0</span>
+            <span class="rn-version-date">22 Mar 2026</span>
+          </div>
+          <div class="rn-cat">Splunk App</div>
+          <ul>
+            <li>App scaffold (app.conf, metadata, nav)</li>
+            <li>Index definitions, props.conf, transforms.conf</li>
+            <li>HEC data loader script and data generator</li>
+            <li>Packaged .spl for install</li>
+          </ul>
+          <div class="rn-cat">Game UI</div>
+          <ul>
+            <li>Dual-mode support (physical + digital)</li>
+            <li>Digital keypad and code validation</li>
+            <li>Seal status panel with LED indicators</li>
+            <li>7 styled clue card reveals</li>
+            <li>Interactive ROT13 decoder (Seal 3)</li>
+            <li>Digital Seal 7 (hidden power element)</li>
+            <li>Timer, game over, and victory overlays</li>
+            <li>Facilitator controls (F key)</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v0.5.0</span>
+            <span class="rn-version-date">20 Mar 2026</span>
+          </div>
+          <div class="rn-cat">Design</div>
+          <ul>
+            <li>Full design document and story/narrative</li>
+            <li>Complete puzzle catalogue (all 7 seals)</li>
+            <li>Data schemas (6 sourcetypes, 3 indexes, 3 lookups)</li>
+            <li>Python data generator (~830 events)</li>
+            <li>Physical model design (electronics, locks, BOM)</li>
+            <li>Tower SVG cross-section illustration</li>
+            <li>Flow diagrams and timeline</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        var ov = document.getElementById('rn-overlay');
+        if (ov && !ov.classList.contains('hidden')) ov.classList.add('hidden');
+      }
+    });
+  </script>
 
   <script>
     mermaid.initialize({
