@@ -851,23 +851,23 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk Instance <span class="tag planned">Planned</span></h4>
+          <h4>Splunk App <span class="tag ready">Ready</span></h4>
           <ul>
             <li>Index: <code>nakatomi_access</code></li>
             <li>Index: <code>nakatomi_vault</code></li>
             <li>Index: <code>nakatomi_building</code></li>
-            <li>App: "Nakatomi Heist" with dashboards</li>
-            <li>Saved searches, alerts, lookups</li>
+            <li>App: "Nakatomi Heist" with Mission Brief</li>
+            <li>3 lookups, 7 sourcetypes, HEC loader</li>
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Data Generator <span class="tag planned">Planned</span></h4>
+          <h4>Data Generator <span class="tag ready">Ready</span></h4>
           <ul>
-            <li>Python scripts</li>
-            <li>Synthetic access logs</li>
-            <li>Synthetic vault logs</li>
-            <li>Building sensor logs</li>
-            <li>Embedded codes &amp; sequences</li>
+            <li>Python script (deterministic seed)</li>
+            <li>~830 events across 3 indexes</li>
+            <li>3 CSV lookup tables</li>
+            <li>Embedded codes &amp; red herrings</li>
+            <li>HEC-format JSON output</li>
           </ul>
         </div>
         <div class="arch-box">
@@ -1205,11 +1205,20 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
+          <h4>Splunk App <span class="status done">Complete</span></h4>
+          <ul>
+            <li class="done">App scaffold (app.conf, metadata)</li>
+            <li class="done">Indexes (access, vault, building)</li>
+            <li class="done">Props &amp; transforms (7 sourcetypes, 3 lookups)</li>
+            <li class="done">Mission Brief dashboard (Dashboard Studio)</li>
+            <li class="done">Packaged .spl for install</li>
+            <li class="done">HEC data loading script</li>
+          </ul>
+        </div>
+        <div class="roadmap-card">
           <h4>Implementation <span class="status next">Next</span></h4>
           <ul>
             <li class="active">Physical model tower build</li>
-            <li class="pending">Splunk app packaging</li>
-            <li class="pending">Mission Brief dashboard</li>
             <li class="pending">ESP32 firmware</li>
             <li class="pending">ESP32 &harr; Game UI integration</li>
             <li class="pending">Playtest &amp; tuning</li>

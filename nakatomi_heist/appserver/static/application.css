@@ -1,0 +1,424 @@
+/*
+ * NAKATOMI PLAZA — CRT Terminal Theme
+ * Die Hard (1988) computer system aesthetic for Splunk
+ *
+ * Applied automatically to all pages in the nakatomi_heist app.
+ * Transforms Dashboard Studio dashboards into green-phosphor CRT terminals.
+ */
+
+:root {
+    --nk-bg: #000d00;
+    --nk-bg-solid: #001200;
+    --nk-surface: #001a00;
+    --nk-border: #004400;
+    --nk-green: #33ff33;
+    --nk-green-bright: #66ff66;
+    --nk-green-dim: #1a9a1a;
+    --nk-green-dark: #0d5a0d;
+    --nk-amber: #d4a843;
+    --nk-amber-dim: #8a6a20;
+    --nk-red: #ff3333;
+    --nk-red-dim: #661a1a;
+    --nk-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace;
+}
+
+/* ── Page Background & Base Typography ──────────────── */
+
+body {
+    background: var(--nk-bg) !important;
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+}
+
+.main-section-body,
+.dashboard-body,
+.dashboard-view-container,
+.shared-page {
+    background: var(--nk-bg) !important;
+}
+
+/* ── CRT Scanline Overlay ───────────────────────────── */
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.06) 2px,
+        rgba(0, 0, 0, 0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 10000;
+}
+
+/* ── CRT Vignette / Edge Darkening ──────────────────── */
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 50%,
+        rgba(0, 10, 0, 0.35) 80%,
+        rgba(0, 5, 0, 0.7) 100%
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ── Subtle Screen Flicker ──────────────────────────── */
+
+@keyframes nk-flicker {
+    0%   { opacity: 1; }
+    92%  { opacity: 1; }
+    93%  { opacity: 0.96; }
+    94%  { opacity: 1; }
+    96%  { opacity: 0.98; }
+    97%  { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+body {
+    animation: nk-flicker 8s infinite !important;
+}
+
+/* ── Cursor Blink ───────────────────────────────────── */
+
+@keyframes nk-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+/* ── Splunk Navigation / Header Chrome ──────────────── */
+
+header,
+.splunk-header,
+.app-bar,
+nav,
+.nav-bar,
+[data-view="nav"] {
+    background: var(--nk-bg) !important;
+    border-bottom: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+}
+
+.app-bar .app-name,
+.app-bar a,
+.nav-bar a,
+.app-bar .app-label,
+[data-view="nav"] a {
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.app-bar a:hover,
+.nav-bar a:hover,
+[data-view="nav"] a:hover {
+    color: var(--nk-green-bright) !important;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5) !important;
+}
+
+.app-bar .app-name {
+    text-shadow: 0 0 10px rgba(51, 255, 51, 0.4) !important;
+}
+
+/* ── Dashboard Panel Containers ─────────────────────── */
+
+.panel-element-row,
+.dashboard-panel,
+.dashboard-cell,
+[data-component] {
+    background: transparent !important;
+}
+
+.panel-head,
+.panel-title {
+    color: var(--nk-amber) !important;
+    font-family: var(--nk-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    text-shadow: 0 0 6px rgba(212, 168, 67, 0.4) !important;
+    border-bottom: 1px solid var(--nk-border) !important;
+}
+
+/* ── Typography — Headers ───────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.4) !important;
+}
+
+/* ── Typography — Paragraphs and Inline ─────────────── */
+
+p, span, li, label, div {
+    font-family: var(--nk-mono) !important;
+}
+
+strong, b {
+    color: var(--nk-green-bright) !important;
+}
+
+em, i {
+    color: var(--nk-green-dim) !important;
+}
+
+/* ── Links ──────────────────────────────────────────── */
+
+a {
+    color: var(--nk-green-dim) !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: var(--nk-green-bright) !important;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5) !important;
+}
+
+/* ── Tables ─────────────────────────────────────────── */
+
+table,
+.table,
+.shared-resultstable,
+.results-table {
+    background: transparent !important;
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+    border-collapse: collapse !important;
+}
+
+th,
+.shared-resultstable th,
+.results-table th {
+    background: var(--nk-surface) !important;
+    color: var(--nk-amber) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.85em !important;
+    padding: 6px 10px !important;
+}
+
+td,
+.shared-resultstable td,
+.results-table td {
+    background: transparent !important;
+    color: var(--nk-green) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+    padding: 5px 10px !important;
+    font-size: 0.85em !important;
+}
+
+tr:hover td,
+.shared-resultstable tr:hover td {
+    background: rgba(51, 255, 51, 0.04) !important;
+}
+
+tr:nth-child(even) td {
+    background: rgba(0, 20, 0, 0.3) !important;
+}
+
+/* ── Form Inputs (Search Terminal) ──────────────────── */
+
+input[type="text"],
+input[type="search"],
+input[type="number"],
+textarea,
+.text-input input,
+[data-test="textbox"] input {
+    background: var(--nk-surface) !important;
+    color: var(--nk-green) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+    font-size: 14px !important;
+    caret-color: var(--nk-green) !important;
+    padding: 8px 12px !important;
+}
+
+input:focus,
+textarea:focus,
+[data-test="textbox"] input:focus {
+    border-color: var(--nk-green) !important;
+    box-shadow: 0 0 10px rgba(51, 255, 51, 0.25) !important;
+    outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--nk-green-dark) !important;
+    font-style: italic !important;
+}
+
+/* ── Dashboard Input Labels ─────────────────────────── */
+
+.input-label,
+[data-test="label"] {
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 700 !important;
+}
+
+/* ── Code Blocks ────────────────────────────────────── */
+
+code, pre {
+    background: rgba(0, 25, 0, 0.6) !important;
+    color: var(--nk-green) !important;
+    font-family: var(--nk-mono) !important;
+    border: 1px solid var(--nk-border) !important;
+    border-radius: 0 !important;
+}
+
+pre {
+    padding: 12px 16px !important;
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+
+button,
+.btn,
+[data-test="button"] {
+    background: var(--nk-surface) !important;
+    color: var(--nk-green) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    cursor: pointer !important;
+}
+
+button:hover,
+.btn:hover,
+[data-test="button"]:hover {
+    background: var(--nk-bg-solid) !important;
+    border-color: var(--nk-green) !important;
+    box-shadow: 0 0 8px rgba(51, 255, 51, 0.2) !important;
+    color: var(--nk-green-bright) !important;
+}
+
+/* ── Dropdowns / Select ─────────────────────────────── */
+
+select,
+.dropdown-toggle {
+    background: var(--nk-surface) !important;
+    color: var(--nk-green) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-family: var(--nk-mono) !important;
+}
+
+/* ── Scrollbars ─────────────────────────────────────── */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--nk-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--nk-border);
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--nk-green-dark);
+}
+
+/* ── Text Selection ─────────────────────────────────── */
+
+::selection {
+    background: rgba(51, 255, 51, 0.3);
+    color: var(--nk-green-bright);
+}
+
+/* ── Markdown Panel Overrides (Dashboard Studio) ────── */
+
+.markdown-body,
+.markdown-panel,
+[data-component="splunk.markdown"] * {
+    font-family: var(--nk-mono) !important;
+}
+
+[data-component="splunk.markdown"] h1,
+[data-component="splunk.markdown"] h2,
+[data-component="splunk.markdown"] h3 {
+    border-bottom: none !important;
+}
+
+[data-component="splunk.markdown"] code {
+    text-shadow: 0 0 4px rgba(51, 255, 51, 0.3) !important;
+}
+
+/* ── Dashboard Studio — Panel Borders ───────────────── */
+
+[data-component="splunk.table"],
+[data-component="splunk.markdown"],
+[data-component="splunk.singlevalue"] {
+    border: 1px solid var(--nk-border) !important;
+}
+
+/* ── Dashboard Studio — Global Input Bar ────────────── */
+
+.dashboard-input-section,
+[data-test="dashboard-inputs"] {
+    background: var(--nk-surface) !important;
+    border-bottom: 1px solid var(--nk-border) !important;
+    padding: 8px 16px !important;
+}
+
+/* ── Misc Splunk UI Elements ────────────────────────── */
+
+.footer,
+.splunk-footer {
+    background: var(--nk-bg) !important;
+    border-top: 1px solid var(--nk-border) !important;
+    color: var(--nk-green-dark) !important;
+}
+
+.modal-backdrop {
+    background: rgba(0, 10, 0, 0.9) !important;
+}
+
+.modal-content {
+    background: var(--nk-bg-solid) !important;
+    border: 1px solid var(--nk-border) !important;
+    color: var(--nk-green) !important;
+}
+
+/* ── Loading / Spinner ──────────────────────────────── */
+
+.wait-spinner,
+.loading-message {
+    color: var(--nk-green-dim) !important;
+}
+
+/* ── Dashboard Studio — Absolute Layout Support ─────── */
+
+.absolute-layout-container {
+    background: var(--nk-bg) !important;
+}
+
+/* ── Print — Disable CRT Effects ────────────────────── */
+
+@media print {
+    body::before,
+    body::after {
+        display: none !important;
+    }
+    body {
+        animation: none !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+}

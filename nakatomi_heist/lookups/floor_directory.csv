@@ -1,0 +1,15 @@
+floor,floor_name,tenant,floor_group,restricted
+B2,Parking Level 2,Nakatomi Corp,basement,false
+B1,Vault Level,Nakatomi Corp,basement,true
+1,Main Lobby,Nakatomi Corp,lobby,false
+2,Mail Room / Loading,Nakatomi Corp,lower,false
+3,Building Maintenance,Nakatomi Corp,lower,false
+5,Legal / Compliance,Nakatomi Corp,lower,false
+10,Human Resources,Nakatomi Corp,mid,false
+15,International Trade,Nakatomi Corp,mid,false
+20,Finance,Nakatomi Corp,upper,false
+25,R&D / Tech,Nakatomi Corp,upper,true
+28,Executive Support,Nakatomi Corp,upper,true
+30,Executive Suite / Event,Nakatomi Corp,upper,true
+35,CEO / Board,Nakatomi Corp,penthouse,true
+roof,Mechanical / Helipad,Nakatomi Corp,roof,true

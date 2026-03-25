@@ -1,0 +1,27 @@
+<form class="splunk-formatter-section" section-label="Display">
+    <splunk-control-group label="Color Scheme" help="Terminal phosphor color">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.colorScheme" value="green">
+            <option value="green">Green</option>
+            <option value="amber">Amber</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+
+    <splunk-control-group label="Show Scanlines" help="CRT scanline overlay effect">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showScanlines" value="true">
+            <option value="true">On</option>
+            <option value="false">Off</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+
+    <splunk-control-group label="Show Timestamp" help="Prefix each line with event timestamp">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showTimestamp" value="true">
+            <option value="true">On</option>
+            <option value="false">Off</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+
+    <splunk-control-group label="Max Lines" help="Maximum visible lines (most recent shown)">
+        <splunk-text-input name="{{VIZ_NAMESPACE}}.maxLines" value="50">
+        </splunk-text-input>
+    </splunk-control-group>
+</form>

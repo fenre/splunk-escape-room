@@ -38,6 +38,9 @@ metadata/local.meta
 generator/output/
 generator/.venv/
 
+# Packaged app (rebuild with: tar czf nakatomi_heist.spl -C . nakatomi_heist/)
+nakatomi_heist.spl
+
 # Environment and secrets
 .env
 .env.*

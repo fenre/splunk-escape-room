@@ -8,6 +8,26 @@ Versioning follows [Semantic Versioning](https://semver.org/): **MAJOR.MINOR.PAT
 
 ---
 
+## 0.6.0 — 2026-03-25
+
+### Added
+- **Splunk app** — `nakatomi_heist/` ready-to-install Splunk app containing:
+  - `indexes.conf` — three indexes: `nakatomi_access`, `nakatomi_vault`, `nakatomi_building`.
+  - `props.conf` — 7 sourcetype definitions with `KV_MODE=auto` and proper timestamp parsing.
+  - `transforms.conf` — 3 lookup table definitions (`floor_directory`, `employee_directory`, `system_codes`).
+  - `lookups/` — pre-loaded CSV lookup tables generated from `scenario.yaml`.
+  - **Mission Brief dashboard** — Dashboard Studio (JSON, dark theme) with mission briefing, vault status panel, available data tables, SPL quick reference, and atmospheric footer.
+  - `metadata/default.meta` — app permissions with system-level export.
+  - `default/data/ui/nav/default.xml` — app navigation with Mission Brief as default view.
+- **Packaged app** — `nakatomi_heist.spl` for one-click install via Splunk Web.
+- **Data loading script** — `scripts/load_data.sh` sends generated HEC-format events to Splunk via HTTP Event Collector.
+
+### Changed
+- `README.md` — replaced "Quick Start" section with full install-and-play instructions (generate, install app, load data, verify). Added Splunk app to repository structure and tech stack. Moved Splunk app from "Planned" to "Complete".
+- `RELEASE_NOTES.md` — this entry.
+
+---
+
 ## 0.5.0 — 2026-03-25
 
 ### Added

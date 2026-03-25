@@ -1,0 +1,22 @@
+<form class="splunk-formatter-section" section-label="Display">
+    <splunk-control-group label="Color Scheme" help="Terminal phosphor color scheme">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.colorScheme" value="green">
+            <option value="green">Green</option>
+            <option value="amber">Amber</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+
+    <splunk-control-group label="Show Scanlines" help="CRT scanline overlay effect">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.showScanlines" value="true">
+            <option value="true">On</option>
+            <option value="false">Off</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+
+    <splunk-control-group label="Animate" help="Enable blinking cursor and LED animations">
+        <splunk-radio-input name="{{VIZ_NAMESPACE}}.animate" value="true">
+            <option value="true">On</option>
+            <option value="false">Off</option>
+        </splunk-radio-input>
+    </splunk-control-group>
+</form>

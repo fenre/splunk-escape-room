@@ -34,6 +34,7 @@ Total game time: **45–60 minutes**. Multiple fail conditions keep the pressure
 - **Data schemas** — 6 sourcetypes, 3 indexes, 3 lookup tables, all field definitions
 - **Data generator** — Python script producing ~830 deterministic Splunk-ingestible events
 - **Player experience** design — dashboard wireframes, phase progression, hint delivery
+- **Splunk app** — `nakatomi_heist/` with indexes, props, transforms, lookups, and Mission Brief dashboard (ready to install)
 
 ### In Progress
 
@@ -41,7 +42,6 @@ Total game time: **45–60 minutes**. Multiple fail conditions keep the pressure
 
 ### Planned
 
-- Splunk app packaging (`nakatomi_heist/`)
 - ESP32 firmware
 - Integration between game UI and ESP32 (seal status polling)
 
@@ -49,7 +49,9 @@ Total game time: **45–60 minutes**. Multiple fail conditions keep the pressure
 
 Open **[index.html](index.html)** in a browser for a full visual overview of the project — game phases, architecture diagrams, seven seals, player roles, fail conditions, flow charts, easter eggs, and roadmap, all on one page.
 
-## Quick Start — Generate the Dataset
+## Quick Start — Install and Play
+
+### 1. Generate the dataset
 
 ```bash
 cd generator
@@ -58,7 +60,52 @@ pip install -r requirements.txt
 python3 generate.py
 ```
 
-Output lands in `generator/output/` — three JSON event files and three CSV lookup tables, ready for Splunk `oneshot` ingest. Change the `seed` in `scenario.yaml` to produce a fresh dataset with different codes for each game session.
+Output lands in `generator/output/` — three JSON event files and three CSV lookup tables. Change the `seed` in `scenario.yaml` to produce a fresh dataset with different codes for each game session.
+
+### 2. Install the Splunk app
+
+**Option A** — Upload via Splunk Web:
+
+Apps > Install app from file > select `nakatomi_heist.spl`
+
+**Option B** — Copy directly:
+
+```bash
+cp -r nakatomi_heist/ $SPLUNK_HOME/etc/apps/nakatomi_heist/
+$SPLUNK_HOME/bin/splunk restart
+```
+
+This creates the three indexes (`nakatomi_access`, `nakatomi_vault`, `nakatomi_building`), configures all sourcetypes, installs lookup tables, and deploys the Mission Brief dashboard.
+
+### 3. Load the data
+
+Enable HTTP Event Collector (HEC) in Splunk, create a token with access to the `nakatomi_*` indexes, then run the loader:
+
+```bash
+scripts/load_data.sh --token YOUR_HEC_TOKEN
+```
+
+Or manually with curl:
+
+```bash
+TOKEN="your-hec-token"
+for f in generator/output/nakatomi_*.json; do
+    curl -k "https://localhost:8088/services/collector" \
+        -H "Authorization: Splunk $TOKEN" \
+        -d @"$f"
+done
+```
+
+### 4. Play
+
+Open **Nakatomi Heist** in Splunk. The Mission Brief dashboard is your starting point. Open `game.html` in a browser for the vault keypad (digital mode) or connect the physical vault model.
+
+### Verify data loaded correctly
+
+```spl
+index=nakatomi_access OR index=nakatomi_vault OR index=nakatomi_building
+| stats count by index, sourcetype
+```
 
 ## Repository Structure
 
@@ -77,10 +124,24 @@ splunk-escape-room/
 │   ├── PLAYER_EXPERIENCE.md        # Dashboard wireframes, progression, hint delivery, digital mode
 │   ├── physical_model_diagram.svg  # Wiring and component placement diagram
 │   └── flow.html                   # Rendered Mermaid flow diagrams
+├── nakatomi_heist/                 # Splunk app (ready to install)
+│   ├── default/
+│   │   ├── app.conf                # App identity and metadata
+│   │   ├── indexes.conf            # nakatomi_access, nakatomi_vault, nakatomi_building
+│   │   ├── props.conf              # 7 sourcetype definitions
+│   │   ├── transforms.conf         # Lookup table definitions
+│   │   └── data/ui/
+│   │       ├── nav/default.xml     # App navigation
+│   │       └── views/mission_brief.xml  # Mission Brief dashboard (Dashboard Studio)
+│   ├── lookups/                    # Pre-loaded CSV lookup tables
+│   └── metadata/default.meta      # App permissions
+├── nakatomi_heist.spl              # Packaged app (install via Splunk Web)
 ├── generator/
 │   ├── generate.py                 # Data generator (Python)
 │   ├── scenario.yaml               # Seal codes, timeline, characters, tuning
 │   └── requirements.txt            # Python dependencies
+├── scripts/
+│   └── load_data.sh                # Load generated data via HEC
 ```
 
 ## Design Documents
@@ -102,7 +163,7 @@ splunk-escape-room/
 | Search & Analytics | Splunk Enterprise or Cloud |
 | Data Generation | Python ([generator/](generator/)) |
 | Game UI | Standalone HTML/CSS/JS ([game.html](game.html)) — dual-mode (physical + digital) |
-| Splunk App | Splunk app with Mission Brief dashboard (planned) |
+| Splunk App | `nakatomi_heist/` with indexes, sourcetypes, lookups, Mission Brief dashboard |
 | Physical Model | ESP32 + servo/solenoid/magnetic locks ([design doc](docs/PHYSICAL_MODEL.md)) |
 
 ## SPL Skills Covered

@@ -1,0 +1,7 @@
+system_id,description,clearance_level,vault_auth_code,location
+SYS-MAIN,Building Master Control,LEVEL-1,,Lobby
+SYS-ELEV,Elevator Override,LEVEL-2,,All floors
+SYS-HVAC,HVAC Master Control,LEVEL-3,,Mechanical
+SYS-FIRE,Fire Suppression Override,LEVEL-4,2817,All floors
+SYS-VAULT,Vault Primary Authorization,LEVEL-5,3940,B1
+SYS-EXEC,Executive Override,LEVEL-6,6102,Floor 35

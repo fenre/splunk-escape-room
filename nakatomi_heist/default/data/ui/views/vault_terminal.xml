@@ -1,0 +1,134 @@
+<dashboard version="2" theme="dark">
+  <label>Vault Terminal</label>
+  <description>NAKATOMI PLAZA — VAULT ACCESS PROTOCOL TERMINAL</description>
+  <definition><![CDATA[
+{
+  "title": "Vault Terminal",
+  "description": "NAKATOMI PLAZA — VAULT ACCESS PROTOCOL TERMINAL",
+  "dataSources": {
+    "ds_results": {
+      "type": "ds.search",
+      "options": {
+        "query": "$spl_query$",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Query Results"
+    },
+    "ds_sessions": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_vault | stats count values(user) as users by session_id | sort -count",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Vault Sessions"
+    },
+    "ds_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_vault | head 15 | table _time session_id user action detail result",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Recent Vault Events"
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> NAKATOMI PLAZA — VAULT ACCESS PROTOCOL v7.2\n> INDEX: nakatomi_vault\n> WARNING: ALL TERMINAL SESSIONS ARE RECORDED\n> ──────────────────────────────────────────────────────────\n> STATUS: ARMED    SEALS: 7/7 LOCKED    ACCESS: RESTRICTED\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_results": {
+      "type": "splunk.table",
+      "title": "> QUERY OUTPUT",
+      "dataSources": {"primary": "ds_results"},
+      "options": {
+        "count": 50,
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_sidebar_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## > SESSION LOG",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_sessions": {
+      "type": "splunk.table",
+      "title": "VAULT SESSIONS",
+      "dataSources": {"primary": "ds_sessions"},
+      "options": {
+        "count": 20,
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_recent": {
+      "type": "splunk.table",
+      "title": "RECENT VAULT ACTIVITY",
+      "dataSources": {"primary": "ds_recent"},
+      "options": {
+        "count": 15,
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_fields": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**AVAILABLE FIELDS:**\n`session_id` `user` `action` `detail` `result`\n\n**KEY ACTIONS:**\n`session_begin` `session_end` `code_attempt` `system_note`\n\n**LOOKUPS:**\n`| inputlookup system_codes.csv`\n`| inputlookup employee_directory.csv`\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_vault user=takagi\nindex=nakatomi_vault | transaction session_id\nindex=nakatomi_vault session_id=\"VS-0042\" | sort _time\n| inputlookup system_codes.csv\n```",
+        "fontColor": "#1a9a1a",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_warning": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> CAUTION: VAULT PROTOCOL ACTIVE\n> 3 FAILED ATTEMPTS = TERMINAL LOCKOUT\n> \"He entered the codes himself — did he enter the RIGHT codes?\"\n```",
+        "fontColor": "#ff3333",
+        "backgroundColor": "#0d0000"
+      }
+    }
+  },
+  "inputs": {
+    "input_spl": {
+      "type": "input.text",
+      "options": {
+        "token": "spl_query",
+        "defaultValue": "index=nakatomi_vault | head 20 | table _time session_id user action detail result"
+      },
+      "title": "> ENTER SPL QUERY"
+    }
+  },
+  "defaults": {
+    "tokens": {
+      "spl_query": "index=nakatomi_vault | head 20 | table _time session_id user action detail result"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "globalInputs": ["input_spl"],
+    "structure": [
+      {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 120}},
+      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 120, "w": 820, "h": 500}},
+      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 120, "w": 380, "h": 50}},
+      {"item": "viz_sessions", "type": "block", "position": {"x": 820, "y": 170, "w": 380, "h": 250}},
+      {"item": "viz_fields", "type": "block", "position": {"x": 820, "y": 420, "w": 380, "h": 430}},
+      {"item": "viz_recent", "type": "block", "position": {"x": 0, "y": 620, "w": 820, "h": 330}},
+      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 950, "w": 1200, "h": 80}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>
