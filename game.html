@@ -4,340 +4,1280 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nakatomi Plaza: Vault Heist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --surface2: #1c2333;
-      --border: #30363d;
-      --text: #e6edf3;
-      --dim: #8b949e;
-      --red: #c9302c;
-      --red-glow: #ff4444;
-      --gold: #d4a843;
-      --green: #3fb950;
-      --green-glow: #4ae168;
-      --amber: #d29922;
-      --amber-glow: #ffb740;
-      --blue: #58a6ff;
-      --cyan: #39c5cf;
+      --bg: #05050f;
+      --surface: #0a0a1a;
+      --surface2: #10102a;
+      --border: #1a1a3a;
+      --text: #d0c8b8;
+      --dim: #5a5050;
+      --red: #ff1744;
+      --red-glow: #ff2266;
+      --gold: #ffd700;
+      --green: #39ff14;
+      --green-glow: #44ff22;
+      --amber: #ff8800;
+      --amber-glow: #ffaa00;
+      --blue: #00b4d8;
+      --cyan: #00f0ff;
+      --hot-pink: #ff2a6d;
+      --purple: #b829dd;
+      --magenta: #ff00ff;
+      --chrome: linear-gradient(135deg, #c0c0c0 0%, #fff 25%, #a0a0a0 50%, #e8e8e8 75%, #808080 100%);
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── GLOBAL RETRO FEEL ──────────────────────── */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
       background: var(--bg); color: var(--text); min-height: 100vh;
       display: flex; flex-direction: column;
+      overflow-x: hidden;
+      cursor: crosshair;
     }
+
+    /* CRT scanlines */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(0,0,0,0.12) 1px,
+        rgba(0,0,0,0.12) 3px
+      );
+      pointer-events: none; z-index: 9998;
+    }
+
+    /* Film grain noise */
+    @keyframes grain {
+      0%, 100% { transform: translate(0,0); }
+      10% { transform: translate(-2%,-3%); }
+      20% { transform: translate(3%,2%); }
+      30% { transform: translate(-1%,4%); }
+      40% { transform: translate(4%,-1%); }
+      50% { transform: translate(-3%,3%); }
+      60% { transform: translate(2%,-4%); }
+      70% { transform: translate(-4%,1%); }
+      80% { transform: translate(1%,-2%); }
+      90% { transform: translate(3%,4%); }
+    }
+    .noise {
+      position: fixed; inset: -50%; z-index: 9997;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      pointer-events: none;
+      animation: grain 0.5s steps(10) infinite;
+      opacity: 0.6;
+    }
+
+    /* VHS tracking line */
+    @keyframes vhsTrack {
+      0% { top: -8%; }
+      100% { top: 108%; }
+    }
+    .vhs-line {
+      position: fixed; left: 0; right: 0; height: 4px; z-index: 9996;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.08), transparent);
+      box-shadow: 0 -4px 12px 2px rgba(255,255,255,0.02);
+      animation: vhsTrack 6s linear infinite;
+      pointer-events: none;
+    }
+
+    /* VCR HUD */
+    .vcr-play {
+      position: fixed; top: 12px; left: 16px; z-index: 9995;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; color: #fff; opacity: 0.5;
+      pointer-events: none; letter-spacing: 0.1em;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+    }
+    .vcr-rec {
+      position: fixed; top: 12px; right: 16px; z-index: 9995;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; color: var(--red); opacity: 0.7;
+      pointer-events: none; letter-spacing: 0.1em;
+      animation: recBlink 1.5s step-end infinite;
+    }
+    @keyframes recBlink { 0%, 100% { opacity: 0.7; } 50% { opacity: 0; } }
+    .vcr-timestamp {
+      position: fixed; bottom: 10px; right: 16px; z-index: 9995;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px; color: #fff; opacity: 0.35;
+      pointer-events: none;
+    }
+
     .hidden { display: none !important; }
-    .mono { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace; }
+    .mono { font-family: 'Share Tech Mono', 'Courier New', monospace; }
+
+    /* ── BOOT SEQUENCE ──────────────────────────── */
+    #boot-screen {
+      position: fixed; inset: 0; z-index: 300;
+      background: #000;
+      display: flex; flex-direction: column; align-items: flex-start;
+      padding: 3rem 4rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; color: var(--green);
+      text-shadow: 0 0 6px rgba(57,255,20,0.4);
+      overflow: hidden;
+    }
+    .boot-line {
+      opacity: 0; white-space: pre;
+      animation: bootType 0.05s forwards;
+    }
+    @keyframes bootType { to { opacity: 1; } }
+    .boot-cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: var(--green); animation: blink 0.6s step-end infinite;
+      box-shadow: 0 0 8px var(--green);
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .boot-bar {
+      width: 300px; height: 12px; border: 1px solid var(--green);
+      margin: 0.5rem 0; position: relative; overflow: hidden;
+    }
+    .boot-bar-fill {
+      height: 100%; width: 0; background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      animation: bootFill 1.8s ease-out forwards;
+    }
+    @keyframes bootFill { to { width: 100%; } }
 
     /* ── MODE SELECT ─────────────────────────────── */
     #mode-select {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 2rem; gap: 3rem;
-      background: linear-gradient(180deg, #1a0a0a 0%, var(--bg) 100%);
+      align-items: center; justify-content: center; padding: 2rem; gap: 1.5rem;
       position: relative; overflow: hidden;
+      background: linear-gradient(180deg, #0a001a 0%, #150530 25%, #2a0a3a 40%, #3a0a2a 52%, #6a1a2a 58%, #cc4422 63%, #ff8844 67%, #ffcc44 70%, #ffee88 72%, #ffcc44 74%, #ff8844 77%, #3a0a2a 85%, var(--bg) 100%);
     }
-    #mode-select::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(201,48,44,0.12) 0%, transparent 70%);
+
+    /* Synthwave sun — sits behind the tower at the horizon */
+    .synth-sun {
+      position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%);
+      width: 320px; height: 160px; overflow: hidden; z-index: 0;
+    }
+    .synth-sun-circle {
+      width: 320px; height: 320px; border-radius: 50%;
+      background: linear-gradient(180deg, #ff2a6d 0%, #ff6644 30%, #ffaa22 60%, #ffee44 100%);
+      box-shadow: 0 0 80px rgba(255,42,109,0.5), 0 0 150px rgba(255,102,68,0.35), 0 0 250px rgba(255,170,34,0.2);
+      position: relative;
+    }
+    .sun-line {
+      position: absolute; left: 0; right: 0; height: 4px;
+      background: var(--bg);
+    }
+    .sun-line:nth-child(1) { bottom: 40px; height: 3px; }
+    .sun-line:nth-child(2) { bottom: 55px; height: 5px; }
+    .sun-line:nth-child(3) { bottom: 75px; height: 7px; }
+    .sun-line:nth-child(4) { bottom: 100px; height: 10px; }
+    .sun-line:nth-child(5) { bottom: 130px; height: 14px; }
+
+    /* Animated perspective grid */
+    .grid-floor {
+      position: absolute; left: -100%; right: -100%; bottom: 0; height: 45%;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent calc(50% - 1px),
+          rgba(0,240,255,0.12) calc(50% - 1px),
+          rgba(0,240,255,0.12) calc(50% + 1px),
+          transparent calc(50% + 1px)
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent 0px,
+          transparent 59px,
+          rgba(0,240,255,0.06) 59px,
+          rgba(0,240,255,0.06) 60px
+        );
+      background-size: 60px 100%;
+      transform: perspective(300px) rotateX(60deg);
+      transform-origin: center top;
+      animation: gridScroll 2s linear infinite;
+      z-index: 0;
+    }
+    .grid-floor::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0px,
+          transparent 39px,
+          rgba(0,240,255,0.05) 39px,
+          rgba(0,240,255,0.05) 40px
+        );
+      background-size: 100% 40px;
+      animation: gridScrollV 1.5s linear infinite;
+    }
+    @keyframes gridScroll {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 0; }
+    }
+    @keyframes gridScrollV {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 40px; }
+    }
+
+    /* ── NAKATOMI PLAZA PHOTO ────────────────────── */
+    .nakatomi-photo {
+      position: absolute; bottom: 0; left: 0; right: 0; top: 0;
+      z-index: 1; pointer-events: none;
+      display: flex; align-items: flex-end; justify-content: center;
+      overflow: hidden;
+    }
+    .nakatomi-photo img {
+      width: 85%; min-width: 600px;
+      height: auto; max-height: none;
+      object-fit: cover;
+      object-position: center top;
+      filter: contrast(1.4) brightness(0.3) saturate(0.1);
+      margin-bottom: -5%;
+      mask-image:
+        linear-gradient(180deg, transparent 0%, black 6%, black 68%, transparent 95%),
+        linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+      mask-composite: intersect;
+      -webkit-mask-image:
+        linear-gradient(180deg, transparent 0%, black 6%, black 68%, transparent 95%),
+        linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+      -webkit-mask-composite: source-in;
+    }
+    /* Synthwave color wash — tints the photo to match the sunset */
+    .nakatomi-photo::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg,
+        rgba(21,5,48,0.7) 0%,
+        rgba(100,20,60,0.35) 30%,
+        rgba(255,68,34,0.2) 50%,
+        rgba(255,136,68,0.12) 60%,
+        rgba(10,0,26,0.4) 80%,
+        transparent 100%
+      );
+      mix-blend-mode: color;
       pointer-events: none;
     }
+    /* Subtle hot pink edge glow around the tower */
+    .nakatomi-photo::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(
+        ellipse 25% 60% at 50% 50%,
+        rgba(255,42,109,0.06) 0%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Palm tree silhouettes (removed) */
+    .palm { display: none; }
+
+    /* Ground fog glow */
+    .fog {
+      position: absolute; bottom: 24%; left: -10%; right: -10%; height: 80px;
+      background: linear-gradient(180deg, transparent, rgba(255,42,109,0.08), rgba(0,240,255,0.05), transparent);
+      filter: blur(20px);
+      z-index: 2; pointer-events: none;
+    }
+
+    .ms-year {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan), 0 0 20px rgba(0,240,255,0.4), 0 0 40px rgba(0,240,255,0.2);
+      position: relative; z-index: 2;
+    }
+
+    /* Chrome title with animated shine */
     .ms-title {
-      font-size: 2.8rem; font-weight: 800; letter-spacing: -0.02em; text-align: center;
-      background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+      font-family: 'Orbitron', monospace;
+      font-size: 3.6rem; font-weight: 900; letter-spacing: 0.1em;
+      text-transform: uppercase; text-align: center; line-height: 1.2;
+      background: linear-gradient(135deg, #888 0%, #ddd 10%, #fff 20%, #ccc 30%, #888 40%, #fff 50%, #aaa 60%, #eee 70%, #888 80%, #fff 90%, #999 100%);
+      background-size: 200% 100%;
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 4px 0 #333) drop-shadow(0 0 30px rgba(255,215,0,0.3));
+      position: relative; z-index: 2;
+      animation: chromeShine 3s linear infinite;
     }
-    .ms-subtitle { color: var(--dim); font-style: italic; font-size: 1.15rem; text-align: center; margin-top: -1.5rem; }
-    .ms-cards { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 1; }
+    @keyframes chromeShine {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .ms-subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      color: var(--hot-pink); font-size: 1.05rem; text-align: center;
+      text-shadow:
+        0 0 7px var(--hot-pink),
+        0 0 15px var(--hot-pink),
+        0 0 30px rgba(255,42,109,0.5),
+        0 0 60px rgba(255,42,109,0.3);
+      position: relative; z-index: 2;
+      animation: neonFlicker 5s infinite;
+    }
+    @keyframes neonFlicker {
+      0%, 100% { opacity: 1; text-shadow: 0 0 7px var(--hot-pink), 0 0 15px var(--hot-pink), 0 0 30px rgba(255,42,109,0.5), 0 0 60px rgba(255,42,109,0.3); }
+      4% { opacity: 0.8; text-shadow: 0 0 2px var(--hot-pink); }
+      5% { opacity: 1; text-shadow: 0 0 7px var(--hot-pink), 0 0 15px var(--hot-pink), 0 0 30px rgba(255,42,109,0.5), 0 0 60px rgba(255,42,109,0.3); }
+      54% { opacity: 1; }
+      55% { opacity: 0.6; text-shadow: 0 0 2px var(--hot-pink); }
+      55.5% { opacity: 1; text-shadow: 0 0 7px var(--hot-pink), 0 0 15px var(--hot-pink), 0 0 30px rgba(255,42,109,0.5), 0 0 60px rgba(255,42,109,0.3); }
+    }
+
+    .ms-insert {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px; letter-spacing: 0.15em;
+      color: var(--gold);
+      text-shadow: 0 0 10px var(--gold), 0 0 20px rgba(255,215,0,0.4);
+      position: relative; z-index: 2;
+      animation: insertBlink 1.2s step-end infinite;
+    }
+    @keyframes insertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .ms-cards { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 2; }
     .ms-card {
-      background: var(--surface); border: 2px solid var(--border); border-radius: 16px;
+      background: rgba(5,5,20,0.85);
       padding: 2.5rem 2rem; width: 320px; cursor: pointer; text-align: center;
-      transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+      transition: all 0.3s; position: relative;
+      border: 2px solid transparent;
+      background-clip: padding-box;
     }
-    .ms-card:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .ms-card::before {
+      content: '';
+      position: absolute; inset: -3px;
+      background: linear-gradient(45deg, var(--hot-pink), var(--cyan), var(--purple), var(--magenta), var(--cyan), var(--hot-pink));
+      background-size: 400% 400%;
+      z-index: -1;
+      animation: neonBorder 4s ease infinite;
+    }
+    .ms-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(5,5,20,0.92);
+      z-index: -1;
+    }
+    @keyframes neonBorder {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .ms-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow:
+        0 0 30px rgba(255,42,109,0.3),
+        0 0 60px rgba(0,240,255,0.2),
+        0 20px 40px rgba(0,0,0,0.5);
+    }
     .ms-card .icon { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
-    .ms-card h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .ms-card p { color: var(--dim); font-size: 0.9rem; line-height: 1.5; }
+    .ms-card h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--cyan);
+      text-shadow: 0 0 8px var(--cyan), 0 0 16px rgba(0,240,255,0.3);
+    }
+    .ms-card p { color: var(--dim); font-size: 0.82rem; line-height: 1.6; }
 
-    /* ── GAME SCREEN ─────────────────────────────── */
-    #game-screen { display: flex; flex-direction: column; min-height: 100vh; }
+    /* Decorative retro lines */
+    .retro-line {
+      width: 300px; height: 2px; position: relative; z-index: 2;
+      background: linear-gradient(90deg, transparent, var(--hot-pink), var(--cyan), var(--hot-pink), transparent);
+      box-shadow: 0 0 10px rgba(255,42,109,0.3);
+    }
 
-    /* Header */
+    .photo-credit {
+      position: absolute; bottom: 6px; right: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.45rem; color: rgba(255,255,255,0.15);
+      z-index: 3; pointer-events: auto;
+    }
+    .photo-credit a { color: rgba(255,255,255,0.25); text-decoration: none; }
+    .photo-credit a:hover { color: rgba(255,255,255,0.5); }
+
+    /* ── GAME SCREEN — PHOTOREALISTIC TERMINAL ──── */
+    #game-screen {
+      display: flex; min-height: 100vh;
+      align-items: center; justify-content: center;
+      background:
+        radial-gradient(ellipse at 40% 45%, rgba(51,255,51,0.015) 0%, transparent 60%),
+        linear-gradient(180deg, #1a1a1a 0%, #151515 100%);
+      padding: 1rem;
+    }
+
+    /* Terminal assembly: monitor + keypad side by side */
+    .terminal-unit {
+      display: flex; flex-direction: row; align-items: stretch;
+      justify-content: center;
+      max-height: calc(100vh - 2rem);
+      gap: 0;
+    }
+
+    /* ── MONITOR BODY ──────────────────────────── */
+    .monitor-housing {
+      background:
+        linear-gradient(180deg,
+          #d8d0b0 0%,
+          #d0c8a8 3%,
+          #c8c0a0 10%,
+          #c0b898 40%,
+          #b8b090 60%,
+          #b0a888 80%,
+          #a8a080 92%,
+          #989070 100%
+        );
+      border-radius: 22px 0 0 10px;
+      padding: 44px 46px 30px;
+      flex: 1;
+      max-width: 900px;
+      box-shadow:
+        0 12px 40px rgba(0,0,0,0.55),
+        0 4px 8px rgba(0,0,0,0.25),
+        0 1px 2px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.4),
+        inset 0 -1px 0 rgba(0,0,0,0.08),
+        inset 1px 0 0 rgba(255,255,255,0.15),
+        inset -1px 0 0 rgba(0,0,0,0.06);
+      position: relative;
+    }
+    /* Subtle plastic texture via noise */
+    .monitor-housing::before {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1;
+    }
+
+    /* Screw recesses in corners */
+    .monitor-screw {
+      position: absolute; width: 7px; height: 7px; border-radius: 50%; z-index: 2;
+      background: radial-gradient(circle at 45% 40%,
+        #a09880 0%, #908870 40%, #807860 70%, #706850 100%
+      );
+      box-shadow:
+        inset 0 1px 2px rgba(0,0,0,0.4),
+        0 1px 0 rgba(255,255,255,0.15);
+    }
+    .monitor-screw::after {
+      content: '+';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5px; font-weight: 900; color: rgba(0,0,0,0.3);
+      line-height: 1;
+    }
+    .monitor-screw.tl { top: 10px; left: 10px; }
+    .monitor-screw.tr { top: 10px; right: 10px; }
+    .monitor-screw.bl { bottom: 28px; left: 10px; }
+    .monitor-screw.br { bottom: 28px; right: 10px; }
+
+    /* Ventilation slots */
+    .monitor-vents {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 3px; z-index: 2;
+    }
+    .monitor-vents span {
+      display: block; width: 5px; height: 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1));
+      border-radius: 1px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Monitor brand embossed label */
+    .monitor-brand {
+      position: absolute; top: 9px; left: 50%; transform: translateX(-50%); z-index: 2;
+      font-family: 'Orbitron', monospace;
+      font-size: 8px; font-weight: 900; letter-spacing: 0.3em;
+      color: transparent; text-transform: uppercase;
+      background: linear-gradient(180deg, #a09880, #8a8070);
+      -webkit-background-clip: text; background-clip: text;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+      filter: drop-shadow(0 -1px 0 rgba(0,0,0,0.15));
+    }
+
+    /* Bottom control panel strip */
+    .monitor-controls {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 22px;
+      background: linear-gradient(180deg, #b0a888 0%, #a8a080 50%, #989070 100%);
+      border-radius: 0 0 0 10px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; z-index: 2;
+    }
+
+    /* Floppy drive slot */
+    .floppy-slot {
+      width: 56px; height: 4px;
+      background: linear-gradient(180deg, #1a1a1a, #2a2a2a, #1a1a1a);
+      border-radius: 1px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .floppy-slot::before {
+      content: '';
+      position: absolute; left: 4px; top: 1px;
+      width: 3px; height: 2px; background: rgba(255,255,255,0.05); border-radius: 0.5px;
+    }
+    .floppy-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 5px; color: #807868; letter-spacing: 0.06em; margin-left: 4px;
+    }
+
+    /* Right side: model, LED, power */
+    .monitor-right-controls {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .monitor-model {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 5.5px; color: #807868; letter-spacing: 0.08em;
+    }
+    .monitor-led {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #33ff33;
+      box-shadow: 0 0 3px #33ff33, 0 0 6px rgba(51,255,51,0.3), 0 0 12px rgba(51,255,51,0.1);
+      animation: ledPulse 2s ease-in-out infinite;
+    }
+    .monitor-power-btn {
+      width: 14px; height: 8px; border-radius: 2px;
+      background: linear-gradient(180deg, #6a6a6a, #4a4a4a);
+      border: 1px solid #3a3a3a;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 1px 0 rgba(255,255,255,0.05);
+      cursor: pointer;
+      position: relative;
+    }
+    .monitor-power-btn::after {
+      content: '';
+      position: absolute; left: 50%; top: 2px; transform: translateX(-50%);
+      width: 1px; height: 4px; background: rgba(255,255,255,0.2);
+    }
+
+    /* Brightness/contrast knobs on right side of monitor */
+    .monitor-knobs {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; align-items: center; z-index: 2;
+    }
+    .monitor-knob {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #888, #555 50%, #3a3a3a);
+      border: 1px solid #333;
+      box-shadow:
+        0 1px 3px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .monitor-knob::after {
+      content: '';
+      position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+      width: 1px; height: 4px; background: rgba(255,255,255,0.3);
+    }
+    .monitor-knob-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 4px; color: #807868; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    /* ── CRT SCREEN ────────────────────────────── */
+
+    /* Dark inner bezel between plastic and glass */
+    .crt-bezel {
+      background: linear-gradient(180deg, #1a1a1a, #222, #1a1a1a);
+      border-radius: 14px;
+      padding: 6px;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.8),
+        inset 0 -1px 3px rgba(0,0,0,0.4),
+        0 0 0 1px rgba(0,0,0,0.3);
+    }
+
+    .crt-screen {
+      background: #000800;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 4 / 3;
+      box-shadow:
+        inset 0 0 100px rgba(0,0,0,0.85),
+        inset 0 0 8px rgba(51,255,51,0.04),
+        0 0 1px rgba(0,0,0,0.8);
+    }
+
+    /* CRT vignette — darker at edges like a real tube */
+    .crt-screen::before {
+      content: '';
+      position: absolute; inset: 0; z-index: 5;
+      background:
+        radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 80%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* CRT scanlines */
+    .crt-screen::after {
+      content: '';
+      position: absolute; inset: 0; z-index: 6;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 1px,
+        rgba(0,0,0,0.12) 1px, rgba(0,0,0,0.12) 3px
+      );
+      pointer-events: none;
+      animation: crtFlicker 0.08s infinite;
+    }
+    @keyframes crtFlicker {
+      0% { opacity: 0.93; }
+      25% { opacity: 1; }
+      50% { opacity: 0.96; }
+      75% { opacity: 0.99; }
+      100% { opacity: 0.95; }
+    }
+
+    /* Glass reflection highlight — diagonal glare across CRT */
+    .crt-glare {
+      position: absolute; inset: 0; z-index: 7; pointer-events: none;
+      border-radius: 10px; overflow: hidden;
+    }
+    .crt-glare::before {
+      content: '';
+      position: absolute;
+      top: -30%; left: -20%;
+      width: 60%; height: 200%;
+      background: linear-gradient(
+        135deg,
+        transparent 40%,
+        rgba(255,255,255,0.03) 45%,
+        rgba(255,255,255,0.06) 50%,
+        rgba(255,255,255,0.03) 55%,
+        transparent 60%
+      );
+      transform: rotate(-15deg);
+    }
+    .crt-glare::after {
+      content: '';
+      position: absolute;
+      top: 5%; right: 8%;
+      width: 25%; height: 12%;
+      background: radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%);
+      border-radius: 50%;
+      transform: rotate(-10deg);
+    }
+
+    /* Green ambient glow on bezel from CRT */
+    .crt-bezel::before {
+      content: '';
+      position: absolute; inset: -4px; border-radius: 18px; z-index: -1;
+      box-shadow:
+        inset 0 0 20px rgba(51,255,51,0.03),
+        inset 0 0 60px rgba(51,255,51,0.015);
+      pointer-events: none;
+    }
+
+    /* Everything inside the CRT is green-on-black */
+    .crt-content {
+      position: relative;
+      display: flex; flex-direction: column;
+      height: 100%;
+      color: #33ff33;
+      text-shadow: 0 0 2px rgba(51,255,51,0.3);
+      animation: phosphorWarm 3s ease-out forwards;
+    }
+    @keyframes phosphorWarm {
+      0% { filter: brightness(0); }
+      5% { filter: brightness(0.05); }
+      20% { filter: brightness(0.4); }
+      50% { filter: brightness(0.8); }
+      100% { filter: brightness(1); }
+    }
+
+    /* Monitor stand removed — terminal sits flat */
+    .monitor-neck, .monitor-base { display: none; }
+
+    /* Header inside CRT */
     #game-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border);
-      background: rgba(13,17,23,0.95); backdrop-filter: blur(8px);
-      position: sticky; top: 0; z-index: 50;
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #1a3a1a;
+      background: rgba(0,20,0,0.4);
+      position: relative; z-index: 2;
     }
-    .gh-title { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
-    .gh-title span { color: var(--gold); }
+    .gh-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; font-weight: 400; letter-spacing: 0.06em;
+      color: #33ff33;
+      text-shadow: 0 0 6px rgba(51,255,51,0.4);
+    }
+    .gh-title span {
+      color: #66ff66;
+      text-shadow: 0 0 8px rgba(102,255,102,0.5);
+    }
     .gh-stats { display: flex; gap: 1.5rem; align-items: center; }
     .gh-timer {
-      font-size: 1.4rem; font-weight: 700; letter-spacing: 0.05em;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem; font-weight: 400; letter-spacing: 0.08em;
+      color: #33ff33;
+      text-shadow: 0 0 5px #33ff33, 0 0 10px rgba(51,255,51,0.5), 0 0 20px rgba(51,255,51,0.2);
     }
-    .gh-timer.urgent { color: var(--red-glow); animation: timerPulse 1s infinite; }
-    .gh-wrong { font-size: 0.9rem; color: var(--dim); }
-    .gh-wrong b { color: var(--red-glow); }
+    .gh-timer.urgent {
+      color: #ff4444;
+      text-shadow: 0 0 5px #ff4444, 0 0 10px rgba(255,68,68,0.5), 0 0 20px rgba(255,68,68,0.3);
+      animation: timerPulse 0.5s infinite;
+    }
+    .gh-wrong {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; color: #227722; letter-spacing: 0.04em;
+    }
+    .gh-wrong b {
+      color: #ff4444;
+      text-shadow: 0 0 6px rgba(255,68,68,0.5);
+    }
 
-    /* Main layout */
-    #game-main { flex: 1; display: flex; overflow: hidden; }
+    /* Main layout inside CRT */
+    #game-main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 2; }
 
-    /* Seal panel (sidebar) */
+    /* Seal panel — green phosphor style */
     #seal-panel {
-      width: 200px; min-width: 200px; border-right: 1px solid var(--border);
-      background: var(--surface); padding: 1.25rem 0; display: flex; flex-direction: column; gap: 0.25rem;
+      width: 180px; min-width: 180px;
+      border-right: 1px solid #1a3a1a;
+      background: rgba(0,10,0,0.3);
+      padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0;
       overflow-y: auto;
     }
     .sp-label {
-      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--dim); padding: 0 1.25rem; margin-bottom: 0.5rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em;
+      color: #227722; padding: 0.15rem 0.75rem 0.5rem;
+      border-bottom: 1px solid #1a3a1a;
+      margin-bottom: 0.25rem;
     }
     .seal-item {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.65rem 1.25rem; cursor: default; transition: background 0.15s;
-      border-left: 3px solid transparent;
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.75rem; cursor: default;
+      transition: background 0.15s;
+      border-left: 2px solid transparent;
     }
-    .seal-item.active { background: rgba(210,153,34,0.08); border-left-color: var(--amber); }
+    .seal-item.active { background: rgba(51,255,51,0.03); border-left-color: #33ff33; }
     .seal-item.open { cursor: pointer; }
-    .seal-item.open:hover { background: rgba(63,185,80,0.08); }
+    .seal-item.open:hover { background: rgba(51,255,51,0.06); }
     .seal-led {
-      width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-      background: #333; border: 2px solid #555; transition: all 0.4s;
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      background: #0a0a0a; border: 1px solid #1a3a1a;
+      transition: all 0.4s;
     }
-    .seal-item.locked .seal-led { background: #4a2020; border-color: #6a3030; }
+    .seal-item.locked .seal-led { background: #1a0a0a; border-color: #2a1a1a; }
     .seal-item.active .seal-led {
-      background: var(--amber); border-color: var(--amber-glow);
-      box-shadow: 0 0 10px var(--amber); animation: pulse 2s infinite;
+      background: #ffaa00; border-color: #ffcc00;
+      box-shadow: 0 0 6px #ffaa00, 0 0 12px rgba(255,170,0,0.4);
+      animation: pulse 1.5s infinite;
     }
     .seal-item.open .seal-led {
-      background: var(--green); border-color: var(--green-glow);
-      box-shadow: 0 0 10px var(--green);
+      background: #33ff33; border-color: #66ff66;
+      box-shadow: 0 0 6px #33ff33, 0 0 12px rgba(51,255,51,0.4);
     }
-    .seal-num { font-size: 0.85rem; font-weight: 600; }
-    .seal-status { font-size: 0.7rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.04em; }
-    .seal-item.active .seal-status { color: var(--amber); }
-    .seal-item.open .seal-status { color: var(--green); }
+    .seal-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem; color: #33ff33;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
+    }
+    .seal-status {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem; color: #1a5a1a;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .seal-item.active .seal-status {
+      color: #ffaa00;
+      text-shadow: 0 0 4px rgba(255,170,0,0.4);
+    }
+    .seal-item.open .seal-status {
+      color: #33ff33;
+      text-shadow: 0 0 4px rgba(51,255,51,0.4);
+    }
 
-    /* Game area */
-    #game-area { flex: 1; display: flex; flex-direction: column; padding: 2rem; overflow-y: auto; }
+    /* Game area — CRT green text */
+    #game-area {
+      flex: 1; display: flex; flex-direction: column; padding: 1rem 1.25rem; overflow-y: auto;
+      background: transparent;
+      color: #33ff33;
+    }
 
-    /* Objective */
-    #objective { margin-bottom: 1.5rem; }
+    /* Objective — terminal style */
+    #objective { margin-bottom: 1rem; }
     .obj-title {
-      font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--amber); margin-bottom: 0.5rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #66ff66; margin-bottom: 0.4rem;
+      text-shadow: 0 0 6px rgba(102,255,102,0.4);
     }
+    .obj-title::before { content: '> '; color: #227722; }
     .obj-text {
-      font-size: 1.05rem; line-height: 1.6; color: var(--text);
-      font-style: italic; max-width: 640px;
-      background: var(--surface); border-left: 3px solid var(--amber);
-      padding: 1rem 1.25rem; border-radius: 0 8px 8px 0;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem; line-height: 1.7; color: #33ff33;
+      font-style: normal; max-width: 640px;
+      background: transparent;
+      border-left: 2px solid #1a5a1a;
+      padding: 0.75rem 1rem;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
     }
     .obj-hint {
-      margin-top: 0.75rem; font-size: 0.8rem; color: var(--dim);
+      margin-top: 0.5rem; font-size: 0.75rem; color: #227722;
     }
     .obj-hint code {
-      background: var(--surface2); padding: 0.15rem 0.5rem; border-radius: 4px;
-      color: var(--cyan); font-size: 0.8rem;
+      background: rgba(51,255,51,0.05); padding: 0.15rem 0.5rem;
+      border: 1px solid #1a3a1a;
+      color: #66ff66; font-size: 0.75rem;
+      text-shadow: 0 0 4px rgba(51,255,51,0.4);
+      font-family: 'Share Tech Mono', monospace;
     }
 
-    /* Keypad */
-    #keypad-area { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; }
+    /* Code display inside CRT */
+    #keypad-area {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
+    }
+    .code-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; color: #227722; letter-spacing: 0.08em;
+    }
     #code-display {
-      display: flex; gap: 0.6rem; padding: 0.75rem 1rem;
-      background: var(--surface); border: 2px solid var(--border); border-radius: 10px;
+      display: flex; gap: 0.5rem; padding: 0.6rem 1rem;
+      background: rgba(51,255,51,0.02);
+      border: 1px solid #1a3a1a;
+      position: relative;
       transition: border-color 0.2s;
     }
-    #code-display.wrong { border-color: var(--red-glow); animation: shake 0.4s; }
-    #code-display.correct { border-color: var(--green); }
+    #code-display.wrong {
+      border-color: #ff4444;
+      box-shadow: 0 0 15px rgba(255,68,68,0.2);
+      animation: shake 0.4s;
+    }
+    #code-display.correct {
+      border-color: #33ff33;
+      box-shadow: 0 0 15px rgba(51,255,51,0.2);
+    }
     .cd-digit {
       width: 36px; height: 48px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem; font-weight: 700; color: var(--dim);
-      border-bottom: 2px solid var(--border);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.2rem; color: #0a2a0a;
+      border-bottom: 2px solid #0a2a0a;
     }
-    .cd-digit.filled { color: var(--text); border-bottom-color: var(--gold); }
+    .cd-digit.filled {
+      color: #33ff33;
+      text-shadow: 0 0 5px #33ff33, 0 0 10px rgba(51,255,51,0.5);
+      border-bottom-color: #33ff33;
+      animation: digitPop 0.15s;
+    }
+    @keyframes digitPop { 0% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+    /* Keypad — hidden inside CRT, text-only prompt instead */
+    .crt-prompt {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; color: #227722; margin-top: 0.5rem;
+    }
+
+    /* ── COILED CABLE (now horizontal) ─────────── */
+    .kb-cable { display: none; }
+    .kb-feet { display: none; }
+
+    /* ── KEYPAD HOUSING (right side of monitor) ── */
+    .keyboard-housing {
+      width: 200px; min-width: 200px;
+      background:
+        linear-gradient(180deg,
+          #d4ccac 0%, #ccc4a4 8%, #c4bc9c 40%,
+          #bcb494 65%, #b4ac8c 85%, #aca484 100%
+        );
+      border-radius: 0 22px 10px 0;
+      padding: 20px 16px 20px 14px;
+      box-shadow:
+        8px 0 24px rgba(0,0,0,0.3),
+        0 8px 24px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        inset -1px 0 0 rgba(0,0,0,0.04);
+      position: relative;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    /* Plastic texture */
+    .keyboard-housing::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .kb-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 5px; letter-spacing: 0.2em;
+      color: transparent;
+      background: linear-gradient(180deg, #9a8a7a, #8a7a6a);
+      -webkit-background-clip: text; background-clip: text;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+      text-align: center; margin-bottom: 6px;
+      position: relative; z-index: 1;
+    }
+    .kb-inner {
+      background: linear-gradient(180deg, #505050, #484848, #404040, #3a3a3a);
+      border-radius: 4px;
+      padding: 10px 10px 12px;
+      box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.6),
+        inset 0 -1px 0 rgba(255,255,255,0.03),
+        0 1px 0 rgba(255,255,255,0.05);
+      position: relative; z-index: 1;
+    }
+
+    /* Status LEDs */
+    .kb-leds {
+      display: flex; justify-content: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .kb-led-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .kb-led-dot {
+      width: 4px; height: 4px; border-radius: 50%;
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.3);
+    }
+    .kb-led-dot.on {
+      background: #33ff33;
+      border-color: #44aa44;
+      box-shadow: 0 0 2px #33ff33, 0 0 5px rgba(51,255,51,0.3);
+    }
+    .kb-led-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 3.5px; color: #888; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ── KEYCAPS ────────────────────────────────── */
     #keypad {
-      display: grid; grid-template-columns: repeat(3, 64px); gap: 8px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
+      width: 100%;
     }
     #keypad button {
-      width: 64px; height: 52px; font-size: 1.25rem; font-weight: 600;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); cursor: pointer; transition: all 0.12s;
+      height: 48px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.05rem; font-weight: 400;
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #d8d0c0 0%, #ccc4b4 30%, #c0b8a8 60%, #b8b0a0 100%);
+      border: none;
+      border-top: 1px solid #e8e0d0;
+      border-left: 1px solid #d8d0c0;
+      border-right: 2px solid #989080;
+      border-bottom: 3px solid #787060;
+      border-radius: 4px 4px 3px 3px;
+      color: #2a2a2a; cursor: pointer;
+      transition: all 0.05s;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+      box-shadow:
+        0 3px 1px rgba(0,0,0,0.12),
+        0 4px 6px rgba(0,0,0,0.2),
+        inset 0 -1px 0 rgba(0,0,0,0.05);
+      position: relative;
     }
-    #keypad button:hover { background: var(--surface2); border-color: var(--dim); }
-    #keypad button:active { transform: scale(0.95); background: #252d3a; }
-    #keypad .key-fn { font-size: 0.8rem; font-weight: 700; color: var(--dim); letter-spacing: 0.04em; }
-    #keypad .key-enter { background: rgba(63,185,80,0.1); border-color: rgba(63,185,80,0.3); color: var(--green); }
-    #keypad .key-enter:hover { background: rgba(63,185,80,0.2); }
+    #keypad button::before {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    #keypad button:hover {
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.12) 0%, transparent 60%),
+        linear-gradient(180deg, #e0d8c8 0%, #d4ccbc 30%, #c8c0b0 60%, #c0b8a8 100%);
+    }
+    #keypad button:active {
+      transform: translateY(2px);
+      border-top: 1px solid #c0b8a8;
+      border-bottom: 1px solid #989080;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.15);
+      background:
+        linear-gradient(180deg, #b8b0a0 0%, #b0a898 30%, #a8a090 60%, #a09888 100%);
+    }
+    #keypad .key-fn {
+      font-size: 0.55rem; font-weight: 700; color: #555; letter-spacing: 0.04em;
+    }
+    #keypad .key-enter {
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #8ab88a 0%, #70a070 30%, #609060 60%, #508050 100%);
+      border-top-color: #a0d0a0;
+      border-left-color: #90c090;
+      border-right-color: #407040;
+      border-bottom-color: #306030;
+      color: #1a3a1a;
+      font-weight: 700;
+    }
+    #keypad .key-enter:hover {
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.12) 0%, transparent 60%),
+        linear-gradient(180deg, #98c898 0%, #80b080 30%, #70a070 60%, #609060 100%);
+    }
 
     /* Physical mode */
     #physical-display {
       flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 2rem; text-align: center;
+      gap: 1rem; text-align: center;
+      color: #33ff33;
     }
-    .pd-seals { display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 400px; }
+    .pd-seals { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; max-width: 360px; }
     .pd-seal {
-      display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.25rem;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
-      font-size: 1.1rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem;
+      background: transparent; border: 1px solid #1a3a1a;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; letter-spacing: 0.04em;
+      text-transform: uppercase; color: #33ff33;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
+      transition: all 0.3s;
     }
     .pd-seal .pd-led {
-      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
-      background: #4a2020; border: 2px solid #6a3030;
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+      background: #1a0a0a; border: 1px solid #2a1a1a;
     }
-    .pd-seal.active .pd-led { background: var(--amber); border-color: var(--amber-glow); box-shadow: 0 0 12px var(--amber); animation: pulse 2s infinite; }
-    .pd-seal.open .pd-led { background: var(--green); border-color: var(--green-glow); box-shadow: 0 0 12px var(--green); }
-    .pd-msg { color: var(--dim); font-size: 1rem; margin-top: 1rem; }
+    .pd-seal.active { border-color: #3a5a1a; }
+    .pd-seal.active .pd-led {
+      background: #ffaa00; border-color: #ffcc00;
+      box-shadow: 0 0 8px #ffaa00, 0 0 16px rgba(255,170,0,0.4);
+      animation: pulse 1.5s infinite;
+    }
+    .pd-seal.open { border-color: #1a5a1a; }
+    .pd-seal.open .pd-led {
+      background: #33ff33; border-color: #66ff66;
+      box-shadow: 0 0 8px #33ff33, 0 0 16px rgba(51,255,51,0.4);
+    }
+    .pd-msg {
+      font-family: 'Share Tech Mono', monospace;
+      color: #227722; font-size: 0.75rem; margin-top: 0.5rem;
+      text-shadow: 0 0 3px rgba(34,119,34,0.3);
+    }
 
     /* Clue card overlay */
+    /* ── CLUE OVERLAY (in-screen terminal program) ── */
     #clue-overlay {
-      position: fixed; inset: 0; z-index: 80;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-      animation: fadeIn 0.3s;
+      position: absolute; inset: 0; z-index: 20;
+      display: flex; align-items: stretch; justify-content: center;
+      background: #000a00;
+      animation: clueFadeIn 0.15s ease-out;
+    }
+    @keyframes clueFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
     }
     #clue-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-      max-width: 560px; width: 90%; max-height: 85vh; overflow-y: auto;
-      padding: 2rem; position: relative; animation: slideIn 0.35s;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      color: #33ff33;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+    }
+
+    /* Terminal-style title bar */
+    .clue-header-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.35rem 0.75rem;
+      background: rgba(0,30,0,0.6);
+      border-bottom: 1px solid #1a3a1a;
+      flex-shrink: 0;
+    }
+    .clue-header-path {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; color: #227722;
+      letter-spacing: 0.05em;
     }
     .clue-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none; color: var(--dim); font-size: 1.5rem;
-      cursor: pointer; line-height: 1; transition: color 0.15s;
+      background: none; border: none;
+      color: #227722; font-size: 0.65rem;
+      cursor: pointer; line-height: 1; transition: all 0.15s;
+      font-family: 'Share Tech Mono', monospace;
+      padding: 0.15rem 0.3rem;
     }
-    .clue-close:hover { color: var(--text); }
-    .clue-tag {
-      font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--amber); margin-bottom: 0.75rem;
-    }
-    .clue-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; }
-    .clue-continue {
-      display: block; margin: 1.5rem auto 0; padding: 0.6rem 2rem;
-      background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.3);
-      border-radius: 8px; color: var(--green); font-weight: 600; font-size: 0.9rem;
-      cursor: pointer; transition: background 0.15s;
-    }
-    .clue-continue:hover { background: rgba(63,185,80,0.2); }
+    .clue-close:hover { color: #33ff33; text-shadow: 0 0 6px rgba(51,255,51,0.5); }
 
-    /* Clue-specific styles */
-    .clue-blueprint {
-      background: #f5e6c8; color: #3a2a10; padding: 1.5rem; border-radius: 4px;
-      border: 1px dashed #c4a76c; position: relative;
+    .clue-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.15em;
+      color: #66ff66; margin-bottom: 0.4rem;
+      text-shadow: 0 0 4px rgba(102,255,102,0.3);
+      padding: 0.6rem 0.75rem 0;
+      flex-shrink: 0;
     }
-    .clue-blueprint .grid { opacity: 0.15; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 19px, #8a7a5a 19px, #8a7a5a 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, #8a7a5a 19px, #8a7a5a 20px); border-radius: 4px; }
+    .clue-tag::before { content: '>> '; color: #227722; }
+    .clue-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; font-weight: 400;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: #33ff33;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
+      padding: 0 0.75rem 0.4rem;
+      border-bottom: 1px solid #0a2a0a;
+      flex-shrink: 0;
+    }
+
+    /* Scrollable clue content area */
+    .clue-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 0.6rem 0.75rem;
+      scrollbar-width: thin;
+      scrollbar-color: #1a3a1a #050a05;
+    }
+    .clue-scroll::-webkit-scrollbar { width: 6px; }
+    .clue-scroll::-webkit-scrollbar-track { background: #050a05; }
+    .clue-scroll::-webkit-scrollbar-thumb { background: #1a3a1a; border-radius: 3px; }
+
+    /* Footer bar with continue button */
+    .clue-footer-bar {
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.35rem 0.75rem;
+      background: rgba(0,30,0,0.6);
+      border-top: 1px solid #1a3a1a;
+      flex-shrink: 0;
+    }
+    .clue-continue {
+      font-family: 'Share Tech Mono', monospace;
+      padding: 0.3rem 1rem;
+      background: transparent;
+      border: 1px solid #1a4a1a;
+      color: #33ff33; font-size: 0.65rem;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.15s;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
+    }
+    .clue-continue:hover {
+      background: rgba(51,255,51,0.08);
+      border-color: #33ff33;
+      box-shadow: 0 0 8px rgba(51,255,51,0.15);
+    }
+
+    /* ── CLUE CONTENT STYLES (terminal-native) ──── */
+    /* All clue types rendered as green monochrome terminal data */
+    .clue-blueprint {
+      background: transparent; color: #33ff33; padding: 0.75rem; position: relative;
+      border: 1px solid #1a3a1a;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+    }
+    .clue-blueprint .grid {
+      opacity: 0.06; position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 19px, #1a4a1a 19px, #1a4a1a 20px),
+                  repeating-linear-gradient(90deg, transparent, transparent 19px, #1a4a1a 19px, #1a4a1a 20px);
+    }
     .clue-blueprint .content { position: relative; z-index: 1; }
-    .clue-blueprint .rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.75rem 0; font-size: 0.8rem; }
-    .clue-blueprint .room { padding: 0.5rem; border: 1px solid #c4a76c; text-align: center; border-radius: 3px; }
-    .clue-blueprint .room.circled { border: 3px solid #c9302c; font-weight: 700; position: relative; }
-    .clue-blueprint .handwritten { font-style: italic; color: #5a3a10; margin-top: 0.75rem; font-size: 0.85rem; border-top: 1px solid #c4a76c; padding-top: 0.75rem; }
+    .clue-blueprint .rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin: 0.5rem 0; font-size: 0.65rem; }
+    .clue-blueprint .room { padding: 0.35rem; border: 1px solid #1a4a1a; text-align: center; color: #33ff33; }
+    .clue-blueprint .room.circled { border: 2px solid #66ff66; font-weight: 700; color: #66ff66; text-shadow: 0 0 4px rgba(102,255,102,0.4); }
+    .clue-blueprint .handwritten { font-style: italic; color: #55cc55; margin-top: 0.5rem; font-size: 0.65rem; border-top: 1px solid #1a3a1a; padding-top: 0.5rem; }
 
     .clue-printout {
-      background: #0a2a0a; color: #33ff33; padding: 1.25rem; border-radius: 4px;
-      font-family: 'Courier New', monospace; font-size: 0.78rem; line-height: 1.8;
+      background: transparent; color: #33ff33; padding: 0.75rem;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; line-height: 1.7;
       border: 1px solid #1a4a1a; white-space: pre-wrap;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
     }
-    .clue-printout .hl { background: rgba(255,255,0,0.25); padding: 0 2px; }
-    .clue-printout .pen { color: #cc9944; font-style: italic; }
+    .clue-printout .hl { background: rgba(51,255,51,0.15); padding: 0 2px; color: #66ff66; }
+    .clue-printout .pen { color: #66ff66; font-style: italic; text-shadow: 0 0 6px rgba(102,255,102,0.4); }
 
-    .clue-cipher { padding: 0.5rem 0; }
+    .clue-cipher { padding: 0.35rem 0; }
     .cipher-sticky {
-      display: inline-block; background: #f5e680; color: #3a3a10; padding: 0.5rem 1rem;
-      border-radius: 2px; font-weight: 700; font-size: 0.9rem; margin-bottom: 1rem;
-      transform: rotate(-2deg); box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      display: inline-block; background: rgba(51,255,51,0.08); color: #66ff66;
+      padding: 0.35rem 0.75rem; font-weight: 700; font-size: 0.7rem;
+      margin-bottom: 0.5rem; transform: none;
+      border: 1px solid #1a4a1a;
+      box-shadow: none; text-shadow: 0 0 4px rgba(102,255,102,0.3);
     }
-    .cipher-rows { display: flex; flex-direction: column; gap: 2px; margin: 1rem 0; overflow-x: auto; }
-    .cipher-row {
-      display: flex; gap: 2px;
-    }
-    .cipher-row span {
-      width: 24px; height: 28px; display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700; border-radius: 3px;
-    }
-    .cipher-row.plain span { background: var(--surface2); color: var(--cyan); }
-    .cipher-row.shift span { background: rgba(210,153,34,0.15); color: var(--gold); }
-    .cipher-input { margin-top: 1rem; }
-    .cipher-input label { font-size: 0.8rem; color: var(--dim); display: block; margin-bottom: 0.35rem; }
-    .cipher-input textarea, .cipher-output {
-      width: 100%; padding: 0.6rem; border-radius: 6px; font-family: monospace;
-      font-size: 0.85rem; resize: vertical;
-    }
-    .cipher-input textarea {
-      background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-      min-height: 48px;
-    }
-    .cipher-output {
-      background: rgba(63,185,80,0.08); border: 1px solid rgba(63,185,80,0.2);
-      color: var(--green); margin-top: 0.5rem; min-height: 48px;
-    }
+    .cipher-rows { display: flex; flex-direction: column; gap: 2px; margin: 0.5rem 0; overflow-x: auto; }
+    .cipher-row { display: flex; gap: 2px; }
+    .cipher-row span { width: 20px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; }
+    .cipher-row.plain span { background: rgba(51,255,51,0.06); color: #33ff33; text-shadow: 0 0 3px rgba(51,255,51,0.3); }
+    .cipher-row.shift span { background: rgba(51,255,51,0.12); color: #66ff66; text-shadow: 0 0 3px rgba(102,255,102,0.3); }
+    .cipher-input { margin-top: 0.5rem; }
+    .cipher-input label { font-family: 'Share Tech Mono', monospace; font-size: 0.5rem; color: #227722; display: block; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .cipher-input textarea, .cipher-output { width: 100%; padding: 0.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; resize: vertical; }
+    .cipher-input textarea { background: #000a00; border: 1px solid #1a4a1a; color: #33ff33; min-height: 36px; }
+    .cipher-output { background: rgba(51,255,51,0.03); border: 1px solid #1a4a1a; color: #33ff33; margin-top: 0.35rem; min-height: 36px; text-shadow: 0 0 3px rgba(51,255,51,0.3); }
 
     .clue-rfcard {
-      background: #fff; color: #1a1a3a; padding: 1.5rem; border-radius: 8px;
-      border: 2px solid #3a4a8a;
+      background: transparent; color: #33ff33; padding: 0.75rem;
+      border: 1px solid #1a4a1a;
+      font-family: 'Share Tech Mono', monospace;
     }
-    .clue-rfcard h4 { color: #3a4a8a; font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
-    .clue-rfcard table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 0.75rem 0; }
-    .clue-rfcard td, .clue-rfcard th { padding: 0.4rem 0.6rem; border: 1px solid #ccc; text-align: left; }
-    .clue-rfcard th { background: #e8eaf6; }
-    .clue-rfcard .circled { background: #ffebee; font-weight: 700; color: #c9302c; }
-    .clue-rfcard .back { margin-top: 0.75rem; font-style: italic; color: #555; font-size: 0.85rem; border-top: 1px dashed #ccc; padding-top: 0.75rem; }
+    .clue-rfcard h4 { font-family: 'Share Tech Mono', monospace; color: #66ff66; font-size: 0.6rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: 0 0 4px rgba(102,255,102,0.3); }
+    .clue-rfcard table { width: 100%; border-collapse: collapse; font-size: 0.6rem; margin: 0.5rem 0; font-family: 'Share Tech Mono', monospace; }
+    .clue-rfcard td, .clue-rfcard th { padding: 0.3rem 0.4rem; border: 1px solid #1a3a1a; text-align: left; color: #33ff33; }
+    .clue-rfcard th { background: rgba(51,255,51,0.05); color: #66ff66; }
+    .clue-rfcard .circled { background: rgba(51,255,51,0.12); font-weight: 700; color: #66ff66; text-shadow: 0 0 4px rgba(102,255,102,0.4); }
+    .clue-rfcard .back { margin-top: 0.5rem; font-style: italic; color: #227722; font-size: 0.6rem; border-top: 1px dashed #1a3a1a; padding-top: 0.5rem; }
 
     .clue-badge {
-      background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%); color: #1a1a2a;
-      padding: 1.5rem; border-radius: 10px; border: 2px solid #ccc;
-      text-align: center; max-width: 320px; margin: 0 auto;
+      background: transparent; color: #33ff33; padding: 0.75rem;
+      border: 1px solid #1a4a1a; text-align: center;
+      max-width: 280px; margin: 0 auto;
+      font-family: 'Share Tech Mono', monospace;
     }
-    .clue-badge .logo { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #8a2020; margin-bottom: 0.75rem; border-bottom: 2px solid #8a2020; padding-bottom: 0.5rem; }
-    .clue-badge .photo { width: 80px; height: 100px; background: #ddd; border-radius: 4px; margin: 0.75rem auto; display: flex; align-items: center; justify-content: center; color: #999; font-size: 2rem; }
-    .clue-badge .name { font-size: 1.1rem; font-weight: 700; margin: 0.5rem 0 0.25rem; }
-    .clue-badge .dept { font-size: 0.85rem; color: #555; }
-    .clue-badge .badge-id { font-size: 1rem; font-weight: 700; color: #3a4a8a; margin: 0.5rem 0; }
-    .clue-badge .clearance { font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; padding-top: 0.5rem; margin-top: 0.5rem; }
-    .clue-badge .clearance b { color: #c9302c; }
-    .clue-badge .postit {
-      background: #f5e680; color: #3a3a10; padding: 0.5rem 0.75rem; border-radius: 2px;
-      font-size: 0.8rem; font-style: italic; margin-top: 1rem;
-      transform: rotate(1deg); box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-      text-align: left;
-    }
+    .clue-badge .logo { font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #66ff66; margin-bottom: 0.5rem; border-bottom: 1px solid #1a4a1a; padding-bottom: 0.35rem; text-shadow: 0 0 4px rgba(102,255,102,0.3); }
+    .clue-badge .photo { width: 60px; height: 72px; background: rgba(51,255,51,0.04); margin: 0.5rem auto; display: flex; align-items: center; justify-content: center; color: #227722; font-size: 1.5rem; border: 1px solid #1a3a1a; }
+    .clue-badge .name { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; font-weight: 700; margin: 0.35rem 0 0.15rem; color: #66ff66; text-shadow: 0 0 4px rgba(102,255,102,0.3); }
+    .clue-badge .dept { font-size: 0.6rem; color: #33ff33; }
+    .clue-badge .badge-id { font-family: 'Share Tech Mono', monospace; font-size: 0.55rem; color: #33ff33; margin: 0.35rem 0; }
+    .clue-badge .clearance { font-size: 0.6rem; color: #227722; border-top: 1px solid #1a3a1a; padding-top: 0.35rem; margin-top: 0.35rem; }
+    .clue-badge .clearance b { color: #66ff66; text-shadow: 0 0 4px rgba(102,255,102,0.4); }
+    .clue-badge .postit { background: rgba(51,255,51,0.06); color: #55cc55; padding: 0.35rem 0.5rem; font-size: 0.6rem; font-style: italic; margin-top: 0.5rem; transform: none; box-shadow: none; text-align: left; border: 1px dashed #1a4a1a; }
 
     .clue-letterhead {
-      background: #fefcf8; color: #2a2a2a; padding: 2rem; border-radius: 4px;
-      border: 1px solid #e0d8c8; text-align: center; position: relative;
+      background: transparent; color: #33ff33; padding: 0.75rem;
+      border: 1px solid #1a4a1a; text-align: center; position: relative;
+      font-family: 'Share Tech Mono', monospace;
     }
-    .clue-letterhead .watermark {
-      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 4rem; font-weight: 800; color: rgba(200,180,140,0.12); pointer-events: none;
-      letter-spacing: 0.1em; text-transform: uppercase;
-    }
-    .clue-letterhead .lh-header { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #8a2020; margin-bottom: 1.5rem; position: relative; }
-    .clue-letterhead .lh-main { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; position: relative; line-height: 1.5; }
-    .clue-letterhead .lh-sub { font-size: 0.9rem; color: #555; font-style: italic; position: relative; line-height: 1.5; }
+    .clue-letterhead .watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Share Tech Mono', monospace; font-size: 2rem; font-weight: 900; color: rgba(51,255,51,0.04); pointer-events: none; letter-spacing: 0.15em; text-transform: uppercase; }
+    .clue-letterhead .lh-header { font-family: 'Share Tech Mono', monospace; font-size: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #66ff66; margin-bottom: 0.75rem; position: relative; text-shadow: 0 0 4px rgba(102,255,102,0.3); }
+    .clue-letterhead .lh-main { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; line-height: 1.4; color: #33ff33; }
+    .clue-letterhead .lh-sub { font-size: 0.65rem; color: #227722; font-style: italic; position: relative; line-height: 1.4; }
 
     .clue-bonds {
-      background: linear-gradient(135deg, #1a1a0a 0%, #2a2a10 100%); color: var(--gold);
-      padding: 2rem; border-radius: 8px; text-align: center;
-      border: 3px double var(--gold); position: relative;
+      background: transparent; color: #33ff33; padding: 0.75rem;
+      text-align: center; border: 2px double #1a4a1a; position: relative;
+      font-family: 'Share Tech Mono', monospace;
     }
-    .clue-bonds .ornament { font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); margin-bottom: 1rem; }
-    .clue-bonds .amount { font-size: 2rem; font-weight: 800; margin: 0.5rem 0; }
-    .clue-bonds .issuer { font-size: 0.9rem; color: var(--dim); margin-bottom: 1rem; }
-    .clue-bonds .yippee { font-size: 1.1rem; font-style: italic; color: var(--text); margin-top: 1rem; }
+    .clue-bonds .ornament { font-family: 'Share Tech Mono', monospace; font-size: 0.45rem; letter-spacing: 0.2em; text-transform: uppercase; color: #227722; margin-bottom: 0.5rem; }
+    .clue-bonds .amount { font-family: 'Press Start 2P', monospace; font-size: 0.7rem; margin: 0.35rem 0; color: #66ff66; text-shadow: 0 0 8px rgba(102,255,102,0.5), 0 0 16px rgba(51,255,51,0.3); }
+    .clue-bonds .issuer { font-size: 0.6rem; color: #227722; margin-bottom: 0.5rem; }
+    .clue-bonds .yippee { font-size: 0.7rem; font-style: italic; color: #33ff33; text-shadow: 0 0 6px rgba(51,255,51,0.4); }
 
-    /* Footer */
+    /* Footer — inside CRT */
     #game-footer {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.5rem 1.5rem; border-top: 1px solid var(--border);
-      background: var(--surface); font-size: 0.75rem; color: var(--dim);
+      padding: 0.35rem 1rem;
+      border-top: 1px solid #1a3a1a;
+      background: rgba(0,20,0,0.4);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem; color: #227722;
+      position: relative; z-index: 2;
     }
-    .gf-power { display: flex; align-items: center; gap: 0.4rem; user-select: none; }
+    .gf-power {
+      display: flex; align-items: center; gap: 0.5rem;
+      user-select: none; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #227722; text-shadow: 0 0 3px rgba(34,119,34,0.3);
+    }
     .gf-power-led {
       width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green); box-shadow: 0 0 6px var(--green);
+      background: #33ff33;
+      box-shadow: 0 0 4px #33ff33, 0 0 8px rgba(51,255,51,0.4);
       cursor: default;
+      animation: ledPulse 2s ease-in-out infinite;
     }
-    .gf-version { font-size: 0.7rem; }
+    @keyframes ledPulse {
+      0%, 100% { box-shadow: 0 0 4px #33ff33; }
+      50% { box-shadow: 0 0 8px #33ff33, 0 0 16px rgba(51,255,51,0.4); }
+    }
+    .gf-version {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 0.06em; color: #1a4a1a;
+    }
+
+    /* Desk surface removed — terminal fills screen */
+    .desk-surface { display: none; }
+    
 
     /* ── OVERLAYS ─────────────────────────────────── */
     .overlay {
@@ -345,131 +1285,165 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 1rem; text-align: center; padding: 2rem;
     }
-    #overlay-gameover {
-      background: rgba(30,5,5,0.95); animation: fadeIn 0.5s;
-    }
+    #overlay-gameover { background: rgba(10,0,0,0.97); animation: fadeIn 0.5s; }
     #overlay-gameover h1 {
-      font-size: 3rem; font-weight: 800; color: var(--red-glow);
-      text-shadow: 0 0 40px rgba(255,68,68,0.5); letter-spacing: 0.1em;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2rem; color: #ff4444;
+      text-shadow: 0 0 10px #ff4444, 0 0 20px rgba(255,68,68,0.5), 0 0 40px rgba(255,68,68,0.3);
+      letter-spacing: 0.12em;
+      animation: gameOverFlash 1s ease-out;
     }
-    #overlay-gameover .reason { font-size: 1.2rem; color: var(--dim); margin-top: 0.5rem; }
-    #overlay-gameover .quote { font-size: 1rem; font-style: italic; color: var(--red); margin-top: 1rem; }
-
-    #overlay-victory {
-      background: rgba(5,15,5,0.95); animation: fadeIn 0.8s;
-    }
-    #overlay-victory h1 {
-      font-size: 3rem; font-weight: 800;
-      background: linear-gradient(135deg, #fff, var(--gold));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      text-shadow: none;
-    }
-    #overlay-victory .amount { font-size: 1.6rem; font-weight: 700; color: var(--gold); margin: 0.5rem 0; }
-    #overlay-victory .yippee { font-size: 1.15rem; font-style: italic; color: var(--green); }
-    #overlay-victory .time-taken { font-size: 0.9rem; color: var(--dim); margin-top: 1rem; }
-
-    .overlay-btn {
-      margin-top: 1.5rem; padding: 0.7rem 2.5rem;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      color: var(--text); font-weight: 600; font-size: 0.95rem; cursor: pointer;
-      transition: all 0.15s;
-    }
-    .overlay-btn:hover { background: var(--surface2); border-color: var(--dim); }
-
-    /* Power-down effect */
-    #overlay-powerdown {
-      position: fixed; inset: 0; z-index: 190; background: #000; pointer-events: none;
-    }
-    #overlay-powerdown.flicker { animation: flicker 1.2s forwards; }
-
-    /* Facilitator panel */
-    #facilitator {
-      position: fixed; bottom: 3rem; right: 1.5rem; z-index: 100;
-      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 1rem; min-width: 200px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
-    .fac-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); margin-bottom: 0.75rem; }
-    .fac-btn {
-      display: block; width: 100%; padding: 0.4rem 0.6rem; margin-bottom: 0.35rem;
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text); font-size: 0.78rem; cursor: pointer; text-align: left;
-      transition: background 0.12s;
-    }
-    .fac-btn:hover { background: #252d3a; }
-    .fac-btn.danger { color: var(--red-glow); border-color: rgba(201,48,44,0.3); }
-    .fac-btn.danger:hover { background: rgba(201,48,44,0.1); }
-
-    /* ── ANIMATIONS ───────────────────────────────── */
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 8px var(--amber); }
-      50% { box-shadow: 0 0 20px var(--amber), 0 0 40px rgba(255,180,0,0.2); }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-6px); }
-      40% { transform: translateX(6px); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
-    }
-    @keyframes slideIn {
-      from { transform: translateY(30px) scale(0.97); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes flicker {
-      0% { opacity: 0; }
-      5% { opacity: 1; }
-      10% { opacity: 0; }
-      15% { opacity: 0.8; }
-      20% { opacity: 0; }
-      28% { opacity: 0.5; }
-      35% { opacity: 0; }
-      45% { opacity: 0.2; }
-      55% { opacity: 0; }
-      100% { opacity: 1; }
-    }
-    @keyframes timerPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    @keyframes sealOpen {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.3); }
+    @keyframes gameOverFlash {
+      0% { opacity: 0; transform: scale(3); filter: blur(10px); }
+      30% { opacity: 1; transform: scale(0.95); filter: blur(0); }
+      50% { transform: scale(1.08); }
       100% { transform: scale(1); }
     }
-    @keyframes rainbow {
-      0% { filter: hue-rotate(0deg); }
-      100% { filter: hue-rotate(360deg); }
+    #overlay-gameover .reason { font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; color: #aa4444; margin-top: 0.5rem; }
+    #overlay-gameover .quote { font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; font-style: italic; color: #ff8888; margin-top: 1rem; }
+
+    #overlay-victory { background: rgba(0,5,0,0.97); animation: fadeIn 0.8s; }
+    #overlay-victory h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 2rem;
+      color: #33ff33;
+      text-shadow: 0 0 10px #33ff33, 0 0 20px rgba(51,255,51,0.5), 0 0 40px rgba(51,255,51,0.3);
+      animation: victoryGlow 2s ease-in-out infinite;
+    }
+    @keyframes victoryGlow {
+      0%, 100% { text-shadow: 0 0 10px #33ff33, 0 0 20px rgba(51,255,51,0.4); }
+      50% { text-shadow: 0 0 15px #33ff33, 0 0 30px #33ff33, 0 0 60px rgba(51,255,51,0.5); }
+    }
+    #overlay-victory .amount { font-family: 'Share Tech Mono', monospace; font-size: 1.2rem; font-weight: 400; color: #66ff66; margin: 0.5rem 0; text-shadow: 0 0 10px rgba(102,255,102,0.5); }
+    #overlay-victory .yippee { font-family: 'Share Tech Mono', monospace; font-size: 1rem; font-style: italic; color: #33ff33; text-shadow: 0 0 8px rgba(51,255,51,0.5); }
+    #overlay-victory .time-taken { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: #227722; margin-top: 1rem; }
+
+    .overlay-btn {
+      font-family: 'Share Tech Mono', monospace;
+      margin-top: 1.5rem; padding: 0.6rem 2rem;
+      background: transparent; border: 1px solid #33ff33;
+      color: #33ff33; font-size: 0.8rem; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      text-shadow: 0 0 4px rgba(51,255,51,0.4);
+      transition: all 0.15s;
+    }
+    .overlay-btn:hover {
+      background: rgba(51,255,51,0.08);
+      box-shadow: 0 0 12px rgba(51,255,51,0.2);
     }
 
-    /* Responsive */
+    #overlay-powerdown { position: fixed; inset: 0; z-index: 190; background: #000; pointer-events: none; }
+    #overlay-powerdown.flicker { animation: flicker 1.2s forwards; }
+
+    /* Facilitator */
+    #facilitator {
+      position: fixed; bottom: 3rem; right: 1.5rem; z-index: 100;
+      background: #0a0a0a; border: 1px solid #1a3a1a;
+      padding: 1rem; min-width: 200px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    .fac-title { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #ffaa00; margin-bottom: 0.75rem; }
+    .fac-btn { font-family: 'Share Tech Mono', monospace; display: block; width: 100%; padding: 0.4rem 0.6rem; margin-bottom: 0.35rem; background: #0a0a0a; border: 1px solid #1a3a1a; color: #33ff33; font-size: 0.75rem; cursor: pointer; text-align: left; transition: all 0.12s; text-shadow: 0 0 3px rgba(51,255,51,0.3); }
+    .fac-btn:hover { background: rgba(51,255,51,0.05); border-color: #33ff33; }
+    .fac-btn.danger { color: #ff4444; border-color: rgba(255,68,68,0.3); }
+    .fac-btn.danger:hover { background: rgba(255,68,68,0.05); }
+
+    /* ── ANIMATIONS ───────────────────────────────── */
+    @keyframes pulse { 0%, 100% { box-shadow: 0 0 8px var(--amber); } 50% { box-shadow: 0 0 20px var(--amber), 0 0 40px rgba(255,136,0,0.3); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+    @keyframes slideIn { from { transform: translateY(30px) scale(0.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes flicker { 0% { opacity: 0; } 5% { opacity: 1; } 10% { opacity: 0; } 15% { opacity: 0.8; } 20% { opacity: 0; } 28% { opacity: 0.5; } 35% { opacity: 0; } 45% { opacity: 0.2; } 55% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes sealOpen { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+
+    /* When game is active, body loses mode-select CRT effects */
+    body.in-game::after { display: none; }
+    body.in-game { background: #151515; cursor: default; }
+
+    /* Ambient CRT glow onto keypad housing */
+    .keyboard-housing::before {
+      content: '';
+      position: absolute; left: -10px; top: 20%; bottom: 20%; width: 20px;
+      background: radial-gradient(ellipse, rgba(51,255,51,0.04) 0%, transparent 80%);
+      pointer-events: none; z-index: 0;
+    }
+
     @media (max-width: 768px) {
-      .ms-title { font-size: 1.8rem; }
+      .ms-title { font-size: 1.8rem; letter-spacing: 0.04em; }
       .ms-card { width: 100%; max-width: 340px; padding: 1.5rem; }
+      .palm { display: none; }
+      .synth-sun { width: 180px; height: 90px; }
+      .synth-sun-circle { width: 180px; height: 180px; }
+      #game-screen { padding: 0.5rem; }
+      .terminal-unit { flex-direction: column; max-width: 100%; }
+      .monitor-housing { border-radius: 14px 14px 0 0; padding: 20px 16px 22px; }
+      .monitor-controls { border-radius: 0; }
+      .monitor-screw { display: none; }
+      .monitor-knobs { display: none; }
+      .monitor-vents { display: none; }
+      .crt-bezel { padding: 4px; }
       #game-main { flex-direction: column; }
-      #seal-panel {
-        width: 100%; min-width: 0; flex-direction: row; overflow-x: auto;
-        border-right: none; border-bottom: 1px solid var(--border); padding: 0.5rem;
-        gap: 0;
-      }
+      #seal-panel { width: 100%; min-width: 0; flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid #1a3a1a; padding: 0.5rem; gap: 0; }
       .sp-label { display: none; }
-      .seal-item { flex-direction: column; gap: 0.25rem; padding: 0.4rem 0.6rem; min-width: 64px; text-align: center; border-left: none; border-bottom: 3px solid transparent; }
-      .seal-item.active { border-bottom-color: var(--amber); }
-      .seal-status { font-size: 0.55rem; }
-      #game-area { padding: 1rem; }
-      #keypad button { width: 56px; height: 46px; font-size: 1.1rem; }
+      .seal-item { flex-direction: column; gap: 0.15rem; padding: 0.3rem 0.5rem; min-width: 56px; text-align: center; border-left: none; border-bottom: 2px solid transparent; }
+      .seal-item.active { border-bottom-color: #ffaa00; }
+      .seal-status { font-size: 0.45rem; }
+      #game-area { padding: 0.75rem; }
+      .keyboard-housing { width: 100%; min-width: 0; border-radius: 0 0 10px 10px; padding: 10px 16px 14px; }
+      #keypad { max-width: 300px; }
+      #keypad button { height: 42px; font-size: 0.95rem; }
+      .gh-timer { font-size: 0.8rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- MODE SELECT -->
+  <!-- VHS / CRT effects -->
+  <div class="noise"></div>
+  <div class="vhs-line"></div>
+  <div class="vcr-play">PLAY &#9654;</div>
+  <div class="vcr-rec">&#9679; REC</div>
+  <div class="vcr-timestamp" id="vcr-ts">1988/12/24  22:00:00</div>
+
+  <!-- BOOT SEQUENCE (shown on digital mode select) -->
+  <div id="boot-screen" class="hidden"></div>
+
+  <!-- MODE SELECT (visible immediately) -->
   <div id="mode-select">
-    <h1 class="ms-title">Nakatomi Plaza: Vault Heist</h1>
+    <!-- Synthwave sun -->
+    <div class="synth-sun">
+      <div class="synth-sun-circle">
+        <div class="sun-line"></div>
+        <div class="sun-line"></div>
+        <div class="sun-line"></div>
+        <div class="sun-line"></div>
+        <div class="sun-line"></div>
+      </div>
+    </div>
+
+    <!-- Animated grid floor -->
+    <div class="grid-floor"></div>
+
+    <!-- Nakatomi Plaza photo -->
+    <div class="nakatomi-photo">
+      <img src="nakatomi-plaza.jpg" alt="Nakatomi Plaza" draggable="false">
+    </div>
+
+    <!-- Palm trees -->
+    <div class="palm palm-left">&#x1F334;</div>
+    <div class="palm palm-right">&#x1F334;</div>
+
+    <!-- Ground fog -->
+    <div class="fog"></div>
+
+    <!-- Photo credit (CC BY-SA 3.0) -->
+    <div class="photo-credit">Photo: <a href="https://commons.wikimedia.org/wiki/File:Fox_Plaza_HD.jpg" target="_blank" rel="noopener noreferrer">Veldin963</a> / CC BY-SA 3.0</div>
+
+    <div class="ms-year">Christmas Eve &middot; MCMLXXXVIII &middot; Los Angeles</div>
+    <h1 class="ms-title">Nakatomi Plaza<br>Vault Heist</h1>
     <p class="ms-subtitle">"Now I have a SPL. Ho-ho-ho."</p>
+    <div class="retro-line"></div>
+    <div class="ms-insert">SELECT YOUR MODE</div>
     <div class="ms-cards">
       <div class="ms-card" onclick="selectMode('physical')">
         <span class="icon">&#x1F3DB;</span>
@@ -486,103 +1460,159 @@
 
   <!-- GAME SCREEN -->
   <div id="game-screen" class="hidden">
-    <header id="game-header">
-      <div class="gh-title">NAKATOMI PLAZA <span>VAULT HEIST</span></div>
-      <div class="gh-stats">
-        <div class="gh-timer mono" id="timer">60:00</div>
-        <div class="gh-wrong">WRONG: <b id="wrong-count">0</b>/3</div>
-      </div>
-    </header>
 
-    <main id="game-main">
-      <aside id="seal-panel">
-        <div class="sp-label">Vault Seals</div>
-      </aside>
-
-      <section id="game-area">
-        <!-- Digital mode content (objective + keypad) -->
-        <div id="digital-content">
-          <div id="objective">
-            <div class="obj-title" id="obj-title">SEAL 1 — THE LOBBY</div>
-            <div class="obj-text" id="obj-text"></div>
-            <div class="obj-hint" id="obj-hint"></div>
-          </div>
-          <div id="keypad-area">
-            <div id="code-display">
-              <span class="cd-digit">_</span>
-              <span class="cd-digit">_</span>
-              <span class="cd-digit">_</span>
-              <span class="cd-digit">_</span>
-            </div>
-            <div id="keypad">
-              <button onclick="enterDigit('1')">1</button>
-              <button onclick="enterDigit('2')">2</button>
-              <button onclick="enterDigit('3')">3</button>
-              <button onclick="enterDigit('4')">4</button>
-              <button onclick="enterDigit('5')">5</button>
-              <button onclick="enterDigit('6')">6</button>
-              <button onclick="enterDigit('7')">7</button>
-              <button onclick="enterDigit('8')">8</button>
-              <button onclick="enterDigit('9')">9</button>
-              <button class="key-fn" onclick="clearCode()">CLR</button>
-              <button onclick="enterDigit('0')">0</button>
-              <button class="key-fn key-enter" onclick="submitCode()">ENT</button>
-            </div>
-          </div>
+    <div class="terminal-unit">
+      <!-- Physical monitor housing -->
+      <div class="monitor-housing">
+        <div class="monitor-brand">NAKATOMI</div>
+        <div class="monitor-screw tl"></div>
+        <div class="monitor-screw tr"></div>
+        <div class="monitor-screw bl"></div>
+        <div class="monitor-screw br"></div>
+        <div class="monitor-vents"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="monitor-knobs">
+          <div class="monitor-knob-label">BRT</div>
+          <div class="monitor-knob"></div>
+          <div class="monitor-knob-label">CON</div>
+          <div class="monitor-knob"></div>
         </div>
 
-        <!-- Physical mode content -->
-        <div id="physical-content" class="hidden">
-          <div id="physical-display">
-            <div class="pd-seals" id="pd-seals"></div>
-            <div class="pd-msg">Enter codes on the vault keypad<br><span style="font-size:0.8rem;color:var(--dim)">Press <kbd style="background:var(--surface2);padding:0.1rem 0.4rem;border-radius:3px;border:1px solid var(--border)">F</kbd> for facilitator controls</span></div>
+        <!-- CRT screen with dark inner bezel -->
+        <div class="crt-bezel">
+          <div class="crt-screen">
+            <div class="crt-glare"></div>
+            <div class="crt-content">
+              <header id="game-header">
+                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.1</span></div>
+                <div class="gh-stats">
+                  <div class="gh-timer mono" id="timer">60:00</div>
+                  <div class="gh-wrong">ERR: <b id="wrong-count">0</b>/3</div>
+                </div>
+              </header>
+
+              <main id="game-main">
+                <aside id="seal-panel">
+                  <div class="sp-label">Vault Seals</div>
+                </aside>
+
+                <section id="game-area">
+                  <div id="digital-content">
+                    <div id="objective">
+                      <div class="obj-title" id="obj-title">SEAL 1 — THE LOBBY</div>
+                      <div class="obj-text" id="obj-text"></div>
+                      <div class="obj-hint" id="obj-hint"></div>
+                    </div>
+                    <div id="keypad-area">
+                      <div class="code-label">ENTER SEAL CODE:</div>
+                      <div id="code-display">
+                        <span class="cd-digit">_</span>
+                        <span class="cd-digit">_</span>
+                        <span class="cd-digit">_</span>
+                        <span class="cd-digit">_</span>
+                      </div>
+                      <div class="crt-prompt">Use keyboard or keypad below to enter code. Press ENTER to submit.</div>
+                    </div>
+                  </div>
+                  <div id="physical-content" class="hidden">
+                    <div id="physical-display">
+                      <div class="pd-seals" id="pd-seals"></div>
+                      <div class="pd-msg">Enter codes on the vault keypad<br><span style="font-size:0.65rem;color:#1a4a1a">Press F for facilitator controls</span></div>
+                    </div>
+                  </div>
+                </section>
+              </main>
+
+              <footer id="game-footer">
+                <div class="gf-power">
+                  SYS
+                  <span class="gf-power-led" id="power-led" onclick="handlePowerClick()" title=""></span>
+                  <span id="power-label">ONLINE</span>
+                </div>
+                <div class="gf-version">NAKATOMI-OS 2.1 &middot; 24-DEC-88</div>
+              </footer>
+              <!-- Clue overlay (inside CRT) -->
+              <div id="clue-overlay" class="hidden">
+                <div id="clue-card">
+                  <div class="clue-header-bar">
+                    <span class="clue-header-path">C:\VAULT\INTEL&gt;</span>
+                    <button class="clue-close" onclick="hideClue()">[X]</button>
+                  </div>
+                  <div class="clue-tag">Compartment Intel</div>
+                  <div class="clue-title" id="clue-title"></div>
+                  <div class="clue-scroll">
+                    <div id="clue-content"></div>
+                  </div>
+                  <div class="clue-footer-bar">
+                    <button class="clue-continue" onclick="hideClue()">[ENTER] Continue</button>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- crt-content -->
+          </div><!-- crt-screen -->
+        </div><!-- crt-bezel -->
+
+        <!-- Bottom control strip -->
+        <div class="monitor-controls">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="floppy-slot"></div>
+            <span class="floppy-label">3½</span>
+          </div>
+          <div class="monitor-right-controls">
+            <span class="monitor-model">NTC-3400</span>
+            <div class="monitor-led"></div>
+            <div class="monitor-power-btn"></div>
           </div>
         </div>
-      </section>
-    </main>
+      </div><!-- monitor-housing -->
 
-    <footer id="game-footer">
-      <div class="gf-power">
-        VAULT SYSTEMS
-        <span class="gf-power-led" id="power-led" onclick="handlePowerClick()" title=""></span>
-        <span id="power-label">ONLINE</span>
-      </div>
-      <div class="gf-version">v0.5</div>
-    </footer>
+      <!-- Keypad on right side -->
+      <div class="keyboard-housing">
+        <div class="kb-label">NAKATOMI CORP.</div>
+        <div class="kb-inner">
+          <div class="kb-leds">
+            <div class="kb-led-item"><div class="kb-led-dot on"></div><div class="kb-led-label">NUM</div></div>
+            <div class="kb-led-item"><div class="kb-led-dot"></div><div class="kb-led-label">CAPS</div></div>
+            <div class="kb-led-item"><div class="kb-led-dot"></div><div class="kb-led-label">SCR</div></div>
+          </div>
+          <div id="keypad">
+            <button onclick="enterDigit('1')">1</button>
+            <button onclick="enterDigit('2')">2</button>
+            <button onclick="enterDigit('3')">3</button>
+            <button onclick="enterDigit('4')">4</button>
+            <button onclick="enterDigit('5')">5</button>
+            <button onclick="enterDigit('6')">6</button>
+            <button onclick="enterDigit('7')">7</button>
+            <button onclick="enterDigit('8')">8</button>
+            <button onclick="enterDigit('9')">9</button>
+            <button class="key-fn" onclick="clearCode()">CLR</button>
+            <button onclick="enterDigit('0')">0</button>
+            <button class="key-fn key-enter" onclick="submitCode()">ENT</button>
+          </div>
+        </div>
+      </div><!-- keyboard-housing -->
+
+    </div><!-- terminal-unit -->
+
   </div>
 
-  <!-- CLUE OVERLAY -->
-  <div id="clue-overlay" class="hidden">
-    <div id="clue-card">
-      <button class="clue-close" onclick="hideClue()">&times;</button>
-      <div class="clue-tag">COMPARTMENT INTEL</div>
-      <div class="clue-title" id="clue-title"></div>
-      <div id="clue-content"></div>
-      <button class="clue-continue" onclick="hideClue()">Continue</button>
-    </div>
-  </div>
-
-  <!-- POWER-DOWN OVERLAY -->
   <div id="overlay-powerdown" class="hidden"></div>
 
-  <!-- GAME OVER -->
   <div id="overlay-gameover" class="overlay hidden">
     <h1>GAME OVER</h1>
     <div class="reason" id="gameover-reason"></div>
     <div class="quote" id="gameover-quote"></div>
-    <button class="overlay-btn" onclick="resetGame()">Reset</button>
+    <button class="overlay-btn" onclick="resetGame()">Continue?</button>
   </div>
 
-  <!-- VICTORY -->
   <div id="overlay-victory" class="overlay hidden">
     <h1>VAULT OPEN</h1>
     <div class="amount">$640,000,000 in Bearer Bonds</div>
     <div class="yippee">"Yippee-ki-yay."</div>
     <div class="time-taken" id="victory-time"></div>
-    <button class="overlay-btn" onclick="resetGame()">Reset</button>
+    <button class="overlay-btn" onclick="resetGame()">Play Again</button>
   </div>
 
-  <!-- FACILITATOR PANEL -->
   <div id="facilitator" class="hidden">
     <div class="fac-title">Facilitator Controls</div>
     <div id="fac-buttons"></div>
@@ -591,496 +1621,183 @@
   </div>
 
 <script>
-/* Seal codes from scenario.yaml */
+/* ── BOOT SEQUENCE (called when digital mode selected) ── */
+function runBoot(onComplete) {
+  const bootEl = document.getElementById('boot-screen');
+  bootEl.innerHTML = '';
+  bootEl.style.opacity = '1';
+  bootEl.classList.remove('hidden');
+  document.getElementById('mode-select').classList.add('hidden');
+
+  const lines = [
+    'NAKATOMI CORP. VAULT CONTROL SYSTEM',
+    'COPYRIGHT (C) 1988 NAKATOMI TRADING CORPORATION',
+    'ALL RIGHTS RESERVED',
+    '',
+    'BIOS VERSION 2.1.88 — 24 DEC 1988',
+    '',
+    'MEMORY TEST.......... 640K OK',
+    'EXTENDED MEMORY...... 384K OK',
+    '',
+    'DETECTING VAULT HARDWARE...',
+    '  SEAL CONTROLLER.... OK',
+    '  KEYPAD INTERFACE... OK',
+    '  LED ARRAY.......... OK',
+    '  POWER MONITOR...... OK',
+    '  RF RECEIVER........ OK',
+    '',
+    'LOADING VAULT OS...',
+    '__BAR__',
+    '',
+    'VAULT STATUS: 7 SEALS LOCKED',
+    'AUTHORIZATION LEVEL: GRUBER, HANS',
+    '',
+    'SYSTEM READY.',
+    '',
+    '> INITIATING HEIST PROTOCOL...'
+  ];
+
+  let delay = 200;
+  lines.forEach(function(line) {
+    setTimeout(function() {
+      if (line === '__BAR__') {
+        const bar = document.createElement('div');
+        bar.className = 'boot-bar';
+        bar.innerHTML = '<div class="boot-bar-fill"></div>';
+        bootEl.appendChild(bar);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'boot-line';
+        div.textContent = line || '\u00A0';
+        div.style.animationDelay = '0s';
+        bootEl.appendChild(div);
+      }
+      bootEl.scrollTop = bootEl.scrollHeight;
+    }, delay);
+    delay += line === '' ? 100 : line === '__BAR__' ? 2000 : (line.startsWith('  ') ? 250 : 400);
+  });
+
+  setTimeout(function() {
+    bootEl.style.transition = 'opacity 0.8s';
+    bootEl.style.opacity = '0';
+    setTimeout(function() {
+      bootEl.classList.add('hidden');
+      onComplete();
+    }, 800);
+  }, delay + 800);
+}
+
+/* starfield removed — game uses terminal housing */
+
+/* ── VCR TIMESTAMP ──────────────────────────── */
+(function updateVCR() {
+  const el = document.getElementById('vcr-ts');
+  let h=22, m=0, s=0;
+  setInterval(() => {
+    s++; if(s>=60){s=0;m++;} if(m>=60){m=0;h++;}
+    if(h>=24) h=0;
+    el.textContent = `1988/12/24  ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }, 1000);
+})();
+
+/* ── GAME LOGIC (unchanged) ─────────────────── */
 const CODES = { 1:'2512', 2:'7439', 3:'4291', 4:'8086', 5:'5765', 6:'3940' };
 const MAX_WRONG = 3;
 const TIMER_SECONDS = 3600;
 
 const OBJECTIVES = {
-  1: { title:'SEAL 1 \u2014 THE LOBBY',
-       text:'\u201cWe\u2019re in. The lobby is ours. Get into the access system \u2014 find out how security was locked down. Start with Floor 1.\u201d',
-       hint:'index=nakatomi_access floor=1' },
-  2: { title:'SEAL 2 \u2014 SECURING THE BUILDING',
-       text:'\u201cThe building is ours. Now find the vault. It\u2019s somewhere above the 25th floor \u2014 the data will tell you where. Use the blueprint.\u201d',
-       hint:'index=nakatomi_access floor>25 | stats count by floor' },
-  3: { title:'SEAL 3 \u2014 TAKAGI\u2019S REFUSAL',
-       text:'\u201cTakagi wouldn\u2019t talk. But he was at the vault terminal \u2014 session VS-0042. He entered codes. Were they real? Find out what he typed.\u201d',
-       hint:'index=nakatomi_vault | transaction session_id' },
-  4: { title:'SEAL 4 \u2014 THE ROOF TRAP',
-       text:'\u201cThe crew is rigging the roof. The building\u2019s systems know something\u2019s off. Find the message they left in the machine room data.\u201d',
-       hint:'index=nakatomi_building floor=roof system=hvac' },
-  5: { title:'SEAL 5 \u2014 THE FBI',
-       text:'\u201cThe feds are here. Their radio chatter is hitting our security intercepts. Find the authorization they\u2019re using to kill the power.\u201d',
-       hint:'index=nakatomi_building channel=freq_14' },
-  6: { title:'SEAL 6 \u2014 THE BEARER BONDS',
-       text:'\u201cSix locks down, one to go. The final vault sequence needs an authorized employee\u2019s code. You have a badge. Find who it belongs to.\u201d',
-       hint:'| inputlookup employee_directory.csv | search badge_id="NP-4472"' },
-  7: { title:'SEAL 7 \u2014 ???',
-       text:'\u201cThe seventh lock is not in the system.\u201d',
-       hint:'' }
+  1: { title:'SEAL 1 \u2014 THE LOBBY', text:'\u201cWe\u2019re in. The lobby is ours. Get into the access system \u2014 find out how security was locked down. Start with Floor 1.\u201d', hint:'index=nakatomi_access floor=1' },
+  2: { title:'SEAL 2 \u2014 SECURING THE BUILDING', text:'\u201cThe building is ours. Now find the vault. It\u2019s somewhere above the 25th floor \u2014 the data will tell you where. Use the blueprint.\u201d', hint:'index=nakatomi_access floor>25 | stats count by floor' },
+  3: { title:'SEAL 3 \u2014 TAKAGI\u2019S REFUSAL', text:'\u201cTakagi wouldn\u2019t talk. But he was at the vault terminal \u2014 session VS-0042. He entered codes. Were they real? Find out what he typed.\u201d', hint:'index=nakatomi_vault | transaction session_id' },
+  4: { title:'SEAL 4 \u2014 THE ROOF TRAP', text:'\u201cThe crew is rigging the roof. The building\u2019s systems know something\u2019s off. Find the message they left in the machine room data.\u201d', hint:'index=nakatomi_building floor=roof system=hvac' },
+  5: { title:'SEAL 5 \u2014 THE FBI', text:'\u201cThe feds are here. Their radio chatter is hitting our security intercepts. Find the authorization they\u2019re using to kill the power.\u201d', hint:'index=nakatomi_building channel=freq_14' },
+  6: { title:'SEAL 6 \u2014 THE BEARER BONDS', text:'\u201cSix locks down, one to go. The final vault sequence needs an authorized employee\u2019s code. You have a badge. Find who it belongs to.\u201d', hint:'| inputlookup employee_directory.csv | search badge_id="NP-4472"' },
+  7: { title:'SEAL 7 \u2014 ???', text:'\u201cThe seventh lock is not in the system.\u201d', hint:'' }
 };
+const SEAL_LABELS = { 1:'The Lobby', 2:'Securing the Building', 3:'Takagi\u2019s Refusal', 4:'The Roof Trap', 5:'The FBI', 6:'The Bearer Bonds', 7:'Shoot the Glass' };
 
-const SEAL_LABELS = {
-  1:'The Lobby', 2:'Securing the Building', 3:'Takagi\u2019s Refusal',
-  4:'The Roof Trap', 5:'The FBI', 6:'The Bearer Bonds', 7:'Shoot the Glass'
-};
+let state = { mode:null, activeSeal:1, seals:[false,false,false,false,false,false,false], wrongCount:0, codeInput:'', gameState:'select', timerRemaining:TIMER_SECONDS, timerInterval:null, startTime:null, facVisible:false };
 
-let state = {
-  mode: null,
-  activeSeal: 1,
-  seals: [false,false,false,false,false,false,false],
-  wrongCount: 0,
-  codeInput: '',
-  gameState: 'select',
-  timerRemaining: TIMER_SECONDS,
-  timerInterval: null,
-  startTime: null,
-  facVisible: false
-};
-
-/* ── AUDIO ──────────────────────────────────── */
 let audioCtx = null;
-function ensureAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-function tone(freq, dur, type, vol) {
-  if (!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type || 'sine'; o.frequency.value = freq;
-  g.gain.value = vol || 0.12;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start();
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur/1000);
-  o.stop(audioCtx.currentTime + dur/1000);
-}
-function playKey() { tone(800, 60, 'sine', 0.06); }
-function playCorrect() {
-  tone(523, 180); setTimeout(()=>tone(659,180), 150); setTimeout(()=>tone(784,300), 300);
-}
-function playWrong() { tone(300, 250, 'sawtooth', 0.1); setTimeout(()=>tone(200,350,'sawtooth',0.1), 200); }
-function playVictory() {
-  [523,587,659,698,784,880,988,1047].forEach((f,i) => setTimeout(()=>tone(f,300,undefined,0.1), i*120));
-}
-function playGameOver() {
-  tone(400,400,'sawtooth',0.08); setTimeout(()=>tone(300,400,'sawtooth',0.08),350);
-  setTimeout(()=>tone(200,600,'sawtooth',0.08),700);
-}
-function playPowerDown() {
-  tone(200,800,'sawtooth',0.08); setTimeout(()=>tone(100,1200,'sawtooth',0.06),600);
-}
+function ensureAudio() { if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+function tone(freq,dur,type,vol) { if(!audioCtx)return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=vol||0.12; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur/1000); o.stop(audioCtx.currentTime+dur/1000); }
+function playKey() { tone(800,60,'sine',0.06); }
+function playCorrect() { tone(523,180); setTimeout(()=>tone(659,180),150); setTimeout(()=>tone(784,300),300); }
+function playWrong() { tone(300,250,'sawtooth',0.1); setTimeout(()=>tone(200,350,'sawtooth',0.1),200); }
+function playVictory() { [523,587,659,698,784,880,988,1047].forEach((f,i)=>setTimeout(()=>tone(f,300,undefined,0.1),i*120)); }
+function playGameOver() { tone(400,400,'sawtooth',0.08); setTimeout(()=>tone(300,400,'sawtooth',0.08),350); setTimeout(()=>tone(200,600,'sawtooth',0.08),700); }
+function playPowerDown() { tone(200,800,'sawtooth',0.08); setTimeout(()=>tone(100,1200,'sawtooth',0.06),600); }
 
-/* ── GAME FLOW ──────────────────────────────── */
-function selectMode(mode) {
-  ensureAudio();
-  state.mode = mode;
-  state.gameState = 'playing';
-  state.startTime = Date.now();
-  document.getElementById('mode-select').classList.add('hidden');
+function enterGame(mode) {
+  state.mode=mode; state.gameState='playing'; state.startTime=Date.now();
   document.getElementById('game-screen').classList.remove('hidden');
-  if (mode === 'digital') {
+  document.body.classList.add('in-game');
+  document.querySelectorAll('.noise,.vhs-line,.vcr-play,.vcr-rec,.vcr-timestamp').forEach(function(el){el.style.display='none';});
+  if(mode==='digital'){
     document.getElementById('digital-content').classList.remove('hidden');
     document.getElementById('physical-content').classList.add('hidden');
+    document.querySelector('.keyboard-housing').style.display='';
+    document.querySelector('.monitor-housing').style.borderRadius='';
   } else {
     document.getElementById('digital-content').classList.add('hidden');
     document.getElementById('physical-content').classList.remove('hidden');
+    document.querySelector('.keyboard-housing').style.display='none';
+    document.querySelector('.monitor-housing').style.borderRadius='22px';
     buildPhysicalDisplay();
   }
-  buildSealPanel();
-  startTimer();
-  render();
+  buildSealPanel(); startTimer(); render();
 }
-
-function startTimer() {
-  state.timerRemaining = TIMER_SECONDS;
-  clearInterval(state.timerInterval);
-  state.timerInterval = setInterval(tickTimer, 1000);
+function selectMode(mode) {
+  ensureAudio();
+  runBoot(function(){ enterGame(mode); });
 }
-function tickTimer() {
-  if (state.gameState !== 'playing') return;
-  state.timerRemaining--;
-  if (state.timerRemaining <= 0) {
-    state.timerRemaining = 0;
-    triggerGameOver('timer');
-  }
-  renderTimer();
-}
-function renderTimer() {
-  const m = Math.floor(state.timerRemaining / 60);
-  const s = state.timerRemaining % 60;
-  const el = document.getElementById('timer');
-  el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
-  el.classList.toggle('urgent', state.timerRemaining <= 300);
-}
+function startTimer() { state.timerRemaining=TIMER_SECONDS; clearInterval(state.timerInterval); state.timerInterval=setInterval(tickTimer,1000); }
+function tickTimer() { if(state.gameState!=='playing')return; state.timerRemaining--; if(state.timerRemaining<=0){state.timerRemaining=0;triggerGameOver('timer');} renderTimer(); }
+function renderTimer() { const m=Math.floor(state.timerRemaining/60),s=state.timerRemaining%60; const el=document.getElementById('timer'); el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); el.classList.toggle('urgent',state.timerRemaining<=300); }
+function enterDigit(d) { if(state.gameState!=='playing'||state.mode!=='digital')return; if(state.activeSeal===7||state.codeInput.length>=4)return; ensureAudio(); playKey(); state.codeInput+=d; renderCodeDisplay(); }
+function clearCode() { state.codeInput=''; renderCodeDisplay(); const cd=document.getElementById('code-display'); cd.classList.remove('wrong','correct'); }
+function submitCode() { if(state.gameState!=='playing'||state.mode!=='digital')return; if(state.codeInput.length!==4)return; if(state.activeSeal>6)return; const expected=CODES[state.activeSeal]; const cd=document.getElementById('code-display'); if(state.codeInput===expected){cd.classList.add('correct');playCorrect();setTimeout(()=>{cd.classList.remove('correct');openSeal(state.activeSeal);},600);}else{state.wrongCount++;cd.classList.add('wrong');playWrong();setTimeout(()=>cd.classList.remove('wrong'),500);document.getElementById('wrong-count').textContent=state.wrongCount;if(state.wrongCount>=MAX_WRONG){setTimeout(()=>triggerGameOver('mcclane'),800);return;}} state.codeInput=''; setTimeout(renderCodeDisplay,600); }
+function openSeal(n) { state.seals[n-1]=true; const sealEl=document.querySelector(`.seal-item[data-seal="${n}"] .seal-led`); if(sealEl)sealEl.style.animation='sealOpen 0.5s'; if(n<7)state.activeSeal=n+1; if(state.mode==='digital'&&n<=6)showClue(n); render(); if(state.mode==='physical')buildPhysicalDisplay(); if(state.seals.every(s=>s))setTimeout(triggerVictory,800); }
+function handlePowerClick() { if(state.gameState!=='playing')return; if(state.activeSeal!==7)return; if(!state.seals.slice(0,6).every(s=>s))return; triggerPowerCut(); }
+function triggerPowerCut() { ensureAudio(); playPowerDown(); const pd=document.getElementById('overlay-powerdown'); pd.classList.remove('hidden'); pd.classList.add('flicker'); setTimeout(()=>{pd.classList.remove('flicker');state.seals[6]=true;render();if(state.mode==='physical')buildPhysicalDisplay();setTimeout(()=>{pd.classList.add('hidden');if(state.mode==='digital'){showClue(7);setTimeout(triggerVictory,1500);}else{triggerVictory();}},1200);},1400); }
+function triggerGameOver(reason) { state.gameState='gameover'; clearInterval(state.timerInterval); playGameOver(); const reasons={mcclane:{text:'McClane got the drop on you.',quote:'"Just another American who saw too many movies."'},timer:{text:'The charges blew. You never got the vault.',quote:'"The plaza floor. Hans sends his regards."'}}; const r=reasons[reason]||reasons.mcclane; document.getElementById('gameover-reason').textContent=r.text; document.getElementById('gameover-quote').textContent=r.quote; document.getElementById('overlay-gameover').classList.remove('hidden'); }
+function triggerVictory() { if(state.gameState==='victory')return; state.gameState='victory'; clearInterval(state.timerInterval); playVictory(); const elapsed=Math.floor((Date.now()-state.startTime)/1000); const em=Math.floor(elapsed/60),es=elapsed%60; document.getElementById('victory-time').textContent=`Completed in ${em}m ${String(es).padStart(2,'0')}s \u2014 ${state.wrongCount} wrong code${state.wrongCount!==1?'s':''}`; document.getElementById('overlay-victory').classList.remove('hidden'); }
+function resetGame() { clearInterval(state.timerInterval); state={mode:null,activeSeal:1,seals:[false,false,false,false,false,false,false],wrongCount:0,codeInput:'',gameState:'select',timerRemaining:TIMER_SECONDS,timerInterval:null,startTime:null,facVisible:false}; document.getElementById('overlay-gameover').classList.add('hidden'); document.getElementById('overlay-victory').classList.add('hidden'); document.getElementById('overlay-powerdown').classList.add('hidden'); document.getElementById('clue-overlay').classList.add('hidden'); document.getElementById('facilitator').classList.add('hidden'); document.getElementById('game-screen').classList.add('hidden'); document.getElementById('mode-select').classList.remove('hidden'); document.body.classList.remove('in-game'); document.querySelectorAll('.noise,.vhs-line,.vcr-play,.vcr-rec,.vcr-timestamp').forEach(function(el){el.style.display='';}); document.querySelector('.keyboard-housing').style.display=''; document.querySelector('.monitor-housing').style.borderRadius=''; document.getElementById('wrong-count').textContent='0'; document.getElementById('timer').classList.remove('urgent'); renderTimer(); }
 
-function enterDigit(d) {
-  if (state.gameState !== 'playing' || state.mode !== 'digital') return;
-  if (state.activeSeal === 7 || state.codeInput.length >= 4) return;
-  ensureAudio(); playKey();
-  state.codeInput += d;
-  renderCodeDisplay();
-}
-function clearCode() {
-  state.codeInput = '';
-  renderCodeDisplay();
-  const cd = document.getElementById('code-display');
-  cd.classList.remove('wrong','correct');
-}
-function submitCode() {
-  if (state.gameState !== 'playing' || state.mode !== 'digital') return;
-  if (state.codeInput.length !== 4) return;
-  if (state.activeSeal > 6) return;
-
-  const expected = CODES[state.activeSeal];
-  const cd = document.getElementById('code-display');
-
-  if (state.codeInput === expected) {
-    cd.classList.add('correct');
-    playCorrect();
-    setTimeout(() => { cd.classList.remove('correct'); openSeal(state.activeSeal); }, 600);
-  } else {
-    state.wrongCount++;
-    cd.classList.add('wrong');
-    playWrong();
-    setTimeout(() => cd.classList.remove('wrong'), 500);
-    document.getElementById('wrong-count').textContent = state.wrongCount;
-    if (state.wrongCount >= MAX_WRONG) {
-      setTimeout(() => triggerGameOver('mcclane'), 800);
-      return;
-    }
-  }
-  state.codeInput = '';
-  setTimeout(renderCodeDisplay, 600);
-}
-
-function openSeal(n) {
-  state.seals[n-1] = true;
-  const sealEl = document.querySelector(`.seal-item[data-seal="${n}"] .seal-led`);
-  if (sealEl) sealEl.style.animation = 'sealOpen 0.5s';
-
-  if (n < 7) {
-    state.activeSeal = n + 1;
-  }
-
-  if (state.mode === 'digital' && n <= 6) {
-    showClue(n);
-  }
-
-  render();
-
-  if (state.mode === 'physical') buildPhysicalDisplay();
-
-  const allOpen = state.seals.every(s => s);
-  if (allOpen) setTimeout(triggerVictory, 800);
-}
-
-function handlePowerClick() {
-  if (state.gameState !== 'playing') return;
-  if (state.activeSeal !== 7) return;
-  if (!state.seals.slice(0,6).every(s => s)) return;
-  triggerPowerCut();
-}
-
-function triggerPowerCut() {
-  ensureAudio(); playPowerDown();
-  const pd = document.getElementById('overlay-powerdown');
-  pd.classList.remove('hidden');
-  pd.classList.add('flicker');
-
-  setTimeout(() => {
-    pd.classList.remove('flicker');
-    state.seals[6] = true;
-    render();
-    if (state.mode === 'physical') buildPhysicalDisplay();
-    setTimeout(() => {
-      pd.classList.add('hidden');
-      if (state.mode === 'digital') {
-        showClue(7);
-        setTimeout(triggerVictory, 1500);
-      } else {
-        triggerVictory();
-      }
-    }, 1200);
-  }, 1400);
-}
-
-function triggerGameOver(reason) {
-  state.gameState = 'gameover';
-  clearInterval(state.timerInterval);
-  playGameOver();
-
-  const reasons = {
-    mcclane: { text:'McClane got the drop on you.', quote:'"Just another American who saw too many movies."' },
-    timer: { text:'The charges blew. You never got the vault.', quote:'"The plaza floor. Hans sends his regards."' }
-  };
-  const r = reasons[reason] || reasons.mcclane;
-  document.getElementById('gameover-reason').textContent = r.text;
-  document.getElementById('gameover-quote').textContent = r.quote;
-  document.getElementById('overlay-gameover').classList.remove('hidden');
-}
-
-function triggerVictory() {
-  if (state.gameState === 'victory') return;
-  state.gameState = 'victory';
-  clearInterval(state.timerInterval);
-  playVictory();
-
-  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
-  const em = Math.floor(elapsed / 60);
-  const es = elapsed % 60;
-  document.getElementById('victory-time').textContent =
-    `Completed in ${em}m ${String(es).padStart(2,'0')}s \u2014 ${state.wrongCount} wrong code${state.wrongCount !== 1 ? 's' : ''}`;
-  document.getElementById('overlay-victory').classList.remove('hidden');
-}
-
-function resetGame() {
-  clearInterval(state.timerInterval);
-  state = {
-    mode: null, activeSeal: 1, seals: [false,false,false,false,false,false,false],
-    wrongCount: 0, codeInput: '', gameState: 'select',
-    timerRemaining: TIMER_SECONDS, timerInterval: null, startTime: null, facVisible: false
-  };
-  document.getElementById('overlay-gameover').classList.add('hidden');
-  document.getElementById('overlay-victory').classList.add('hidden');
-  document.getElementById('overlay-powerdown').classList.add('hidden');
-  document.getElementById('clue-overlay').classList.add('hidden');
-  document.getElementById('facilitator').classList.add('hidden');
-  document.getElementById('game-screen').classList.add('hidden');
-  document.getElementById('mode-select').classList.remove('hidden');
-  document.getElementById('wrong-count').textContent = '0';
-  document.getElementById('timer').classList.remove('urgent');
-  renderTimer();
-}
-
-/* ── CLUE CARDS ─────────────────────────────── */
 function clueHTML(n) {
   switch(n) {
-    case 1: return `
-      <div class="clue-blueprint">
-        <div class="grid"></div>
-        <div class="content">
-          <div style="font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem">Nakatomi Plaza \u2014 Floors 25\u201335 (Partial)</div>
-          <div class="rooms">
-            <div class="room">Exec Suite 30-A</div>
-            <div class="room circled">Conf Room 30-B</div>
-            <div class="room">Server Room 25</div>
-            <div class="room">Board Room 35</div>
-            <div class="room">CEO Office 35</div>
-            <div class="room">R&amp;D Lab 25</div>
-          </div>
-          <div class="handwritten">\u201cCheck Takagi\u2019s schedule \u2014 he keeps the vault rotation codes.\u201d</div>
-        </div>
-      </div>`;
-    case 2: return `
-      <div class="clue-printout">NAKATOMI PLAZA \u2014 VAULT ACCESS LOG (PARTIAL)
-\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-SESSION    USER       TIME         STATUS
-\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-VS-0038    system     14:00:12     MAINT TEST
-VS-0039    chen_r     15:22:45     ROUTINE
-VS-0040    ellis      21:55:03     UNAUTHORIZED
-VS-0041    hans       22:18:44     ABORTED
-<span class="hl">VS-0042    takagi     22:21:00     ACTIVE</span>
-VS-0043    system     22:30:00     SCHEDULED
-
-<span class="pen">\u201cTakagi\u2019s terminal\u201d</span>
-<span class="pen">\u201cHe entered the codes himself \u2014</span>
-<span class="pen"> but did he enter the RIGHT codes?\u201d</span></div>`;
+    case 1: return `<div class="clue-blueprint"><div class="grid"></div><div class="content"><div style="font-weight:700;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem">Nakatomi Plaza \u2014 Floors 25\u201335 (Partial)</div><div class="rooms"><div class="room">Exec Suite 30-A</div><div class="room circled">Conf Room 30-B</div><div class="room">Server Room 25</div><div class="room">Board Room 35</div><div class="room">CEO Office 35</div><div class="room">R&amp;D Lab 25</div></div><div class="handwritten">\u201cCheck Takagi\u2019s schedule \u2014 he keeps the vault rotation codes.\u201d</div></div></div>`;
+    case 2: return `<div class="clue-printout">NAKATOMI PLAZA \u2014 VAULT ACCESS LOG (PARTIAL)\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nSESSION    USER       TIME         STATUS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nVS-0038    system     14:00:12     MAINT TEST\nVS-0039    chen_r     15:22:45     ROUTINE\nVS-0040    ellis      21:55:03     UNAUTHORIZED\nVS-0041    hans       22:18:44     ABORTED\n<span class="hl">VS-0042    takagi     22:21:00     ACTIVE</span>\nVS-0043    system     22:30:00     SCHEDULED\n\n<span class="pen">\u201cTakagi\u2019s terminal\u201d</span>\n<span class="pen">\u201cHe entered the codes himself \u2014</span>\n<span class="pen"> but did he enter the RIGHT codes?\u201d</span></div>`;
     case 3: return buildCipherClue();
-    case 4: return `
-      <div class="clue-rfcard">
-        <h4>Nakatomi Plaza \u2014 Radio Frequency Authorization Card</h4>
-        <table>
-          <tr><th>Channel</th><th>Assignment</th><th>Callsign</th></tr>
-          <tr><td>freq_10</td><td>Building Ops</td><td>BRAVO-OPS</td></tr>
-          <tr><td>freq_12</td><td>LAPD Tactical</td><td>SIERRA-TAC</td></tr>
-          <tr class="circled"><td>freq_14</td><td>FBI Field Command</td><td>KILO-FOXTROT-BRAVO</td></tr>
-          <tr><td>freq_16</td><td>LAFD Command</td><td>DELTA-FIRE</td></tr>
-        </table>
-        <div class="back">\u201cListen to what they\u2019re saying on this channel.\u201d</div>
-      </div>`;
-    case 5: return `
-      <div class="clue-badge">
-        <div class="logo">Nakatomi Trading Corporation</div>
-        <div class="photo">\u263A</div>
-        <div class="name">Naomi Park</div>
-        <div class="dept">Vault Operations</div>
-        <div class="badge-id">NP-4472</div>
-        <div class="clearance">Clearance: <b>LEVEL-5</b></div>
-        <div class="postit">\u201cHer clearance unlocks the final vault sequence. Cross-reference.\u201d</div>
-      </div>`;
-    case 6: return `
-      <div class="clue-letterhead">
-        <div class="watermark">NAKATOMI</div>
-        <div class="lh-header">Nakatomi Trading Corporation \u2014 Internal Memo</div>
-        <div class="lh-main">The seventh lock is not in the system.</div>
-        <div class="lh-sub">\u201cThink about what holds the vault shut. What happens when it doesn\u2019t have what it needs?\u201d</div>
-      </div>`;
-    case 7: return `
-      <div class="clue-bonds">
-        <div class="ornament">\u2736 \u2736 \u2736 Certificate of Bearer Bonds \u2736 \u2736 \u2736</div>
-        <div class="amount">$640,000,000</div>
-        <div class="issuer">Nakatomi Trading Corporation</div>
-        <div class="yippee">\u201cVault open. Heist complete. Yippee-ki-yay.\u201d</div>
-      </div>`;
+    case 4: return `<div class="clue-rfcard"><h4>Nakatomi Plaza \u2014 Radio Frequency Authorization Card</h4><table><tr><th>Channel</th><th>Assignment</th><th>Callsign</th></tr><tr><td>freq_10</td><td>Building Ops</td><td>BRAVO-OPS</td></tr><tr><td>freq_12</td><td>LAPD Tactical</td><td>SIERRA-TAC</td></tr><tr class="circled"><td>freq_14</td><td>FBI Field Command</td><td>KILO-FOXTROT-BRAVO</td></tr><tr><td>freq_16</td><td>LAFD Command</td><td>DELTA-FIRE</td></tr></table><div class="back">\u201cListen to what they\u2019re saying on this channel.\u201d</div></div>`;
+    case 5: return `<div class="clue-badge"><div class="logo">Nakatomi Trading Corporation</div><div class="photo">\u263A</div><div class="name">Naomi Park</div><div class="dept">Vault Operations</div><div class="badge-id">NP-4472</div><div class="clearance">Clearance: <b>LEVEL-5</b></div><div class="postit">\u201cHer clearance unlocks the final vault sequence. Cross-reference.\u201d</div></div>`;
+    case 6: return `<div class="clue-letterhead"><div class="watermark">NAKATOMI</div><div class="lh-header">Nakatomi Trading Corporation \u2014 Internal Memo</div><div class="lh-main">The seventh lock is not in the system.</div><div class="lh-sub">\u201cThink about what holds the vault shut. What happens when it doesn\u2019t have what it needs?\u201d</div></div>`;
+    case 7: return `<div class="clue-bonds"><div class="ornament">\u2736 \u2736 \u2736 Certificate of Bearer Bonds \u2736 \u2736 \u2736</div><div class="amount">$640,000,000</div><div class="issuer">Nakatomi Trading Corporation</div><div class="yippee">\u201cVault open. Heist complete. Yippee-ki-yay.\u201d</div></div>`;
     default: return '';
   }
 }
+function buildCipherClue() { const p='ABCDEFGHIJKLMNOPQRSTUVWXYZ',s='NOPQRSTUVWXYZABCDEFGHIJKLM'; let pc='',sc=''; for(let i=0;i<26;i++){pc+=`<span>${p[i]}</span>`;sc+=`<span>${s[i]}</span>`;} return `<div class="clue-cipher"><div class="cipher-sticky">Shift 13 \u2014 \u201cThe building talks in code.\u201d</div><div class="cipher-rows"><div class="cipher-row plain">${pc}</div><div class="cipher-row shift">${sc}</div></div><div class="cipher-input"><label>Encoded text:</label><textarea id="cipher-in" oninput="decodeCipher()" placeholder="Paste encoded message here\u2026"></textarea><label style="margin-top:0.5rem">Decoded:</label><div class="cipher-output mono" id="cipher-out"></div></div></div>`; }
+function decodeCipher() { const input=document.getElementById('cipher-in').value; const decoded=input.replace(/[A-Za-z]/g,c=>{const base=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-base+13)%26+base);}); document.getElementById('cipher-out').textContent=decoded; }
+function showClue(n) { document.getElementById('clue-title').textContent='Seal '+n+' \u2014 '+SEAL_LABELS[n]; document.getElementById('clue-content').innerHTML=clueHTML(n); document.getElementById('clue-overlay').classList.remove('hidden'); }
+function hideClue() { document.getElementById('clue-overlay').classList.add('hidden'); }
 
-function buildCipherClue() {
-  const plain = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const shifted = 'NOPQRSTUVWXYZABCDEFGHIJKLM';
-  let plainCells = '', shiftCells = '';
-  for (let i = 0; i < 26; i++) {
-    plainCells += `<span>${plain[i]}</span>`;
-    shiftCells += `<span>${shifted[i]}</span>`;
-  }
-  return `
-    <div class="clue-cipher">
-      <div class="cipher-sticky">Shift 13 \u2014 \u201cThe building talks in code.\u201d</div>
-      <div class="cipher-rows">
-        <div class="cipher-row plain">${plainCells}</div>
-        <div class="cipher-row shift">${shiftCells}</div>
-      </div>
-      <div class="cipher-input">
-        <label>Encoded text:</label>
-        <textarea id="cipher-in" oninput="decodeCipher()" placeholder="Paste encoded message here\u2026"></textarea>
-        <label style="margin-top:0.5rem">Decoded:</label>
-        <div class="cipher-output mono" id="cipher-out"></div>
-      </div>
-    </div>`;
-}
+function buildSealPanel() { const panel=document.getElementById('seal-panel'); panel.innerHTML='<div class="sp-label">Vault Seals</div>'; for(let i=1;i<=7;i++){const div=document.createElement('div');div.className='seal-item';div.dataset.seal=i;div.innerHTML=`<div class="seal-led"></div><div><div class="seal-num">Seal ${i}</div><div class="seal-status"></div></div>`;div.addEventListener('click',()=>handleSealClick(i));panel.appendChild(div);} }
+function handleSealClick(n) { if(state.seals[n-1]&&state.mode==='digital')showClue(n); }
+function buildPhysicalDisplay() { const c=document.getElementById('pd-seals');c.innerHTML=''; for(let i=1;i<=7;i++){const div=document.createElement('div');const o=state.seals[i-1],a=!o&&i===state.activeSeal;div.className='pd-seal'+(o?' open':'')+(a?' active':'');const st=o?'OPEN':(i===7&&!o?'???':(a?'ACTIVE':'LOCKED'));div.innerHTML=`<div class="pd-led"></div><span>Seal ${i} \u2014 ${st}</span>`;c.appendChild(div);} }
+function buildFacilitatorButtons() { const c=document.getElementById('fac-buttons');c.innerHTML=''; for(let i=1;i<=7;i++){const btn=document.createElement('button');btn.className='fac-btn';btn.textContent=state.seals[i-1]?`Seal ${i}: OPEN`:`Open Seal ${i}`;btn.disabled=state.seals[i-1];btn.style.opacity=state.seals[i-1]?0.4:1;btn.addEventListener('click',()=>{if(i===7)triggerPowerCut();else openSeal(i);buildFacilitatorButtons();});c.appendChild(btn);} }
 
-function decodeCipher() {
-  const input = document.getElementById('cipher-in').value;
-  const decoded = input.replace(/[A-Za-z]/g, c => {
-    const base = c <= 'Z' ? 65 : 97;
-    return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
-  });
-  document.getElementById('cipher-out').textContent = decoded;
-}
-
-function showClue(n) {
-  document.getElementById('clue-title').textContent = 'Seal ' + n + ' \u2014 ' + SEAL_LABELS[n];
-  document.getElementById('clue-content').innerHTML = clueHTML(n);
-  document.getElementById('clue-overlay').classList.remove('hidden');
-}
-function hideClue() {
-  document.getElementById('clue-overlay').classList.add('hidden');
-}
-
-/* ── BUILD UI ───────────────────────────────── */
-function buildSealPanel() {
-  const panel = document.getElementById('seal-panel');
-  panel.innerHTML = '<div class="sp-label">Vault Seals</div>';
-  for (let i = 1; i <= 7; i++) {
-    const div = document.createElement('div');
-    div.className = 'seal-item';
-    div.dataset.seal = i;
-    div.innerHTML = `
-      <div class="seal-led"></div>
-      <div><div class="seal-num">Seal ${i}</div><div class="seal-status"></div></div>`;
-    div.addEventListener('click', () => handleSealClick(i));
-    panel.appendChild(div);
-  }
-}
-
-function handleSealClick(n) {
-  if (state.seals[n-1] && state.mode === 'digital') showClue(n);
-}
-
-function buildPhysicalDisplay() {
-  const container = document.getElementById('pd-seals');
-  container.innerHTML = '';
-  for (let i = 1; i <= 7; i++) {
-    const div = document.createElement('div');
-    const isOpen = state.seals[i-1];
-    const isActive = !isOpen && i === state.activeSeal;
-    div.className = 'pd-seal' + (isOpen ? ' open' : '') + (isActive ? ' active' : '');
-    const statusText = isOpen ? 'OPEN' : (i === 7 && !isOpen ? '???' : (isActive ? 'ACTIVE' : 'LOCKED'));
-    div.innerHTML = `<div class="pd-led"></div><span>Seal ${i} \u2014 ${statusText}</span>`;
-    container.appendChild(div);
-  }
-}
-
-function buildFacilitatorButtons() {
-  const container = document.getElementById('fac-buttons');
-  container.innerHTML = '';
-  for (let i = 1; i <= 7; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'fac-btn';
-    btn.textContent = state.seals[i-1] ? `Seal ${i}: OPEN` : `Open Seal ${i}`;
-    btn.disabled = state.seals[i-1];
-    btn.style.opacity = state.seals[i-1] ? 0.4 : 1;
-    btn.addEventListener('click', () => {
-      if (i === 7) triggerPowerCut();
-      else openSeal(i);
-      buildFacilitatorButtons();
-    });
-    container.appendChild(btn);
-  }
-}
-
-/* ── RENDER ──────────────────────────────────── */
-function render() {
-  for (let i = 1; i <= 7; i++) {
-    const el = document.querySelector(`.seal-item[data-seal="${i}"]`);
-    if (!el) continue;
-    const isOpen = state.seals[i-1];
-    const isActive = !isOpen && i === state.activeSeal;
-    el.className = 'seal-item' + (isOpen ? ' open' : '') + (isActive ? ' active' : ' locked');
-    const statusEl = el.querySelector('.seal-status');
-    if (statusEl) statusEl.textContent = isOpen ? 'OPEN' : (i === 7 && !isOpen ? '???' : (isActive ? 'ACTIVE' : 'LOCKED'));
-  }
-
-  if (state.mode === 'digital') {
-    const obj = OBJECTIVES[state.activeSeal];
-    if (obj) {
-      document.getElementById('obj-title').textContent = obj.title;
-      document.getElementById('obj-text').textContent = obj.text;
-      const hintEl = document.getElementById('obj-hint');
-      hintEl.innerHTML = obj.hint ? 'Try: <code class="mono">' + escHTML(obj.hint) + '</code>' : '';
-    }
-    const kpArea = document.getElementById('keypad-area');
-    kpArea.style.display = state.activeSeal === 7 ? 'none' : '';
-  }
-
-  document.getElementById('wrong-count').textContent = state.wrongCount;
-}
-
-function renderCodeDisplay() {
-  const digits = document.querySelectorAll('.cd-digit');
-  for (let i = 0; i < 4; i++) {
-    const c = state.codeInput[i];
-    digits[i].textContent = c || '_';
-    digits[i].classList.toggle('filled', !!c);
-  }
-}
-
+function render() { for(let i=1;i<=7;i++){const el=document.querySelector(`.seal-item[data-seal="${i}"]`);if(!el)continue;const o=state.seals[i-1],a=!o&&i===state.activeSeal;el.className='seal-item'+(o?' open':'')+(a?' active':' locked');const s=el.querySelector('.seal-status');if(s)s.textContent=o?'OPEN':(i===7&&!o?'???':(a?'ACTIVE':'LOCKED'));} if(state.mode==='digital'){const obj=OBJECTIVES[state.activeSeal];if(obj){document.getElementById('obj-title').textContent=obj.title;document.getElementById('obj-text').textContent=obj.text;const h=document.getElementById('obj-hint');h.innerHTML=obj.hint?'Try: <code class="mono">'+escHTML(obj.hint)+'</code>':'';}document.getElementById('keypad-area').style.display=state.activeSeal===7?'none':'';} document.getElementById('wrong-count').textContent=state.wrongCount; }
+function renderCodeDisplay() { const digits=document.querySelectorAll('.cd-digit'); for(let i=0;i<4;i++){const c=state.codeInput[i];digits[i].textContent=c||'_';digits[i].classList.toggle('filled',!!c);} }
 function escHTML(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-/* ── KEYBOARD ────────────────────────────────── */
 document.addEventListener('keydown', e => {
-  if (state.gameState !== 'playing') return;
-
-  if (e.key === 'f' || e.key === 'F') {
-    state.facVisible = !state.facVisible;
-    document.getElementById('facilitator').classList.toggle('hidden', !state.facVisible);
-    if (state.facVisible) buildFacilitatorButtons();
-    return;
-  }
-  if (e.key === 'Escape') {
-    if (!document.getElementById('clue-overlay').classList.contains('hidden')) { hideClue(); return; }
-    if (state.facVisible) { state.facVisible = false; document.getElementById('facilitator').classList.add('hidden'); return; }
-  }
-
-  if (state.mode !== 'digital') return;
-  if (state.activeSeal === 7) return;
-
-  if (e.key >= '0' && e.key <= '9') enterDigit(e.key);
-  else if (e.key === 'Backspace' || e.key === 'Delete') clearCode();
-  else if (e.key === 'Enter') submitCode();
+  if(state.gameState!=='playing') return;
+  if(e.key==='f'||e.key==='F'){state.facVisible=!state.facVisible;document.getElementById('facilitator').classList.toggle('hidden',!state.facVisible);if(state.facVisible)buildFacilitatorButtons();return;}
+  if(e.key==='Escape'){if(!document.getElementById('clue-overlay').classList.contains('hidden')){hideClue();return;}if(state.facVisible){state.facVisible=false;document.getElementById('facilitator').classList.add('hidden');return;}}
+  if(state.mode!=='digital')return; if(state.activeSeal===7)return;
+  if(e.key>='0'&&e.key<='9')enterDigit(e.key);
+  else if(e.key==='Backspace'||e.key==='Delete')clearCode();
+  else if(e.key==='Enter')submitCode();
 });
 </script>
 </body>

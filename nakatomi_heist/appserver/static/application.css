@@ -377,6 +377,41 @@ select,
     padding: 8px 16px !important;
 }
 
+/* ── Inline Canvas SPL Input (Terminal Prompt) ────────── */
+
+[data-input-id="input_spl"] {
+    background: var(--nk-bg) !important;
+    border: 1px solid var(--nk-green-dark) !important;
+    border-left: 3px solid var(--nk-green) !important;
+    padding: 4px 12px !important;
+}
+
+[data-input-id="input_spl"] label,
+[data-input-id="input_spl"] [data-test="label"] {
+    color: var(--nk-green) !important;
+    font-size: 13px !important;
+    letter-spacing: 0.12em !important;
+    text-shadow: 0 0 6px rgba(51, 255, 51, 0.4) !important;
+    animation: nk-blink 1.2s step-end infinite !important;
+}
+
+[data-input-id="input_spl"] input[type="text"],
+[data-input-id="input_spl"] [data-test="textbox"] input {
+    background: var(--nk-bg) !important;
+    color: var(--nk-green-bright) !important;
+    border: 1px solid var(--nk-border) !important;
+    font-size: 16px !important;
+    padding: 10px 14px !important;
+    text-shadow: 0 0 4px rgba(51, 255, 51, 0.3) !important;
+    letter-spacing: 0.04em !important;
+}
+
+[data-input-id="input_spl"] input[type="text"]:focus,
+[data-input-id="input_spl"] [data-test="textbox"] input:focus {
+    border-color: var(--nk-green) !important;
+    box-shadow: 0 0 15px rgba(51, 255, 51, 0.3), inset 0 0 5px rgba(51, 255, 51, 0.1) !important;
+}
+
 /* ── Misc Splunk UI Elements ────────────────────────── */
 
 .footer,

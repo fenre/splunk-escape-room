@@ -1,0 +1,286 @@
+# Nakatomi Plaza: Vault Heist — Scenario Configuration
+#
+# This file drives the data generator. Change seal codes here to produce
+# a fresh dataset for each event. Keep the structure; the generator
+# relies on these keys.
+
+game:
+  title: "Nakatomi Plaza: Vault Heist"
+  duration_minutes: 60
+  max_wrong_codes: 3
+  date: "2025-12-24"
+  timezone: "America/Los_Angeles"
+
+# Random seed — same seed = same dataset. Change for a new game.
+seed: 19881215
+
+# ── Timeline (ISO 8601, local time) ──────────────────────────────
+timeline:
+  party_setup:          "2025-12-24T18:00:00"
+  party_start:          "2025-12-24T20:00:00"
+  takeover:             "2025-12-24T22:00:00"
+  lobby_secured:        "2025-12-24T22:02:00"
+  floors_secured:       "2025-12-24T22:10:00"
+  takagi_confrontation: "2025-12-24T22:20:00"
+  takagi_session_end:   "2025-12-24T22:25:00"
+  vault_work_begins:    "2025-12-24T22:30:00"
+  mcclane_first:        "2025-12-24T22:45:00"
+  fbi_arrives:          "2025-12-24T23:00:00"
+  power_cut:            "2025-12-24T23:15:00"
+  roof_setup:           "2025-12-24T23:30:00"
+  final_act:            "2025-12-24T23:45:00"
+  midnight:             "2025-12-25T00:00:00"
+
+# ── Seal Codes ───────────────────────────────────────────────────
+seals:
+  1:
+    code: "2512"
+    description: "Lobby security override code"
+    index: nakatomi_access
+    sourcetype: "nakatomi:access:badge"
+    embed_field: detail
+    embed_value: "security override engaged, vault protocol initiated, access_code=2512"
+
+  2:
+    code: "7439"
+    description: "Vault maintenance cycle"
+    index: nakatomi_access
+    sourcetype: "nakatomi:access:badge"
+    embed_field: detail
+    embed_value: "exec_calendar: vault maintenance cycle 7439 — rotation scheduled 2025-12-25T02:00"
+
+  3:
+    code: "4291"
+    description: "Takagi's failed input sequence"
+    index: nakatomi_vault
+    sourcetype: "nakatomi:vault:attempt"
+    embed_field: detail
+    embed_sequence: ["input=4", "input=2", "input=9", "input=1"]
+
+  4:
+    code: "8086"
+    description: "HVAC encoded message (ROT13)"
+    index: nakatomi_building
+    sourcetype: "nakatomi:building:hvac"
+    embed_field: encoded_message
+    embed_value_rot13: "THERE IS NO POWER WITHOUT CODE 8086"
+
+  5:
+    code: "5765"
+    description: "FBI tactical authorization"
+    index: nakatomi_building
+    sourcetype: "nakatomi:building:security"
+    embed_field: message
+    embed_value: "FBI FIELD CMD // GRID-SEC-7 // AUTH:5765 // PRIORITY:IMMEDIATE // CONFIRM POWER DISCONNECT"
+
+  6:
+    code: "3940"
+    description: "Vault auth code via employee lookup"
+    index: null
+    sourcetype: null
+    embed_location: "system_codes.csv → clearance_level=LEVEL-5 → vault_auth_code"
+
+  7:
+    code: null
+    description: "Meta — unplug power (no code)"
+
+# ── Characters ───────────────────────────────────────────────────
+characters:
+  protagonists:
+    - badge_id: HG-1988
+      name: Hans Gruber
+      department: External Contractor
+      clearance: EXTERNAL
+      role: leader
+    - badge_id: KA-2205
+      name: Karl Vreski
+      department: External Contractor
+      clearance: EXTERNAL
+      role: enforcer
+    - badge_id: TH-0099
+      name: Theo
+      department: External Contractor
+      clearance: EXTERNAL
+      role: tech
+
+  key_employees:
+    - badge_id: JT-0001
+      name: Joseph Takagi
+      department: CEO
+      clearance: LEVEL-6
+      role: ceo
+    - badge_id: HE-3301
+      name: Harry Ellis
+      department: International Trade
+      clearance: LEVEL-2
+      role: dealmaker
+    - badge_id: HP-1015
+      name: Holly Gennaro
+      department: International Trade
+      clearance: LEVEL-4
+      role: executive
+    - badge_id: NP-4472
+      name: Naomi Park
+      department: Vault Operations
+      clearance: LEVEL-5
+      role: vault_ops
+    - badge_id: AG-0077
+      name: Argyle
+      department: Building Services
+      clearance: LEVEL-1
+      role: driver
+
+  supporting:
+    - badge_id: MAINT-007
+      name: Eduardo Vasquez
+      department: Facilities
+      clearance: LEVEL-2
+    - badge_id: SE-0012
+      name: James Marsh
+      department: Security
+      clearance: LEVEL-3
+    - badge_id: NP-4471
+      name: Robert Chen
+      department: IT Operations
+      clearance: LEVEL-3
+    - badge_id: SE-0015
+      name: Lisa Tanaka
+      department: Security
+      clearance: LEVEL-3
+    - badge_id: CAT-001
+      name: Maria Santos
+      department: Catering
+      clearance: LEVEL-1
+
+# ── Building ─────────────────────────────────────────────────────
+building:
+  name: Nakatomi Plaza
+  floors:
+    - { number: "B2",   name: "Parking Level 2",        group: basement,  restricted: false }
+    - { number: "B1",   name: "Vault Level",            group: basement,  restricted: true }
+    - { number: 1,      name: "Main Lobby",             group: lobby,     restricted: false }
+    - { number: 2,      name: "Mail Room / Loading",    group: lower,     restricted: false }
+    - { number: 3,      name: "Building Maintenance",   group: lower,     restricted: false }
+    - { number: 5,      name: "Legal / Compliance",     group: lower,     restricted: false }
+    - { number: 10,     name: "Human Resources",        group: mid,       restricted: false }
+    - { number: 15,     name: "International Trade",    group: mid,       restricted: false }
+    - { number: 20,     name: "Finance",                group: upper,     restricted: false }
+    - { number: 25,     name: "R&D / Tech",             group: upper,     restricted: true }
+    - { number: 28,     name: "Executive Support",      group: upper,     restricted: true }
+    - { number: 30,     name: "Executive Suite / Event", group: upper,    restricted: true }
+    - { number: 35,     name: "CEO / Board",            group: penthouse, restricted: true }
+    - { number: "roof", name: "Mechanical / Helipad",   group: roof,      restricted: true }
+
+# ── Event Volume Tuning ──────────────────────────────────────────
+volume:
+  badge_events_per_hour_normal: 50
+  badge_events_per_hour_party: 80
+  badge_events_per_hour_takeover: 40
+  door_events_per_hour: 60
+  hvac_readings_interval_minutes: 5
+  vault_system_checks_per_hour: 4
+  security_events_per_hour_normal: 8
+  security_events_per_hour_fbi: 25
+
+# ── Red Herrings ─────────────────────────────────────────────────
+red_herrings:
+  seal_1:
+    - badge_id: MAINT-007
+      floor: 1
+      room: Security Office
+      action: swipe
+      time_offset_minutes: -150
+      detail: "routine security check"
+    - badge_id: SE-0012
+      floor: 1
+      room: Main Entrance
+      action: swipe
+      time_offset_minutes: 5
+      detail: "post-takeover badge used by unknown"
+    - badge_id: HE-3301
+      floor: 1
+      room: Parking Garage Entry
+      action: attempt
+      outcome: deny
+      time_offset_minutes: -5
+      detail: "badge not valid for this entrance after hours"
+
+  seal_2:
+    - floor: 35
+      detail: "Late executive work session — quarterly report review"
+    - floor: 30
+      room: Conference Room A
+      detail: "Christmas party catering delivery confirmed"
+    - floor: 25
+      detail: "vault HVAC inspection — nominal"
+
+  seal_3:
+    - session_id: VS-0038
+      user: system
+      inputs: ["0", "0", "0", "0"]
+      detail: "automated maintenance test"
+    - session_id: VS-0040
+      user: ellis
+      inputs: ["1", "2", "3", "4"]
+      detail: "unauthorized access attempt"
+    - session_id: VS-0041
+      user: hans
+      inputs: ["****"]
+      detail: "session aborted by operator"
+
+  seal_4:
+    - encoded_message_rot13: "HUMIDITY CALIBRATION COMPLETE"
+      floor: 20
+    - encoded_message_rot13: "FILTER REPLACED ZONE 4"
+      floor: 15
+    - encoded_message_rot13: "ANNUAL INSPECTION DUE 2026-01-15"
+      floor: 10
+    - event: elevator_call
+      floor: roof
+      detail: "service_code: E-4401"
+
+  seal_5:
+    - channel: freq_12
+      message: "LAPD TAC-3 // AUTH:9901 // SWAT STAGING CONFIRMED"
+    - channel: freq_14
+      message: "FBI FIELD CMD // ALL UNITS HOLD POSITION"
+    - channel: freq_14
+      message: "FBI FIELD CMD // REF:5765-A // ACKNOWLEDGE"
+    - channel: freq_16
+      message: "LAFD COMMAND // AUTH:3388 // HAZMAT STANDBY"
+    - channel: freq_14
+      message: "FBI FIELD CMD // HELICOPTER ETA 10 MINUTES"
+
+  seal_6:
+    - badge_id: NP-4471
+      clearance: LEVEL-3
+      note: "Similar badge number, different person"
+    - badge_id: JT-0001
+      clearance: LEVEL-6
+      status: terminated
+      note: "CEO badge — terminated tonight"
+
+# ── Output ───────────────────────────────────────────────────────
+output:
+  directory: "output"
+  format: "json"
+  files:
+    - filename: "nakatomi_access.json"
+      index: nakatomi_access
+      sourcetypes:
+        - "nakatomi:access:badge"
+        - "nakatomi:access:door"
+    - filename: "nakatomi_vault.json"
+      index: nakatomi_vault
+      sourcetypes:
+        - "nakatomi:vault:attempt"
+        - "nakatomi:vault:system"
+    - filename: "nakatomi_building.json"
+      index: nakatomi_building
+      sourcetypes:
+        - "nakatomi:building:hvac"
+        - "nakatomi:building:security"
+  lookups:
+    - filename: "floor_directory.csv"
+    - filename: "employee_directory.csv"
+    - filename: "system_codes.csv"

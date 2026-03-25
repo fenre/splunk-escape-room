@@ -9,7 +9,7 @@
     "ds_results": {
       "type": "ds.search",
       "options": {
-        "query": "$spl_query$",
+        "query": "$spl_query$ | fields - _bkt _cd _indextime _raw _serial _si _subsecond _sourcetype host index linecount source sourcetype splunk_server",
         "queryParameters": {
           "earliest": "0",
           "latest": "now"
@@ -118,15 +118,16 @@
   },
   "layout": {
     "type": "grid",
-    "globalInputs": ["input_spl"],
+    "globalInputs": [],
     "structure": [
       {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 120}},
-      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 120, "w": 820, "h": 500}},
-      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 120, "w": 380, "h": 50}},
-      {"item": "viz_sessions", "type": "block", "position": {"x": 820, "y": 170, "w": 380, "h": 250}},
-      {"item": "viz_fields", "type": "block", "position": {"x": 820, "y": 420, "w": 380, "h": 430}},
-      {"item": "viz_recent", "type": "block", "position": {"x": 0, "y": 620, "w": 820, "h": 330}},
-      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 950, "w": 1200, "h": 80}}
+      {"item": "input_spl", "type": "block", "position": {"x": 0, "y": 120, "w": 1200, "h": 70}},
+      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 190, "w": 820, "h": 500}},
+      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 190, "w": 380, "h": 50}},
+      {"item": "viz_sessions", "type": "block", "position": {"x": 820, "y": 240, "w": 380, "h": 250}},
+      {"item": "viz_fields", "type": "block", "position": {"x": 820, "y": 490, "w": 380, "h": 430}},
+      {"item": "viz_recent", "type": "block", "position": {"x": 0, "y": 690, "w": 820, "h": 330}},
+      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 1020, "w": 1200, "h": 80}}
     ]
   }
 }

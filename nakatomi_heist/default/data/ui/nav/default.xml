@@ -1,5 +1,6 @@
 <nav search_view="search_terminal" color="#003300">
-    <view name="mission_brief" default="true" />
+    <view name="terminal" default="true" />
+    <view name="mission_brief" />
     <view name="search_terminal" />
     <view name="access_terminal" />
     <view name="vault_terminal" />

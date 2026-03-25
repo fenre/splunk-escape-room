@@ -1,0 +1,25 @@
+{
+    "name": "nakatomi-heist-react",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "webpack --mode production",
+        "dev": "webpack --mode development --watch"
+    },
+    "dependencies": {
+        "@splunk/react-page": "^8.2.1",
+        "@splunk/themes": "^1.6.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.26.0",
+        "@babel/preset-env": "^7.26.0",
+        "@babel/preset-react": "^7.26.0",
+        "babel-loader": "^9.2.1",
+        "css-loader": "^7.1.2",
+        "style-loader": "^4.0.0",
+        "webpack": "^5.97.0",
+        "webpack-cli": "^6.0.1"
+    }
+}

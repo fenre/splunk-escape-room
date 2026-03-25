@@ -1,0 +1,512 @@
+/* ═══════════════════════════════════════════════════════════
+   NAKATOMI PLAZA — CRT TERMINAL STYLES
+   Die Hard (1988) computer terminal aesthetic
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+    --nk-bg: #0a0a0a;
+    --nk-green: #33ff33;
+    --nk-green-bright: #66ff66;
+    --nk-green-dim: #1a9a1a;
+    --nk-green-dark: #0d5a0d;
+    --nk-green-glow: rgba(51, 255, 51, 0.4);
+    --nk-amber: #d4a843;
+    --nk-amber-dim: #8a6a20;
+    --nk-red: #ff3333;
+    --nk-surface: #001a00;
+    --nk-border: #004400;
+    --nk-bezel-outer: #222;
+    --nk-bezel-mid: #1a1a1a;
+    --nk-bezel-inner: #111;
+    --nk-bezel-ridge: #333;
+    --nk-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Strip ALL Splunk chrome ────────────────────────── */
+.splunk-header,
+.splunk-bar,
+header[role="banner"],
+.app-bar,
+.nav-bar,
+.dashboard-header,
+.dashboard-header-editmenu,
+.edit-dashboard-menu,
+.dashboard-title,
+.fieldset,
+footer {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+}
+.main-section-body,
+.dashboard-body,
+.dashboard-body .dashboard-row,
+.dashboard-body .dashboard-cell,
+.dashboard-body .dashboard-panel,
+.dashboard-body .panel-body,
+.dashboard-body .html {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: #050505 !important;
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+.main-section-body { position: fixed !important; inset: 0 !important; z-index: 9999 !important; }
+.dashboard-body { height: 100% !important; }
+
+body {
+    background: #050505 !important;
+    font-family: var(--nk-mono);
+    color: var(--nk-green);
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ── Page Layout (single centred monitor) ───────────── */
+
+.nk-page {
+    width: 100vw;
+    height: 100vh;
+    background: #050505;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    position: relative;
+}
+
+/* ── CRT Monitor — thick realistic bezel ────────────── */
+
+.crt-monitor {
+    width: 100%;
+    max-width: 1400px;
+    height: calc(100vh - 32px);
+    background: linear-gradient(
+        180deg,
+        #2e2e2e 0%,
+        #222 8%,
+        #1a1a1a 50%,
+        #151515 92%,
+        #111 100%
+    );
+    border-radius: 24px;
+    padding: 36px 40px 16px;
+    box-shadow:
+        0 12px 60px rgba(0, 0, 0, 0.9),
+        0 2px 0 #3a3a3a,
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Brand label embossed in top bezel */
+.crt-brand {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #444;
+    font-size: 11px;
+    font-family: var(--nk-mono);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 #1a1a1a;
+    user-select: none;
+}
+
+.crt-bezel {
+    flex: 1;
+    background: var(--nk-bezel-inner);
+    border-radius: 14px;
+    padding: 4px;
+    box-shadow:
+        inset 0 3px 12px rgba(0, 0, 0, 0.95),
+        inset 0 0 3px rgba(0, 0, 0, 0.6),
+        0 1px 0 var(--nk-bezel-ridge);
+    overflow: hidden;
+    position: relative;
+}
+
+.crt-screen {
+    position: relative;
+    background: #000800;
+    border-radius: 10px;
+    height: 100%;
+    overflow: hidden;
+}
+
+.crt-content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.crt-content.nk-boot-mode {
+    padding: 30px 36px;
+    overflow-y: auto;
+}
+
+/* CRT Scanlines */
+.crt-scanlines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.06) 2px,
+        rgba(0, 0, 0, 0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* CRT Vignette */
+.crt-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 55%,
+        rgba(0, 8, 0, 0.35) 80%,
+        rgba(0, 4, 0, 0.75) 100%
+    );
+    pointer-events: none;
+    z-index: 11;
+}
+
+/* Subtle screen curvature illusion */
+.crt-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: radial-gradient(
+        ellipse 120% 120% at 30% 20%,
+        rgba(255, 255, 255, 0.015) 0%,
+        transparent 60%
+    );
+    pointer-events: none;
+    z-index: 13;
+}
+
+/* CRT Flicker */
+@keyframes crt-flicker {
+    0%   { opacity: 1; }
+    92%  { opacity: 1; }
+    93%  { opacity: 0.97; }
+    94%  { opacity: 1; }
+    96%  { opacity: 0.985; }
+    97%  { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+.crt-flicker {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+    animation: crt-flicker 6s infinite;
+}
+
+/* ── CRT Base / Stand ───────────────────────────────── */
+.crt-base {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 2px;
+    flex-shrink: 0;
+}
+
+.crt-base-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.crt-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nk-green);
+    box-shadow: 0 0 6px var(--nk-green-glow);
+    animation: led-pulse 2s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+}
+
+.crt-model {
+    color: #555;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+/* ── Mission Intel toggle button (in bezel base) ───── */
+
+.nk-intel-btn {
+    background: transparent;
+    border: 1px solid #444;
+    color: #666;
+    font-family: var(--nk-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+}
+
+.nk-intel-btn:hover {
+    border-color: var(--nk-green-dark);
+    color: var(--nk-green-dim);
+}
+
+.nk-intel-btn.nk-intel-open {
+    border-color: var(--nk-green-dark);
+    color: var(--nk-green);
+    text-shadow: 0 0 4px var(--nk-green-glow);
+}
+
+/* Mission Intel drawer — slides from right inside the screen */
+.nk-intel-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 50%;
+    background: rgba(0, 6, 0, 0.92);
+    border-left: 1px solid var(--nk-border);
+    z-index: 5;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    padding: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--nk-border) transparent;
+    backdrop-filter: blur(4px);
+}
+
+.nk-intel-drawer.nk-intel-visible {
+    transform: translateX(0);
+}
+
+.nk-intel-close {
+    background: transparent;
+    border: none;
+    color: var(--nk-green-dim);
+    font-family: var(--nk-mono);
+    font-size: 18px;
+    cursor: pointer;
+    float: right;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+.nk-intel-close:hover {
+    color: var(--nk-green-bright);
+}
+
+/* ── Boot Sequence ───────────────────────────────────── */
+
+.nk-boot {
+    padding: 20px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.nk-boot-line {
+    color: var(--nk-green);
+    text-shadow: 0 0 6px var(--nk-green-glow);
+    white-space: pre;
+}
+
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+.nk-cursor {
+    display: inline-block;
+    color: var(--nk-green-bright);
+    animation: blink-cursor 0.8s step-end infinite;
+    text-shadow: 0 0 8px var(--nk-green-glow);
+}
+
+/* ── Inner layout (header + iframe) ──────────────────── */
+
+.nk-crt-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ── Terminal Header Bar ────────────────────────────── */
+
+.nk-terminal-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--nk-border);
+    background: rgba(0, 12, 0, 0.5);
+    flex-shrink: 0;
+}
+
+.nk-header-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--nk-green);
+    text-shadow: 0 0 8px var(--nk-green-glow);
+    letter-spacing: 0.05em;
+}
+
+.nk-header-status {
+    font-size: 11px;
+    color: var(--nk-green-dim);
+    letter-spacing: 0.08em;
+}
+
+.nk-status-online { color: var(--nk-green-bright); }
+.nk-status-override { color: var(--nk-amber); }
+
+/* ── Embedded Search Frame ──────────────────────────── */
+
+.nk-iframe-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.nk-search-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #000800;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    filter: sepia(1) hue-rotate(75deg) saturate(2) brightness(0.8) contrast(1.1);
+}
+
+.nk-search-iframe.nk-iframe-visible {
+    opacity: 1;
+}
+
+.nk-iframe-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nk-amber);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 6px rgba(212, 168, 67, 0.3);
+}
+
+.nk-dots::after {
+    content: '...';
+    animation: blink-cursor 1s step-end infinite;
+}
+
+/* ── Sidebar content (reused inside drawer) ─────────── */
+
+.nk-sidebar-section {
+    border: 1px solid var(--nk-border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.nk-sidebar-title {
+    background: rgba(0, 25, 0, 0.6);
+    color: var(--nk-amber);
+    font-size: 11px;
+    font-weight: bold;
+    padding: 8px 12px;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 4px rgba(212, 168, 67, 0.3);
+    border-bottom: 1px solid var(--nk-border);
+}
+
+.nk-sidebar-body {
+    padding: 10px 12px;
+    font-size: 12px;
+    background: rgba(0, 8, 0, 0.4);
+}
+
+.nk-seal-row {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 40, 0, 0.3);
+}
+
+.nk-seal-row:last-child { border-bottom: none; }
+
+.nk-seal-num {
+    color: var(--nk-amber);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-right: 8px;
+}
+
+.nk-seal-name {
+    color: var(--nk-green);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.nk-seal-hint {
+    color: var(--nk-green-dark);
+    font-size: 11px;
+    margin-top: 3px;
+    word-break: break-all;
+}
+
+.nk-ds-list {
+    line-height: 1.8;
+    color: var(--nk-green-dim);
+}
+
+.nk-ds-label {
+    color: var(--nk-green);
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.nk-lookup-cmd {
+    color: var(--nk-green-dark);
+    font-size: 11px;
+    padding: 2px 0;
+    word-break: break-all;
+}
+
+/* ── Print ────────────────────────────────────────────── */
+
+@media print {
+    .crt-scanlines,
+    .crt-vignette,
+    .crt-flicker,
+    .crt-led { display: none; }
+    .crt-monitor { background: #fff; box-shadow: none; }
+    .crt-screen { background: #fff; }
+}

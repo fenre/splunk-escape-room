@@ -5,3 +5,22 @@ export = system
 [views]
 access = read : [ * ], write : [ admin ]
 export = system
+
+[indexes]
+export = system
+
+[lookups]
+export = system
+
+[transforms]
+export = system
+
+[props]
+export = system
+
+[data/ui/nav]
+access = read : [ * ], write : [ admin ]
+export = system
+
+[visualizations]
+export = system

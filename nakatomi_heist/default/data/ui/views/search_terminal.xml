@@ -9,7 +9,7 @@
     "ds_results": {
       "type": "ds.search",
       "options": {
-        "query": "$spl_query$",
+        "query": "$spl_query$ | fields - _bkt _cd _indextime _raw _serial _si _subsecond _sourcetype host index linecount source sourcetype splunk_server",
         "queryParameters": {
           "earliest": "0",
           "latest": "now"
@@ -111,13 +111,14 @@
   },
   "layout": {
     "type": "grid",
-    "globalInputs": ["input_spl"],
+    "globalInputs": [],
     "structure": [
       {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 110}},
-      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 110, "w": 820, "h": 580}},
-      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 110, "w": 380, "h": 80}},
-      {"item": "viz_hints", "type": "block", "position": {"x": 820, "y": 190, "w": 380, "h": 340}},
-      {"item": "viz_indexes", "type": "block", "position": {"x": 820, "y": 530, "w": 380, "h": 160}}
+      {"item": "input_spl", "type": "block", "position": {"x": 0, "y": 110, "w": 1200, "h": 70}},
+      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 180, "w": 820, "h": 580}},
+      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 180, "w": 380, "h": 80}},
+      {"item": "viz_hints", "type": "block", "position": {"x": 820, "y": 260, "w": 380, "h": 340}},
+      {"item": "viz_indexes", "type": "block", "position": {"x": 820, "y": 600, "w": 380, "h": 160}}
     ]
   }
 }
