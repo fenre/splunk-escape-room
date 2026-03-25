@@ -871,12 +871,13 @@
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Game Orchestration <span class="tag planned">Planned</span></h4>
+          <h4>Game UI <span class="tag ready">Ready</span></h4>
           <ul>
-            <li>Narrative presentation</li>
-            <li>Answer submission &amp; validation</li>
-            <li>Phase progression</li>
-            <li>Timer &amp; fail-condition tracking</li>
+            <li>Dual mode: physical or digital</li>
+            <li>Code entry, seal status, timer</li>
+            <li>Clue card reveals (7 styled cards)</li>
+            <li>Digital Seal 7 (power element)</li>
+            <li>Facilitator controls (F key)</li>
           </ul>
         </div>
 
@@ -894,7 +895,7 @@
         <div class="arch-box span-full">
           <h4>Physical Model (Nakatomi Plaza + Vault) <span class="tag planned">Planned</span></h4>
           <ul>
-            <li>Microcontroller (Arduino / Raspberry Pi Pico)</li>
+            <li>Microcontroller (ESP32 DevKit V1)</li>
             <li>7 seal inputs: keypad, dials, switches</li>
             <li>LED / servo feedback per seal</li>
             <li>Seal 7: power-loss detection or hidden switch</li>
@@ -1040,7 +1041,7 @@ flowchart TD
   end
 
   subgraph physical [Physical Layer]
-    PL -->|enter codes| VM[Vault Model\nArduino/Pico]
+    PL -->|enter codes| VM[Vault Model\nESP32]
     VM -->|LED/servo feedback| PL
   end
 
@@ -1180,26 +1181,38 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>MVP <span class="status next">Next</span></h4>
+          <h4>Data &amp; Puzzles <span class="status done">Complete</span></h4>
           <ul>
-            <li class="pending">Lock the narrative (final script)</li>
-            <li class="pending">Spec exact data fields &amp; seal codes</li>
-            <li class="pending">Build data generator (Python)</li>
-            <li class="pending">One Splunk index (access + vault)</li>
-            <li class="pending">Simple game UI (HTML or dashboard)</li>
-            <li class="pending">Facilitator runbook</li>
+            <li class="done">Complete puzzle catalogue (all 7 seals)</li>
+            <li class="done">Data schemas (6 sourcetypes, 3 indexes, 3 lookups)</li>
+            <li class="done">Python data generator (~830 events)</li>
+            <li class="done">Player experience design (dashboard, progression)</li>
+            <li class="done">Seal codes &amp; red herrings specified</li>
+            <li class="done">Splunk config (props/transforms/indexes)</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>V1 &mdash; Full Experience <span class="status next">Future</span></h4>
+          <h4>Game UI <span class="status done">Complete</span></h4>
           <ul>
-            <li class="pending">All 4 phases + 7-seal physical model</li>
-            <li class="pending">Dashboard per phase</li>
-            <li class="pending">Answer validation per seal</li>
-            <li class="pending">Physical build (ESP32 + locks)</li>
-            <li class="pending">Seal 7 meta implementation</li>
-            <li class="pending">Timer &amp; fail-condition engine</li>
-            <li class="pending">Answer key &amp; reset procedure</li>
+            <li class="done">Dual-mode support (physical + digital)</li>
+            <li class="done">Digital keypad &amp; code validation</li>
+            <li class="done">Seal status panel (LED-style indicators)</li>
+            <li class="done">Clue card reveals (7 styled compartment cards)</li>
+            <li class="done">Interactive ROT13 decoder (Seal 3)</li>
+            <li class="done">Digital Seal 7 (hidden power element)</li>
+            <li class="done">Timer, game over, victory overlays</li>
+            <li class="done">Facilitator controls (F key)</li>
+          </ul>
+        </div>
+        <div class="roadmap-card">
+          <h4>Implementation <span class="status next">Next</span></h4>
+          <ul>
+            <li class="active">Physical model tower build</li>
+            <li class="pending">Splunk app packaging</li>
+            <li class="pending">Mission Brief dashboard</li>
+            <li class="pending">ESP32 firmware</li>
+            <li class="pending">ESP32 &harr; Game UI integration</li>
+            <li class="pending">Playtest &amp; tuning</li>
           </ul>
         </div>
       </div>
@@ -1217,7 +1230,7 @@ flowchart LR
         </a>
         <a href="docs/STORY_AND_MYSTERIES.md" class="doc-link">
           <h4>Story &amp; Mysteries</h4>
-          <p>Introduction narrative, Die Hard easter eggs, and the mystery/task catalogue.</p>
+          <p>Narrative, easter eggs, and complete seal-by-seal puzzle catalogue with SPL paths and codes.</p>
         </a>
         <a href="docs/TIMELINE_AND_FLOWS.md" class="doc-link">
           <h4>Timeline &amp; Flows</h4>
@@ -1226,6 +1239,18 @@ flowchart LR
         <a href="docs/PHYSICAL_MODEL.md" class="doc-link">
           <h4>Physical Model</h4>
           <p>Electronics, lock mechanisms, wiring, BOM, Seal 7 circuit, and build guide.</p>
+        </a>
+        <a href="docs/DATA_SCHEMAS.md" class="doc-link">
+          <h4>Data Schemas</h4>
+          <p>Sourcetype definitions, _raw formats, field extractions, lookup tables, and Splunk config.</p>
+        </a>
+        <a href="docs/PLAYER_EXPERIENCE.md" class="doc-link">
+          <h4>Player Experience</h4>
+          <p>Dashboard wireframes, phase progression, hint delivery, fail/win states, digital mode, and app structure.</p>
+        </a>
+        <a href="game.html" class="doc-link">
+          <h4>Game UI</h4>
+          <p>Dual-mode game interface &mdash; digital keypad, clue cards, timer, Seal 7 power element. Open to play.</p>
         </a>
         <a href="docs/flow.html" class="doc-link">
           <h4>Flow Diagrams (standalone)</h4>
