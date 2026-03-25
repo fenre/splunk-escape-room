@@ -8,6 +8,23 @@ Versioning follows [Semantic Versioning](https://semver.org/): **MAJOR.MINOR.PAT
 
 ---
 
+## 0.7.0 — 2026-03-25
+
+### Added
+- **Live deployment** — Nakatomi Heist app deployed to distributed Splunk environment (search head `rev` + indexer `mink`, both Splunk 10.2.0).
+  - 3 indexes created on both search head and indexer.
+  - 7 sourcetype definitions configured via REST API.
+  - 3 lookup table definitions and CSV data populated via SPL (`outputlookup`).
+  - Mission Brief dashboard deployed via REST API.
+  - HEC token (`nakatomi_heist`) created; 833 events loaded and verified across all 6 sourcetypes.
+- **Splunk environment rule** — `.cursor/rules/splunk-environment.mdc` documenting distributed topology, IPs, roles, authentication tokens, and operational notes for future sessions.
+
+### Changed
+- `index.html` — added "Deployed & Playable" hero badge, new "Splunk Environment" architecture box showing live distributed deployment, new "Deployment" roadmap card (complete), updated Splunk App tag from "Ready" to "Deployed" with per-index event counts.
+- `secrets.env` — added `SPLUNK_MINK_TOKEN` for indexer REST API access alongside existing `SPLUNK_REST_TOKEN` for search head.
+
+---
+
 ## 0.6.0 — 2026-03-25
 
 ### Added

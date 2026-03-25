@@ -365,6 +365,7 @@
       font-weight: 600;
     }
     .tag.ready { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+    .tag.live { background: rgba(57,197,207,0.15); color: var(--cyan); border: 1px solid rgba(57,197,207,0.3); }
     .tag.planned { background: rgba(210,153,34,0.15); color: var(--orange); border: 1px solid rgba(210,153,34,0.3); }
     .arch-box ul {
       list-style: none;
@@ -651,6 +652,7 @@
       <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
       <span class="badge"><span class="dot green"></span> 7 Seals</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
+      <span class="badge"><span class="dot green"></span> Deployed &amp; Playable</span>
     </div>
     <div class="hero-tower">
       <a href="index.svg" target="_blank" title="View full size">
@@ -851,11 +853,11 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk App <span class="tag ready">Ready</span></h4>
+          <h4>Splunk App <span class="tag live">Deployed</span></h4>
           <ul>
-            <li>Index: <code>nakatomi_access</code></li>
-            <li>Index: <code>nakatomi_vault</code></li>
-            <li>Index: <code>nakatomi_building</code></li>
+            <li>Index: <code>nakatomi_access</code> (508 events)</li>
+            <li>Index: <code>nakatomi_vault</code> (77 events)</li>
+            <li>Index: <code>nakatomi_building</code> (248 events)</li>
             <li>App: "Nakatomi Heist" with Mission Brief</li>
             <li>3 lookups, 7 sourcetypes, HEC loader</li>
           </ul>
@@ -864,7 +866,7 @@
           <h4>Data Generator <span class="tag ready">Ready</span></h4>
           <ul>
             <li>Python script (deterministic seed)</li>
-            <li>~830 events across 3 indexes</li>
+            <li>833 events across 6 sourcetypes</li>
             <li>3 CSV lookup tables</li>
             <li>Embedded codes &amp; red herrings</li>
             <li>HEC-format JSON output</li>
@@ -890,6 +892,16 @@
             <div class="arrow-line"></div>
             &#x25B2; Seal status to narrative
           </div>
+        </div>
+
+        <div class="arch-box span-full">
+          <h4>Splunk Environment <span class="tag live">Live</span></h4>
+          <ul>
+            <li>Search head (rev) &mdash; dashboards, searches, knowledge objects</li>
+            <li>Indexer (mink) &mdash; 833 events indexed across 3 indexes</li>
+            <li>HEC ingestion via port 8088</li>
+            <li>Splunk 10.2.0 &middot; distributed deployment</li>
+          </ul>
         </div>
 
         <div class="arch-box span-full">
@@ -1216,7 +1228,17 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Implementation <span class="status next">Next</span></h4>
+          <h4>Deployment <span class="status done">Complete</span></h4>
+          <ul>
+            <li class="done">App deployed to distributed Splunk (search head + indexer)</li>
+            <li class="done">3 indexes created &amp; 833 events loaded via HEC</li>
+            <li class="done">3 lookup tables populated (73 rows)</li>
+            <li class="done">Mission Brief dashboard live</li>
+            <li class="done">All 7 sourcetypes parsing correctly</li>
+          </ul>
+        </div>
+        <div class="roadmap-card">
+          <h4>Physical Build <span class="status next">Next</span></h4>
           <ul>
             <li class="active">Physical model tower build</li>
             <li class="pending">ESP32 firmware</li>
