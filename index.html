@@ -1788,7 +1788,7 @@ flowchart LR
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
     Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
-    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v1.1.0</button>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v1.0.0</button>
   </footer>
 
   <!-- Release Notes Modal -->
@@ -1802,90 +1802,44 @@ flowchart LR
 
         <div class="rn-version">
           <div class="rn-version-header">
-            <span class="rn-version-num">v1.1.0</span>
-            <span class="rn-version-date">24 Mar 2026</span>
-            <span class="rn-version-tag rn-tag-latest">Latest</span>
+            <span class="rn-version-num">v1.0.0</span>
+            <span class="rn-version-date">25 Mar 2026</span>
+            <span class="rn-version-tag rn-tag-latest">First Major Release</span>
           </div>
-          <div class="rn-cat">Game UI</div>
-          <ul>
-            <li>Real Fox Plaza photo on welcome screen with synthwave color wash and edge fade</li>
-            <li>Clue popups now render inside CRT screen as terminal-native overlay</li>
-            <li>All clue content types restyled to green phosphor monochrome</li>
-            <li>Physical mode hides side keypad; monitor sizes match across modes</li>
-            <li>Boot sequence now plays for both physical and digital modes</li>
-            <li>Removed palm tree silhouettes for cleaner composition</li>
-          </ul>
           <div class="rn-cat">Splunk App</div>
           <ul>
-            <li>App version bumped to 1.1.0 (build 8)</li>
-            <li>Terminal dashboard, React components, and webpack build added</li>
-            <li>Custom CSS for in-app CRT terminal view</li>
-            <li>Modular inputs config for data replay</li>
-          </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
-            <span class="rn-version-num">v1.0.0</span>
-            <span class="rn-version-date">23 Mar 2026</span>
-          </div>
-          <div class="rn-cat">Deployment</div>
-          <ul>
-            <li>App deployed to distributed Splunk (search head + indexer)</li>
+            <li>Complete app scaffold (app.conf, metadata, nav, indexes, props, transforms)</li>
+            <li>Deployed to distributed Splunk (search head + indexer)</li>
             <li>3 indexes created, 833 events loaded via HEC</li>
-            <li>3 lookup tables populated (73 rows)</li>
-            <li>Mission Brief dashboard live</li>
-            <li>All 7 sourcetypes parsing correctly</li>
+            <li>3 lookup tables populated (73 rows), 7 sourcetypes parsing correctly</li>
+            <li>Mission Brief, Access Terminal, Vault Terminal, and Building Systems dashboards</li>
+            <li>Terminal dashboard with React components and webpack build</li>
+            <li>Custom CRT terminal view CSS for in-app experience</li>
+            <li>HEC data loader script and Python data generator</li>
+            <li>Packaged .spl for one-click install</li>
           </ul>
           <div class="rn-cat">Game UI</div>
           <ul>
+            <li>Over-the-top 80s synthwave welcome screen (sunset, grid, chrome text)</li>
+            <li>Real Fox Plaza photo with synthwave color wash and edge fade</li>
             <li>Photorealistic CRT terminal with 4:3 aspect ratio</li>
             <li>Side-mounted keypad panel with mechanical key styling</li>
             <li>Monitor housing with screws, vents, knobs, floppy slot, and power LED</li>
-            <li>Over-the-top 80s synthwave welcome screen (sunset, grid, chrome text)</li>
-            <li>Retro boot sequence with DOS-style text animation</li>
-          </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
-            <span class="rn-version-num">v0.9.0</span>
-            <span class="rn-version-date">22 Mar 2026</span>
-          </div>
-          <div class="rn-cat">Splunk App</div>
-          <ul>
-            <li>App scaffold (app.conf, metadata, nav)</li>
-            <li>Index definitions, props.conf, transforms.conf</li>
-            <li>HEC data loader script and data generator</li>
-            <li>Packaged .spl for install</li>
-          </ul>
-          <div class="rn-cat">Game UI</div>
-          <ul>
-            <li>Dual-mode support (physical + digital)</li>
-            <li>Digital keypad and code validation</li>
-            <li>Seal status panel with LED indicators</li>
-            <li>7 styled clue card reveals</li>
-            <li>Interactive ROT13 decoder (Seal 3)</li>
-            <li>Digital Seal 7 (hidden power element)</li>
+            <li>Retro DOS boot sequence for both physical and digital modes</li>
+            <li>Dual-mode support (physical vault + digital vault)</li>
+            <li>Digital keypad with code validation and seal status LEDs</li>
+            <li>7 styled clue card reveals (rendered inside CRT as terminal-native overlay)</li>
+            <li>Interactive ROT13 decoder (Seal 3) and hidden power element (Seal 7)</li>
             <li>Timer, game over, and victory overlays</li>
             <li>Facilitator controls (F key)</li>
           </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
-            <span class="rn-version-num">v0.5.0</span>
-            <span class="rn-version-date">20 Mar 2026</span>
-          </div>
-          <div class="rn-cat">Design</div>
+          <div class="rn-cat">Project Site</div>
           <ul>
-            <li>Full design document and story/narrative</li>
+            <li>Full design document and narrative</li>
             <li>Complete puzzle catalogue (all 7 seals)</li>
-            <li>Data schemas (6 sourcetypes, 3 indexes, 3 lookups)</li>
-            <li>Python data generator (~830 events)</li>
-            <li>Physical model design (electronics, locks, BOM)</li>
+            <li>Synthwave hero with Start Game button</li>
             <li>Tower SVG cross-section illustration</li>
-            <li>Flow diagrams and timeline</li>
+            <li>Flow diagrams, timeline, and physical model BOM</li>
           </ul>
         </div>
 
