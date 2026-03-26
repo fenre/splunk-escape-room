@@ -1591,6 +1591,39 @@
     .fac-btn.danger { color: #ff4444; border-color: rgba(255,68,68,0.3); }
     .fac-btn.danger:hover { background: rgba(255,68,68,0.05); }
 
+    /* Facilitator PIN prompt */
+    #fac-pin-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+    }
+    #fac-pin-overlay.hidden { display: none; }
+    .fac-pin-box {
+      background: #0a0a0a; border: 1px solid #1a5a1a;
+      padding: 1.5rem 2rem; min-width: 280px; text-align: center;
+      box-shadow: 0 0 40px rgba(26,90,26,0.15);
+    }
+    .fac-pin-box h4 {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: #ffaa00; margin: 0 0 0.75rem;
+    }
+    .fac-pin-input {
+      font-family: 'Share Tech Mono', monospace; font-size: 1.4rem;
+      text-align: center; width: 8ch; padding: 0.4rem;
+      background: #050505; border: 1px solid #1a3a1a; color: #33ff33;
+      letter-spacing: 0.3em; outline: none;
+      text-shadow: 0 0 6px rgba(51,255,51,0.4);
+    }
+    .fac-pin-input:focus { border-color: #33ff33; box-shadow: 0 0 8px rgba(51,255,51,0.15); }
+    .fac-pin-input::placeholder { color: #1a3a1a; }
+    .fac-pin-msg {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.6rem;
+      color: #1a5a1a; margin-top: 0.6rem; min-height: 1em;
+    }
+    .fac-pin-msg.error { color: #ff4444; text-shadow: 0 0 4px rgba(255,68,68,0.3); }
+
     /* ── ANIMATIONS ───────────────────────────────── */
     @keyframes pulse { 0%, 100% { box-shadow: 0 0 8px var(--amber); } 50% { box-shadow: 0 0 20px var(--amber), 0 0 40px rgba(255,136,0,0.3); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
@@ -1754,7 +1787,7 @@
                   <div id="physical-content" class="hidden">
                     <div id="physical-display">
                       <div class="pd-seals" id="pd-seals"></div>
-                      <div class="pd-msg">Enter codes on the vault keypad<br><span style="font-size:0.65rem;color:#1a4a1a">Press F for facilitator controls</span></div>
+                      <div class="pd-msg">Enter codes on the vault keypad</div>
                     </div>
                   </div>
                 </section>
@@ -1885,6 +1918,14 @@
     <div id="fac-buttons"></div>
     <button class="fac-btn danger" onclick="triggerGameOver('mcclane')" style="margin-top:0.5rem">Game Over</button>
     <button class="fac-btn" onclick="resetGame()" style="margin-top:0.25rem">Reset</button>
+  </div>
+
+  <div id="fac-pin-overlay" class="hidden">
+    <div class="fac-pin-box">
+      <h4>Facilitator Access</h4>
+      <input type="password" id="fac-pin-input" class="fac-pin-input" maxlength="6" placeholder="------" autocomplete="off" spellcheck="false">
+      <div id="fac-pin-msg" class="fac-pin-msg">Enter facilitator PIN</div>
+    </div>
   </div>
 
 <script>
@@ -2454,6 +2495,8 @@ function resetGame() {
   document.getElementById('clue-overlay').classList.add('hidden');
   document.getElementById('dossier-panel').classList.add('hidden');
   document.getElementById('facilitator').classList.add('hidden');
+  document.getElementById('fac-pin-overlay').classList.add('hidden');
+  facUnlocked = false;
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('mode-select').classList.remove('hidden');
   document.body.classList.remove('in-game');
@@ -2750,6 +2793,66 @@ function buildPhysicalDisplay() {
 }
 
 /* ── FACILITATOR ────────────────────────────── */
+var FAC_PIN = '241288';
+var facUnlocked = false;
+
+function showFacPinPrompt() {
+  var overlay = document.getElementById('fac-pin-overlay');
+  var input = document.getElementById('fac-pin-input');
+  var msg = document.getElementById('fac-pin-msg');
+  overlay.classList.remove('hidden');
+  input.value = '';
+  msg.textContent = 'Enter facilitator PIN';
+  msg.className = 'fac-pin-msg';
+  setTimeout(function() { input.focus(); }, 50);
+}
+function hideFacPinPrompt() {
+  document.getElementById('fac-pin-overlay').classList.add('hidden');
+}
+(function() {
+  var input = document.getElementById('fac-pin-input');
+  input.addEventListener('keydown', function(e) {
+    e.stopPropagation();
+    if (e.key === 'Escape') { hideFacPinPrompt(); return; }
+    if (e.key === 'Enter') {
+      var msg = document.getElementById('fac-pin-msg');
+      if (input.value === FAC_PIN) {
+        facUnlocked = true;
+        hideFacPinPrompt();
+        state.facVisible = true;
+        document.getElementById('facilitator').classList.remove('hidden');
+        buildFacilitatorButtons();
+      } else {
+        msg.textContent = 'ACCESS DENIED';
+        msg.className = 'fac-pin-msg error';
+        input.value = '';
+        setTimeout(function() {
+          msg.textContent = 'Enter facilitator PIN';
+          msg.className = 'fac-pin-msg';
+        }, 1500);
+      }
+    }
+  });
+  document.getElementById('fac-pin-overlay').addEventListener('click', function(e) {
+    if (e.target === this) hideFacPinPrompt();
+  });
+})();
+
+function toggleFacilitator() {
+  if (state.facVisible) {
+    state.facVisible = false;
+    document.getElementById('facilitator').classList.add('hidden');
+    return;
+  }
+  if (!facUnlocked) {
+    showFacPinPrompt();
+    return;
+  }
+  state.facVisible = true;
+  document.getElementById('facilitator').classList.remove('hidden');
+  buildFacilitatorButtons();
+}
+
 function buildFacilitatorButtons() {
   var c = document.getElementById('fac-buttons');
   c.innerHTML = '';
@@ -2824,9 +2927,7 @@ function escHTML(s) {
 document.addEventListener('keydown', function(e) {
   if (state.gameState !== 'playing') return;
   if (e.key === 'f' || e.key === 'F') {
-    state.facVisible = !state.facVisible;
-    document.getElementById('facilitator').classList.toggle('hidden', !state.facVisible);
-    if (state.facVisible) buildFacilitatorButtons();
+    toggleFacilitator();
     return;
   }
   if (e.key === 'd' || e.key === 'D') { toggleDossier(); return; }
@@ -2835,6 +2936,7 @@ document.addEventListener('keydown', function(e) {
     if (state.hintConfirmPending) { confirmHint(false); return; }
     if (!document.getElementById('dossier-panel').classList.contains('hidden')) { toggleDossier(); return; }
     if (!document.getElementById('clue-overlay').classList.contains('hidden')) { hideClue(); return; }
+    if (!document.getElementById('fac-pin-overlay').classList.contains('hidden')) { hideFacPinPrompt(); return; }
     if (state.facVisible) { state.facVisible = false; document.getElementById('facilitator').classList.add('hidden'); return; }
   }
   if (state.mode !== 'digital') return;
