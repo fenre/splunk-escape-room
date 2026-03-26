@@ -1,0 +1,16 @@
+floor,camera_id,zone,coverage_area,status,swat_coverage
+B2,CAM-B2-01,parking,Parking Level 2,active,no
+B1,CAM-B1-01,vault,Vault Anteroom,active,no
+1,CAM-01-01,lobby,Main Entrance,active,yes
+1,CAM-01-02,lobby,Security Office,active,yes
+2,CAM-02-01,loading,Loading Dock,offline,no
+5,CAM-05-01,office,Legal Suite,active,no
+10,CAM-10-01,office,HR Open Floor,active,no
+15,CAM-15-01,office,Trading Floor,active,no
+20,CAM-20-01,office,Finance Suite,active,no
+25,CAM-25-01,lab,R&D Lab,active,no
+28,CAM-28-01,office,Exec Support,active,no
+30,CAM-30-01,event,Main Hall,active,no
+30,CAM-30-02,event,Conference Room B,active,no
+35,CAM-35-01,executive,CEO Office,active,no
+roof,CAM-RF-01,mechanical,Helipad Access,active,yes

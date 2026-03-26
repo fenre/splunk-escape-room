@@ -5,5 +5,4 @@
     <view name="access_terminal" />
     <view name="vault_terminal" />
     <view name="building_systems" />
-    <view name="comms_terminal" />
 </nav>

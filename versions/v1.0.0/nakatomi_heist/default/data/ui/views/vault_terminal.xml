@@ -44,7 +44,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI PLAZA — VAULT ACCESS PROTOCOL v2.0\n> INDEX: nakatomi_vault\n> WARNING: ALL TERMINAL SESSIONS ARE RECORDED\n> ──────────────────────────────────────────────────────────\n> STATUS: ARMED    SEALS: 7/7 LOCKED    ACCESS: RESTRICTED\n```",
+        "markdown": "```\n> NAKATOMI PLAZA — VAULT ACCESS PROTOCOL v7.2\n> INDEX: nakatomi_vault\n> WARNING: ALL TERMINAL SESSIONS ARE RECORDED\n> ──────────────────────────────────────────────────────────\n> STATUS: ARMED    SEALS: 7/7 LOCKED    ACCESS: RESTRICTED\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
@@ -87,7 +87,7 @@
     "viz_fields": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "**AVAILABLE FIELDS:**\n`session_id` `user` `action` `detail` `result` `system`\n\n**KEY ACTIONS:**\n`session_begin` `session_end` `code_attempt` `system_note`\n\n**SYSTEMS:**\n`vault_terminal` `detonator_inventory`\n\n**LOOKUPS:**\n`| inputlookup system_codes.csv`\n`| inputlookup employee_directory.csv`\n`| inputlookup bearer_bonds.csv`\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_vault user=takagi\nindex=nakatomi_vault | transaction session_id\nindex=nakatomi_vault session_id=\"VS-0042\"\n  | sort _time\nindex=nakatomi_vault\n  system=detonator_inventory\n| inputlookup system_codes.csv\n| inputlookup bearer_bonds.csv\n```",
+        "markdown": "**AVAILABLE FIELDS:**\n`session_id` `user` `action` `detail` `result`\n\n**KEY ACTIONS:**\n`session_begin` `session_end` `code_attempt` `system_note`\n\n**LOOKUPS:**\n`| inputlookup system_codes.csv`\n`| inputlookup employee_directory.csv`\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_vault user=takagi\nindex=nakatomi_vault | transaction session_id\nindex=nakatomi_vault session_id=\"VS-0042\" | sort _time\n| inputlookup system_codes.csv\n```",
         "fontColor": "#1a9a1a",
         "backgroundColor": "#000d00"
       }

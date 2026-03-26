@@ -1,54 +1,48 @@
 badge_id,name,department,clearance_level,status,hire_date
-JT-0001,Joseph Takagi,CEO,LEVEL-6,terminated,2020-03-09
-HE-3301,Harry Ellis,International Trade,LEVEL-2,active,2018-04-04
-HP-1015,Holly Gennaro,International Trade,LEVEL-4,active,2023-12-28
-NP-4472,Naomi Park,Vault Operations,LEVEL-5,active,2021-11-22
-AG-0077,Argyle,Building Services,LEVEL-1,active,2020-04-10
-MAINT-007,Eduardo Vasquez,Facilities,LEVEL-2,active,2024-09-14
-SE-0012,James Marsh,Security,LEVEL-3,active,2024-03-16
-NP-4471,Robert Chen,IT Operations,LEVEL-3,active,2022-07-07
-SE-0015,Lisa Tanaka,Security,LEVEL-3,active,2017-10-26
-CAT-001,Maria Santos,Catering,LEVEL-1,active,2023-06-13
-HG-1988,Hans Gruber,External Contractor,EXTERNAL,active,2024-01-23
-KA-2205,Karl Vreski,External Contractor,EXTERNAL,active,2022-12-23
-TH-0099,Theo,External Contractor,EXTERNAL,active,2016-07-24
-TMP-2391,Dana Adams,Finance,LEVEL-1,active,2021-07-17
-NP-8127,Terry Garcia,IT,LEVEL-1,active,2024-09-09
-TMP-5726,Quinn Ueda,R&D,LEVEL-1,active,2017-09-25
-NP-5501,Cameron Walsh,HR,LEVEL-3,active,2017-07-13
-SE-9772,Taylor Ueda,Admin,LEVEL-3,active,2016-11-23
-TMP-1898,Drew Torres,R&D,LEVEL-3,active,2016-12-04
-VIS-2807,Quinn Torres,Admin,LEVEL-2,active,2020-02-09
-VIS-3856,Dana Clark,IT,LEVEL-2,active,2020-10-08
-VIS-6666,Lane Miller,R&D,LEVEL-3,active,2017-01-10
-NP-6135,Kendall Clark,Legal,LEVEL-3,active,2024-05-13
-NP-9075,Lee Patel,Facilities,LEVEL-3,active,2016-05-27
-TMP-3574,Jordan Yates,HR,LEVEL-1,active,2024-12-17
-NP-7400,Pat Diaz,IT,LEVEL-1,active,2020-08-09
-NP-2365,Lane Walsh,R&D,LEVEL-3,active,2024-06-17
-SE-8499,Avery Clark,Sales,LEVEL-2,active,2021-06-03
-NP-6963,Lane Miller,R&D,LEVEL-2,active,2022-10-25
-NP-5463,Terry Diaz,IT,LEVEL-1,active,2020-06-18
-TMP-2486,Sage Patel,Facilities,LEVEL-4,active,2018-11-15
-NP-5656,Noel Rivera,Sales,LEVEL-1,active,2016-09-28
-NP-6203,Drew Ueda,Legal,LEVEL-3,active,2017-02-28
-NP-6063,Glenn Xu,R&D,LEVEL-1,active,2024-03-12
-NP-7983,Sage Clark,Sales,LEVEL-4,active,2021-10-06
-NP-4235,Cameron Torres,R&D,LEVEL-1,active,2021-02-14
-TMP-6671,Jordan Kim,Marketing,LEVEL-3,active,2022-10-03
-VIS-8969,Dana Rivera,HR,LEVEL-2,active,2024-03-22
-NP-6509,Terry Quinn,Finance,LEVEL-4,active,2021-08-04
-SE-2630,Pat Hayes,Finance,LEVEL-1,active,2023-01-22
-SE-3144,Jamie Hayes,Finance,LEVEL-4,active,2019-01-21
-TMP-7526,Dana Walsh,Marketing,LEVEL-2,active,2017-11-02
-NP-6982,Pat Olsen,IT,LEVEL-2,active,2023-04-28
-VIS-5108,Taylor Lawson,Admin,LEVEL-3,active,2024-05-16
-NP-2765,Reese Nguyen,Facilities,LEVEL-3,active,2018-01-01
-VIS-9986,Robin Yates,Admin,LEVEL-3,active,2023-03-26
-NP-6245,Quinn Ueda,Legal,LEVEL-2,active,2023-09-17
-TMP-8022,Robin Grant,Admin,LEVEL-1,active,2024-03-07
-TMP-3148,Drew Jensen,Finance,LEVEL-1,active,2020-03-06
-NP-6478,Jordan Zhang,Legal,LEVEL-2,active,2022-01-04
-NP-9989,Reese Diaz,HR,LEVEL-3,active,2018-01-13
-NP-6524,Alex Ito,Marketing,LEVEL-1,active,2019-09-26
-NP-8255,Alex Xu,Sales,LEVEL-3,active,2017-09-11
+JT-0001,Joseph Takagi,CEO,LEVEL-6,terminated,2023-04-23
+HE-3301,Harry Ellis,International Trade,LEVEL-2,active,2016-03-06
+HP-1015,Holly Gennaro,International Trade,LEVEL-4,active,2022-03-13
+NP-4472,Naomi Park,Vault Operations,LEVEL-5,active,2019-05-22
+AG-0077,Argyle,Building Services,LEVEL-1,active,2022-02-26
+MAINT-007,Eduardo Vasquez,Facilities,LEVEL-2,active,2019-10-03
+SE-0012,James Marsh,Security,LEVEL-3,active,2024-02-03
+NP-4471,Robert Chen,IT Operations,LEVEL-3,active,2020-12-21
+SE-0015,Lisa Tanaka,Security,LEVEL-3,active,2017-03-09
+CAT-001,Maria Santos,Catering,LEVEL-1,active,2024-02-18
+HG-1988,Hans Gruber,External Contractor,EXTERNAL,active,2022-12-13
+KA-2205,Karl Vreski,External Contractor,EXTERNAL,active,2018-12-27
+TH-0099,Theo,External Contractor,EXTERNAL,active,2023-03-20
+NP-2974,Glenn Diaz,IT,LEVEL-3,active,2024-10-10
+NP-3978,Pat Walsh,HR,LEVEL-1,active,2023-10-09
+NP-7835,Jamie Dunn,Marketing,LEVEL-2,active,2023-02-04
+NP-8211,Terry Hayes,Marketing,LEVEL-1,active,2019-10-28
+TMP-6370,Kendall Torres,Facilities,LEVEL-2,active,2018-07-20
+NP-1811,Sam Xu,Legal,LEVEL-4,active,2018-05-04
+SE-8390,Yuki Evans,Finance,LEVEL-2,active,2022-11-28
+SE-6290,Avery Torres,Facilities,LEVEL-2,active,2024-12-17
+SE-1882,Cameron Valdez,Admin,LEVEL-2,active,2016-07-27
+NP-8591,Avery Quinn,Facilities,LEVEL-2,active,2020-07-10
+TMP-9881,Micah Ito,HR,LEVEL-1,active,2020-07-05
+NP-6915,Terry Olsen,Legal,LEVEL-3,active,2020-11-01
+NP-7500,Noel Hayes,Facilities,LEVEL-4,active,2018-03-08
+NP-8538,Yuki Xu,Admin,LEVEL-2,active,2024-09-21
+NP-2990,Jamie Brooks,Sales,LEVEL-1,active,2023-11-13
+TMP-6200,Terry Quinn,Sales,LEVEL-2,active,2020-10-25
+TMP-4116,Glenn Patel,Finance,LEVEL-2,active,2017-09-08
+SE-6087,Chris Garcia,IT,LEVEL-3,active,2016-01-07
+TMP-6192,Riley Garcia,Marketing,LEVEL-2,active,2017-07-23
+NP-7859,Pat Grant,Legal,LEVEL-3,active,2017-05-12
+TMP-4036,Sage Xu,Finance,LEVEL-2,active,2017-11-04
+SE-2799,Alex Valdez,Facilities,LEVEL-3,active,2024-06-13
+NP-1616,Riley Miller,Admin,LEVEL-4,active,2017-09-21
+SE-7169,Blake Jensen,IT,LEVEL-1,active,2023-11-17
+NP-1674,Avery Evans,R&D,LEVEL-2,active,2020-11-26
+TMP-2701,Taylor Adams,R&D,LEVEL-2,active,2018-04-04
+TMP-6753,Kendall Kim,Sales,LEVEL-3,active,2016-10-02
+NP-4476,Robin Ueda,Admin,LEVEL-3,active,2022-02-13
+NP-6613,Glenn Carter,HR,LEVEL-1,active,2022-04-19
+NP-2560,Emery Rivera,R&D,LEVEL-4,active,2024-08-18
+TMP-5152,Kendall Kim,Marketing,LEVEL-3,active,2018-07-03
+TMP-4436,Micah Valdez,Marketing,LEVEL-1,active,2023-11-21
+NP-3742,Sage Jensen,Sales,LEVEL-3,active,2016-04-22
+TMP-6572,Casey Ueda,Finance,LEVEL-4,active,2022-03-21

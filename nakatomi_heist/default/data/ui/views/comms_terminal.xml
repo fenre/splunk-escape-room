@@ -1,0 +1,135 @@
+<dashboard version="2" theme="dark">
+  <label>Comms Terminal</label>
+  <description>NAKATOMI PLAZA — COMMUNICATIONS INTERCEPT TERMINAL</description>
+  <definition><![CDATA[
+{
+  "title": "Comms Terminal",
+  "description": "NAKATOMI PLAZA — COMMUNICATIONS INTERCEPT TERMINAL",
+  "dataSources": {
+    "ds_results": {
+      "type": "ds.search",
+      "options": {
+        "query": "$spl_query$ | fields - _bkt _cd _indextime _raw _serial _si _subsecond _sourcetype host index linecount source sourcetype splunk_server",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Query Results"
+    },
+    "ds_channel_summary": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_comms | stats count by channel | sort -count",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Channel Summary"
+    },
+    "ds_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_comms | head 15 | table _time sourcetype channel message caller_badge trunk_id status",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Recent Comms Events"
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> NAKATOMI PLAZA — COMMUNICATIONS INTERCEPT TERMINAL v2.0\n> INDEX: nakatomi_comms\n> SUBSYSTEMS: RADIO INTERCEPT / PHONE SYSTEM / TRUNK LINES\n> ──────────────────────────────────────────────────────────\n> *** MONITORING ALL FREQUENCIES — INTERCEPTS ACTIVE ***\n```",
+        "fontColor": "#33bbff",
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_results": {
+      "type": "splunk.table",
+      "title": "> QUERY OUTPUT",
+      "dataSources": {"primary": "ds_results"},
+      "options": {
+        "count": 50,
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_sidebar_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## > CHANNEL STATUS",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_channel_summary": {
+      "type": "splunk.table",
+      "title": "EVENTS BY CHANNEL",
+      "dataSources": {"primary": "ds_channel_summary"},
+      "options": {
+        "count": 20,
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_recent": {
+      "type": "splunk.table",
+      "title": "RECENT INTERCEPTS",
+      "dataSources": {"primary": "ds_recent"},
+      "options": {
+        "count": 15,
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_fields": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**SOURCETYPES:**\n`nakatomi:comms:radio` `nakatomi:comms:phone`\n\n**RADIO FIELDS:**\n`channel` `callsign` `message` `sender`\n\n**PHONE FIELDS:**\n`trunk_id` `trunk_type` `caller_badge` `destination` `status`\n\n**LOOKUPS:**\n`| inputlookup radio_channels.csv`\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_comms channel=freq_14\nindex=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" trunk_type=external\nindex=nakatomi_comms status=intercepted\nindex=nakatomi_comms | search powell\n```",
+        "fontColor": "#2288cc",
+        "backgroundColor": "#000814"
+      }
+    },
+    "viz_warning": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> ALERT: EXTERNAL TRUNK LINES CUT AT 22:05\n> ALERT: FBI FIELD COMMAND ACTIVE ON FREQ_14\n> ALERT: LAPD TACTICAL CHATTER ON FREQ_12\n> \"We're monitoring everything.\"\n```",
+        "fontColor": "#ff3333",
+        "backgroundColor": "#0d0000"
+      }
+    }
+  },
+  "inputs": {
+    "input_spl": {
+      "type": "input.text",
+      "options": {
+        "token": "spl_query",
+        "defaultValue": "index=nakatomi_comms | head 20 | table _time sourcetype channel message caller_badge trunk_id status"
+      },
+      "title": "> ENTER SPL QUERY"
+    }
+  },
+  "defaults": {
+    "tokens": {
+      "spl_query": "index=nakatomi_comms | head 20 | table _time sourcetype channel message caller_badge trunk_id status"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "globalInputs": [],
+    "structure": [
+      {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 120}},
+      {"item": "input_spl", "type": "block", "position": {"x": 0, "y": 120, "w": 1200, "h": 70}},
+      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 190, "w": 820, "h": 500}},
+      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 190, "w": 380, "h": 50}},
+      {"item": "viz_channel_summary", "type": "block", "position": {"x": 820, "y": 240, "w": 380, "h": 230}},
+      {"item": "viz_fields", "type": "block", "position": {"x": 820, "y": 470, "w": 380, "h": 450}},
+      {"item": "viz_recent", "type": "block", "position": {"x": 0, "y": 690, "w": 820, "h": 330}},
+      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 1020, "w": 1200, "h": 100}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>

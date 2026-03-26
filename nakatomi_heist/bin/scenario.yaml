@@ -1,37 +1,437 @@
-# Nakatomi Plaza: Vault Heist — Scenario Configuration
+# Nakatomi Plaza: Vault Heist v2.0 — Scenario Configuration
 #
-# This file drives the data generator. Change seal codes here to produce
-# a fresh dataset for each event. Keep the structure; the generator
-# relies on these keys.
+# Five-act structure following the Die Hard movie timeline.
+# 26 tasks across 5 acts. Same seed = same dataset (deterministic).
 
 game:
   title: "Nakatomi Plaza: Vault Heist"
-  duration_minutes: 60
-  max_wrong_codes: 3
+  version: "2.0"
+  duration_minutes: 90
+  max_wrong_codes: 7
   date: "2025-12-24"
   timezone: "America/Los_Angeles"
 
-# Random seed — same seed = same dataset. Change for a new game.
 seed: 19881215
 
 # ── Timeline (ISO 8601, local time) ──────────────────────────────
 timeline:
   party_setup:          "2025-12-24T18:00:00"
+  guests_arrive:        "2025-12-24T19:00:00"
   party_start:          "2025-12-24T20:00:00"
+  party_peak:           "2025-12-24T21:00:00"
   takeover:             "2025-12-24T22:00:00"
   lobby_secured:        "2025-12-24T22:02:00"
+  comms_cut:            "2025-12-24T22:05:00"
+  elevators_locked:     "2025-12-24T22:08:00"
   floors_secured:       "2025-12-24T22:10:00"
+  hostages_gathered:    "2025-12-24T22:15:00"
   takagi_confrontation: "2025-12-24T22:20:00"
   takagi_session_end:   "2025-12-24T22:25:00"
   vault_work_begins:    "2025-12-24T22:30:00"
   mcclane_first:        "2025-12-24T22:45:00"
+  mcclane_fire_alarm:   "2025-12-24T22:50:00"
+  holly_911:            "2025-12-24T22:55:00"
   fbi_arrives:          "2025-12-24T23:00:00"
+  powell_contact:       "2025-12-24T23:05:00"
+  c4_planted:           "2025-12-24T23:10:00"
   power_cut:            "2025-12-24T23:15:00"
+  fbi_helicopter:       "2025-12-24T23:30:00"
   roof_setup:           "2025-12-24T23:30:00"
+  detonators_stolen:    "2025-12-24T23:35:00"
   final_act:            "2025-12-24T23:45:00"
+  deadline:             "2025-12-25T02:00:00"
   midnight:             "2025-12-25T00:00:00"
 
-# ── Seal Codes ───────────────────────────────────────────────────
+# ── Five Acts with 26 Tasks ──────────────────────────────────────
+acts:
+  1:
+    name: "The Christmas Party"
+    quote: "40th floor. Just had their Christmas party. They're going to need a new bartender."
+    tasks:
+      1:
+        id: "1.1"
+        name: "Guest List"
+        type: code
+        code: "0047"
+        objective: "Count how many unique employees badged into the building tonight. That's our headcount."
+        spl_hint: 'index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)'
+        hints:
+          - "The badge system logs every swipe. Start there."
+          - "Search nakatomi_access for badge events with action=swipe and count unique IDs."
+          - 'Try: index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)'
+          - "The answer is 0047."
+        story_beat: "47 employees on-site. Good — we know our headcount. Now find the CEO."
+        embed:
+          sourcetype: "nakatomi:access:badge"
+          note: "Generator produces exactly 47 unique badge_ids in pre-takeover badge events"
+
+      2:
+        id: "1.2"
+        name: "Find Takagi"
+        type: code
+        code: "0030"
+        objective: "Takagi is somewhere in the building. Track his badge to find which floor he's on."
+        spl_hint: 'index=nakatomi_access badge_id="JT-0001" | sort -_time | head 1'
+        hints:
+          - "Takagi's badge ID is in the employee directory."
+          - 'His badge ID is JT-0001. Find his latest swipe.'
+          - 'Try: index=nakatomi_access badge_id="JT-0001" | sort -_time | head 1'
+          - "Floor 30. Enter 0030."
+        story_beat: "Floor 30 — the Christmas party. That's where we take him."
+
+      3:
+        id: "1.3"
+        name: "Security Gaps"
+        type: code
+        code: "0003"
+        objective: "Cross-reference the camera coverage map with the floor directory. Find the floor with no cameras — that's our blind spot."
+        spl_hint: '| inputlookup floor_directory.csv | lookup camera_coverage floor OUTPUT camera_id | where isnull(camera_id)'
+        hints:
+          - "There's a camera coverage map in the lookups."
+          - "Compare floor_directory with camera_coverage — one floor is missing."
+          - '| inputlookup floor_directory.csv | lookup camera_coverage floor OUTPUT camera_id | where isnull(camera_id)'
+          - "Floor 3 — Building Maintenance. Enter 0003."
+        story_beat: "Floor 3 — Maintenance. No cameras. That's how we get the equipment up."
+
+      4:
+        id: "1.4"
+        name: "The Parking Garage"
+        type: code
+        code: "1247"
+        objective: "Argyle just radioed in. His message got scrambled by our signal jammer. Decode it to find which parking bay the limo is in."
+        spl_hint: 'index=nakatomi_comms channel=freq_18 argyle'
+        hints:
+          - "The message was scrambled. Our jammer uses the same encoding as the HVAC system."
+          - "It's ROT13 — use the cipher tool."
+          - "The radio message on the internal channel contains the bay number."
+          - "Bay 1247. Enter 1247."
+        story_beat: "Bay 1247. Argyle's ready with the limo. That's our backup exit."
+
+      5:
+        id: "1.5"
+        name: "Party Recon"
+        type: code
+        code: "4472"
+        objective: "We need someone with vault clearance. Search the employee directory — find the badge number of the highest-clearance active employee."
+        spl_hint: '| inputlookup employee_directory.csv | search status=active clearance_level="LEVEL-5"'
+        hints:
+          - "The employee directory has clearance levels."
+          - "Look for the highest clearance among ACTIVE employees — Takagi is terminated."
+          - '| inputlookup employee_directory.csv | search status=active | sort -clearance_level'
+          - "NP-4472 — Naomi Park. Enter 4472."
+        story_beat: "Naomi Park. Vault Operations. LEVEL-5 clearance. Remember that badge number — we'll need it."
+
+  2:
+    name: "The Takeover"
+    quote: "Nice suit. John Phillips, London. I have two myself."
+    tasks:
+      1:
+        id: "2.1"
+        name: "Cut Communications"
+        type: code
+        code: "7700"
+        objective: "The phone system logs show which trunk lines are active. Find the main external trunk line ID to cut outside communications."
+        spl_hint: 'index=nakatomi_comms sourcetype="nakatomi:comms:phone" trunk_type=external | stats count by trunk_id'
+        hints:
+          - "Phone system logs are in the communications index."
+          - "Look for trunk lines marked as 'external'."
+          - 'Try: index=nakatomi_comms sourcetype="nakatomi:comms:phone" trunk_type=external'
+          - "TRUNK-7700. Enter 7700."
+        story_beat: "Lines are cut. No one's calling out. The building is ours."
+
+      2:
+        id: "2.2"
+        name: "Elevator Lockdown"
+        type: code
+        code: "4401"
+        objective: "Lock down the elevators. The override code is in the building systems. Find it."
+        spl_hint: 'index=nakatomi_building sourcetype="nakatomi:building:elevator" action=override'
+        hints:
+          - "The elevator system has an override function."
+          - "Search for elevator override events in the building index."
+          - 'Try: index=nakatomi_building sourcetype="nakatomi:building:elevator" override_code=*'
+          - "Override code 4401. Enter 4401."
+        story_beat: "Elevators locked. No one goes up or down without our say."
+
+      3:
+        id: "2.3"
+        name: "Guard Rotation"
+        type: code
+        code: "0012"
+        objective: "Security guards patrol on a schedule. Find the gap between patrols on floor 30 — that's our window, in minutes."
+        spl_hint: 'index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol'
+        hints:
+          - "Camera logs show guard patrols — look for timestamps."
+          - "Floor 30 patrols — check the time between each pass."
+          - 'Try: index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap'
+          - "12-minute gap. Enter 0012."
+        story_beat: "Twelve minutes. That's all we need. Time it right."
+
+      4:
+        id: "2.4"
+        name: "Hostage Floor"
+        type: code
+        code: "0030"
+        objective: "Where should we keep the hostages? Find which floor had the most badge activity during the party."
+        spl_hint: 'index=nakatomi_access earliest="2025-12-24T20:00:00" latest="2025-12-24T22:00:00" | stats dc(badge_id) by floor | sort -dc(badge_id)'
+        hints:
+          - "The party drew the biggest crowd — check badge data."
+          - "Look at badge activity between 20:00 and 22:00."
+          - 'Try: index=nakatomi_access earliest="2025-12-24T20:00:00" latest="2025-12-24T22:00:00" | stats dc(badge_id) by floor | sort -dc(badge_id)'
+          - "Floor 30 — the party floor. Enter 0030."
+        story_beat: "Floor 30. Everyone's already there. Round them up."
+
+      5:
+        id: "2.5"
+        name: "Intercept the Call"
+        type: code
+        code: "1015"
+        objective: "Someone tried calling 911. We intercepted it. The caller's badge number is in the phone log — who tried to reach outside?"
+        spl_hint: 'index=nakatomi_comms sourcetype="nakatomi:comms:phone" status=intercepted'
+        hints:
+          - "Someone tried to reach outside — check the phone intercepts."
+          - "Look for intercepted calls in the phone system logs."
+          - 'Try: index=nakatomi_comms sourcetype="nakatomi:comms:phone" status=intercepted'
+          - "Holly Gennaro, HP-1015. Enter 1015."
+        story_beat: "Holly Gennaro — she's Takagi's VP. Bold move. Keep her close — she might be useful."
+
+  3:
+    name: "The Vault"
+    quote: "You want money? What kind of terrorists are you? Who said we were terrorists?"
+    tasks:
+      1:
+        id: "3.1"
+        name: "The Lobby"
+        type: code
+        code: "2512"
+        objective: "We're in. The lobby is ours. Get into the access system — find out how security was locked down on Floor 1."
+        spl_hint: "index=nakatomi_access floor=1"
+        hints:
+          - "The access logs record everything that happened in the lobby."
+          - "Look for override events on floor 1."
+          - 'Try: index=nakatomi_access floor=1 action=override'
+          - "Access code 2512. Enter 2512."
+        story_beat: "Lobby override confirmed. Karl reports — ground floor is secure. Moving up."
+
+      2:
+        id: "3.2"
+        name: "Securing the Building"
+        type: code
+        code: "7439"
+        objective: "The building is ours. Now find the vault. It's somewhere above the 25th floor — the data will tell you where."
+        spl_hint: 'index=nakatomi_access floor>25 | stats count by floor'
+        hints:
+          - "The vault location is tied to maintenance schedules."
+          - "Takagi's calendar has rotation codes — check his badge events."
+          - 'Try: index=nakatomi_access badge_id="JT-0001" detail=*vault*'
+          - "Vault maintenance cycle 7439. Enter 7439."
+        story_beat: "Cycle 7439 confirmed. Hans disables cameras on floors 25 through 35 — no record of what happens next."
+
+      3:
+        id: "3.3"
+        name: "Takagi's Refusal"
+        type: code
+        code: "4291"
+        objective: "Takagi wouldn't talk. But he was at the vault terminal — session VS-0042. He entered codes. Were they real? Find out what he typed."
+        spl_hint: "index=nakatomi_vault | transaction session_id"
+        hints:
+          - "The vault logs every keystroke during a session."
+          - "Filter for session VS-0042 and look at code attempts."
+          - 'Try: index=nakatomi_vault session_id="VS-0042" action=code_attempt'
+          - "He typed 4, 2, 9, 1. Enter 4291."
+        story_beat: "Takagi entered 4-2-9-1 under duress. A transcript of the confrontation surfaces — he refused to give the real codes. He paid with his life."
+
+      4:
+        id: "3.4"
+        name: "The Roof Trap"
+        type: code
+        code: "8086"
+        objective: "The crew is rigging the roof. The building's systems know something's off. Find the message they left in the machine room data."
+        spl_hint: "index=nakatomi_building floor=roof system=hvac"
+        hints:
+          - "The HVAC system recorded something unusual on the roof."
+          - "There's an encoded message — it uses the same shift cipher."
+          - 'Try: index=nakatomi_building floor=roof encoded_message=*'
+          - "Decoded: THERE IS NO POWER WITHOUT CODE 8086. Enter 8086."
+        story_beat: "HVAC sensors show heat signatures — four C4 charges positioned along the roof structure. The detonation pattern will bring down the entire helipad."
+
+      5:
+        id: "3.5"
+        name: "The FBI"
+        type: code
+        code: "5765"
+        objective: "The feds are here. Their radio chatter is hitting our security intercepts. Find the authorization they're using to kill the power."
+        spl_hint: "index=nakatomi_building channel=freq_14"
+        hints:
+          - "The FBI broadcasts on freq_14."
+          - "Look for authorization codes in their tactical messages."
+          - 'Try: index=nakatomi_building channel=freq_14 | search AUTH'
+          - "AUTH:5765. Enter 5765."
+        story_beat: "Full FBI tactical plan intercepted: power cut at 23:15, helicopter assault at 23:30. Everything Hans predicted. They're playing right into his hands."
+
+      6:
+        id: "3.6"
+        name: "The Bearer Bonds"
+        type: code
+        code: "3940"
+        objective: "Six locks down, one to go. The final vault sequence needs an authorized employee's code. You have a badge — find who it belongs to."
+        spl_hint: '| inputlookup employee_directory.csv | search badge_id="NP-4472"'
+        hints:
+          - "The badge NP-4472 belongs to someone in the employee directory."
+          - "Find their clearance level, then match it to the system codes."
+          - '| inputlookup system_codes.csv | search clearance_level="LEVEL-5"'
+          - "vault_auth_code 3940. Enter 3940."
+        story_beat: "Bond inventory manifest confirmed — $640,000,000 in bearer bonds across five series. Serial numbers logged."
+
+      7:
+        id: "3.7"
+        name: "Shoot the Glass"
+        type: power
+        code: null
+        objective: "The seventh lock is not in the system."
+        spl_hint: ""
+        hints:
+          - "This lock can't be cracked with a code."
+          - "Think about what holds the vault shut."
+          - "What happens when the power goes out?"
+          - "Click the power LED on the system panel."
+        story_beat: "Power grid cascade — the electromagnetic lock releases. All seven seals broken."
+
+  4:
+    name: "McClane's Counterattack"
+    quote: "Come out to the coast, we'll get together, have a few laughs..."
+    tasks:
+      1:
+        id: "4.1"
+        name: "The Fire Alarm"
+        type: code
+        code: "0025"
+        objective: "Someone pulled a fire alarm. Which floor did it come from? Track the cowboy."
+        spl_hint: 'index=nakatomi_building event_type=alarm_trigger | sort -_time'
+        hints:
+          - "Check the building security logs for alarm events."
+          - "Look for alarm triggers — which floor was it?"
+          - 'Try: index=nakatomi_building event_type=alarm_trigger | sort -_time | head 1'
+          - "Floor 25. Enter 0025."
+        story_beat: "Floor 25. He's getting brave. Send Karl."
+
+      2:
+        id: "4.2"
+        name: "The C4"
+        type: code
+        code: "0004"
+        objective: "The C4 charges are planted. Check the HVAC sensors — abnormal heat signatures reveal the charge locations. How many charges?"
+        spl_hint: 'index=nakatomi_building sourcetype="nakatomi:building:hvac" floor=roof value>95'
+        hints:
+          - "C4 generates heat — check HVAC temperature readings."
+          - "Look at the roof floor for abnormally high temperatures."
+          - 'Try: index=nakatomi_building sourcetype="nakatomi:building:hvac" floor=roof value>95 | stats count'
+          - "4 charges. Enter 0004."
+        story_beat: "Four charges — enough to blow the roof. The FBI won't know what hit them."
+
+      3:
+        id: "4.3"
+        name: "Powell's Radio"
+        type: code
+        code: "8114"
+        objective: "LAPD Sergeant Powell is on the radio — he's talking to McClane. Find his badge number in the police dispatch."
+        spl_hint: 'index=nakatomi_comms channel=freq_12 powell'
+        hints:
+          - "Powell is LAPD — check their tactical frequency."
+          - "Search the radio logs for 'powell'."
+          - 'Try: index=nakatomi_comms channel=freq_12 | search powell'
+          - "Badge 8114. Enter 8114."
+        story_beat: "Powell — badge 8114. He's McClane's lifeline. If we cut that connection, the cowboy is alone."
+
+      4:
+        id: "4.4"
+        name: "The Detonators"
+        type: code
+        code: "0003"
+        objective: "McClane stole detonators from our stash. The vault system tracks inventory. How many are missing?"
+        spl_hint: 'index=nakatomi_vault sourcetype="nakatomi:vault:system" system=detonator_inventory'
+        hints:
+          - "Our equipment is tracked in the vault system."
+          - "Check detonator inventory — compare original count to current."
+          - 'Try: index=nakatomi_vault sourcetype="nakatomi:vault:system" system=detonator_inventory'
+          - "3 detonators missing. Enter 0003."
+        story_beat: "Three detonators. He's going to use them against us. This changes the timeline."
+
+      5:
+        id: "4.5"
+        name: "Roof Timing"
+        type: code
+        code: "2330"
+        objective: "The FBI helicopter assault is coming. Find the ETA in their tactical comms — enter it as a 4-digit time (HHMM)."
+        spl_hint: 'index=nakatomi_comms channel=freq_14 helicopter'
+        hints:
+          - "The FBI broadcasts on freq_14."
+          - "Check their tactical channel for helicopter timing."
+          - 'Try: index=nakatomi_comms channel=freq_14 | search helicopter'
+          - "ETA 23:30. Enter 2330."
+        story_beat: "23:30 — that's when the lights go out. Everything is on schedule."
+
+  5:
+    name: "The Escape"
+    quote: "Yippee-ki-yay."
+    tasks:
+      1:
+        id: "5.1"
+        name: "The Ambulance"
+        type: code
+        code: "2819"
+        objective: "Theo is prepping our exit. Find the ambulance's vehicle ID in the parking registry."
+        spl_hint: '| inputlookup vehicle_registry.csv | search vehicle_type=ambulance'
+        hints:
+          - "Our getaway vehicle is registered in the parking system."
+          - "Look up the vehicle registry for an ambulance."
+          - 'Try: | inputlookup vehicle_registry.csv | search vehicle_type=ambulance'
+          - "AMB-2819. Enter 2819."
+        story_beat: "The ambulance is ready. $640 million — let's load it up."
+
+      2:
+        id: "5.2"
+        name: "Bond Transfer"
+        type: code
+        code: "0005"
+        objective: "Verify the bearer bonds. How many distinct bond series are in the vault?"
+        spl_hint: '| inputlookup bearer_bonds.csv | stats dc(bond_series)'
+        hints:
+          - "The bonds are catalogued — check the lookup tables."
+          - "Count the distinct bond series in the bearer bonds manifest."
+          - 'Try: | inputlookup bearer_bonds.csv | stats dc(bond_series)'
+          - "5 series. Enter 0005."
+        story_beat: "Five series confirmed. All $640 million accounted for."
+
+      3:
+        id: "5.3"
+        name: "Exit Route"
+        type: code
+        code: "0002"
+        objective: "SWAT has the perimeter. Find which floor exit still has power and no SWAT coverage — check power grid and camera feeds."
+        spl_hint: 'index=nakatomi_building sourcetype="nakatomi:building:power" status=active'
+        hints:
+          - "Some exits are blocked by SWAT, some have lost power."
+          - "Cross-reference active power zones with SWAT positions in camera feeds."
+          - 'Try: index=nakatomi_building sourcetype="nakatomi:building:power" status=active | lookup camera_coverage floor OUTPUT swat_coverage'
+          - "Floor 2 — the loading dock. Enter 0002."
+        story_beat: "The loading dock on floor 2. No SWAT coverage. Theo — bring the ambulance around."
+
+      4:
+        id: "5.4"
+        name: "Final Extraction"
+        type: code
+        code: "0200"
+        objective: "The deadline Hans gave the FBI — when does the building come down? Find it in the negotiations. Enter the time as HHMM."
+        spl_hint: 'index=nakatomi_comms channel=freq_14 deadline'
+        hints:
+          - "Hans gave the FBI a deadline. It's in the communications."
+          - "Check the negotiation transcripts — what time did he threaten?"
+          - 'Try: index=nakatomi_comms channel=freq_14 | search deadline'
+          - "02:00 AM. Enter 0200."
+        story_beat: "The vault is open. $640 million loaded. Merry Christmas."
+
+# ── Seal Codes (Act 3, for backward compat) ──────────────────────
 seals:
   1:
     code: "2512"
@@ -40,7 +440,6 @@ seals:
     sourcetype: "nakatomi:access:badge"
     embed_field: detail
     embed_value: "security override engaged, vault protocol initiated, access_code=2512"
-
   2:
     code: "7439"
     description: "Vault maintenance cycle"
@@ -48,7 +447,6 @@ seals:
     sourcetype: "nakatomi:access:badge"
     embed_field: detail
     embed_value: "exec_calendar: vault maintenance cycle 7439 — rotation scheduled 2025-12-25T02:00"
-
   3:
     code: "4291"
     description: "Takagi's failed input sequence"
@@ -56,7 +454,6 @@ seals:
     sourcetype: "nakatomi:vault:attempt"
     embed_field: detail
     embed_sequence: ["input=4", "input=2", "input=9", "input=1"]
-
   4:
     code: "8086"
     description: "HVAC encoded message (ROT13)"
@@ -64,7 +461,6 @@ seals:
     sourcetype: "nakatomi:building:hvac"
     embed_field: encoded_message
     embed_value_rot13: "THERE IS NO POWER WITHOUT CODE 8086"
-
   5:
     code: "5765"
     description: "FBI tactical authorization"
@@ -72,17 +468,15 @@ seals:
     sourcetype: "nakatomi:building:security"
     embed_field: message
     embed_value: "FBI FIELD CMD // GRID-SEC-7 // AUTH:5765 // PRIORITY:IMMEDIATE // CONFIRM POWER DISCONNECT"
-
   6:
     code: "3940"
     description: "Vault auth code via employee lookup"
     index: null
     sourcetype: null
     embed_location: "system_codes.csv → clearance_level=LEVEL-5 → vault_auth_code"
-
   7:
     code: null
-    description: "Meta — unplug power (no code)"
+    description: "Meta — power cut (no code)"
 
 # ── Characters ───────────────────────────────────────────────────
 characters:
@@ -130,6 +524,28 @@ characters:
       clearance: LEVEL-1
       role: driver
 
+  law_enforcement:
+    - badge_id: LAPD-8114
+      name: Sgt Al Powell
+      department: LAPD
+      role: patrol
+    - badge_id: FBI-3320
+      name: Agent Johnson
+      department: FBI
+      role: special_agent
+    - badge_id: FBI-3321
+      name: Agent Johnson
+      department: FBI
+      role: special_agent_2
+    - badge_id: SWAT-0010
+      name: Cpt Mitchell
+      department: LAPD SWAT
+      role: swat_lead
+    - badge_id: LAPD-9900
+      name: Dwayne Robinson
+      department: LAPD
+      role: deputy_chief
+
   supporting:
     - badge_id: MAINT-007
       name: Eduardo Vasquez
@@ -156,20 +572,20 @@ characters:
 building:
   name: Nakatomi Plaza
   floors:
-    - { number: "B2",   name: "Parking Level 2",        group: basement,  restricted: false }
-    - { number: "B1",   name: "Vault Level",            group: basement,  restricted: true }
-    - { number: 1,      name: "Main Lobby",             group: lobby,     restricted: false }
-    - { number: 2,      name: "Mail Room / Loading",    group: lower,     restricted: false }
-    - { number: 3,      name: "Building Maintenance",   group: lower,     restricted: false }
-    - { number: 5,      name: "Legal / Compliance",     group: lower,     restricted: false }
-    - { number: 10,     name: "Human Resources",        group: mid,       restricted: false }
-    - { number: 15,     name: "International Trade",    group: mid,       restricted: false }
-    - { number: 20,     name: "Finance",                group: upper,     restricted: false }
-    - { number: 25,     name: "R&D / Tech",             group: upper,     restricted: true }
-    - { number: 28,     name: "Executive Support",      group: upper,     restricted: true }
-    - { number: 30,     name: "Executive Suite / Event", group: upper,    restricted: true }
-    - { number: 35,     name: "CEO / Board",            group: penthouse, restricted: true }
-    - { number: "roof", name: "Mechanical / Helipad",   group: roof,      restricted: true }
+    - { number: "B2",   name: "Parking Level 2",         group: basement,  restricted: false }
+    - { number: "B1",   name: "Vault Level",             group: basement,  restricted: true }
+    - { number: 1,      name: "Main Lobby",              group: lobby,     restricted: false }
+    - { number: 2,      name: "Mail Room / Loading",     group: lower,     restricted: false }
+    - { number: 3,      name: "Building Maintenance",    group: lower,     restricted: false }
+    - { number: 5,      name: "Legal / Compliance",      group: lower,     restricted: false }
+    - { number: 10,     name: "Human Resources",         group: mid,       restricted: false }
+    - { number: 15,     name: "International Trade",     group: mid,       restricted: false }
+    - { number: 20,     name: "Finance",                 group: upper,     restricted: false }
+    - { number: 25,     name: "R&D / Tech",              group: upper,     restricted: true }
+    - { number: 28,     name: "Executive Support",       group: upper,     restricted: true }
+    - { number: 30,     name: "Executive Suite / Event",  group: upper,    restricted: true }
+    - { number: 35,     name: "CEO / Board",             group: penthouse, restricted: true }
+    - { number: "roof", name: "Mechanical / Helipad",    group: roof,      restricted: true }
 
 # ── Event Volume Tuning ──────────────────────────────────────────
 volume:
@@ -181,6 +597,12 @@ volume:
   vault_system_checks_per_hour: 4
   security_events_per_hour_normal: 8
   security_events_per_hour_fbi: 25
+  phone_events_per_hour: 30
+  radio_events_per_hour_normal: 5
+  radio_events_per_hour_active: 20
+  camera_events_per_hour: 60
+  elevator_events_per_hour: 40
+  power_readings_interval_minutes: 10
 
 # ── Red Herrings ─────────────────────────────────────────────────
 red_herrings:
@@ -235,9 +657,6 @@ red_herrings:
       floor: 15
     - encoded_message_rot13: "ANNUAL INSPECTION DUE 2026-01-15"
       floor: 10
-    - event: elevator_call
-      floor: roof
-      detail: "service_code: E-4401"
 
   seal_5:
     - channel: freq_12
@@ -280,7 +699,19 @@ output:
       sourcetypes:
         - "nakatomi:building:hvac"
         - "nakatomi:building:security"
+        - "nakatomi:security:camera"
+        - "nakatomi:building:elevator"
+        - "nakatomi:building:power"
+    - filename: "nakatomi_comms.json"
+      index: nakatomi_comms
+      sourcetypes:
+        - "nakatomi:comms:radio"
+        - "nakatomi:comms:phone"
   lookups:
     - filename: "floor_directory.csv"
     - filename: "employee_directory.csv"
     - filename: "system_codes.csv"
+    - filename: "radio_channels.csv"
+    - filename: "camera_coverage.csv"
+    - filename: "bearer_bonds.csv"
+    - filename: "vehicle_registry.csv"

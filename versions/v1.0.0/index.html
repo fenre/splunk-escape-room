@@ -1133,9 +1133,9 @@
     <div class="badges">
       <span class="badge"><span class="dot red"></span> Splunk-Powered</span>
       <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
-      <span class="badge"><span class="dot green"></span> 5 Acts &middot; 26 Tasks</span>
+      <span class="badge"><span class="dot green"></span> 7 Seals</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
-      <span class="badge"><span class="dot green"></span> v2.0 &middot; Playable</span>
+      <span class="badge"><span class="dot green"></span> Deployed &amp; Playable</span>
     </div>
 
     <div class="hero-line"></div>
@@ -1152,8 +1152,8 @@
   <nav class="toc">
     <div class="container">
       <a href="#concept">Concept</a>
-      <a href="#phases">Five Acts</a>
-      <a href="#seals">Puzzle Catalogue</a>
+      <a href="#phases">Game Phases</a>
+      <a href="#seals">Seven Seals</a>
       <a href="#roles">Player Roles</a>
       <a href="#architecture">Architecture</a>
       <a href="#data">Data Model</a>
@@ -1170,9 +1170,9 @@
   <section id="concept">
     <div class="container">
       <h2><span class="section-num">01</span> The Concept</h2>
-      <p class="lead">An inverse escape room where players break <em>in</em> instead of out. Use Splunk to complete 26 tasks across five acts &mdash; from the Christmas party to the vault heist.</p>
+      <p class="lead">An inverse escape room where players break <em>in</em> instead of out. Use Splunk to crack a vault guarded by seven seals.</p>
       <div class="intro-quote">
-        Christmas Eve. Nakatomi Plaza, Los Angeles. A tower of glass and steel, and tonight there's a party on the thirtieth floor. You're not here for the party. You're part of the team that just took the building. Five acts. Twenty-six tasks. From party recon to the final extraction. There's a vault. Seven locks. $640 million in bearer bonds. The man who knew the codes is gone. So we crack it ourselves.
+        Christmas Eve. Nakatomi Plaza, Los Angeles. A tower of glass and steel, and tonight there's a party on the thirtieth floor. You're not here for the party. You're part of the team that just took the building. There's a vault. Seven locks. Bearer bonds inside &mdash; a fortune. The man who knew the codes isn't giving them up. So we crack it ourselves.
       </div>
       <div class="concept-grid">
         <div class="concept-card">
@@ -1202,44 +1202,44 @@
   <!-- 2. Game Phases -->
   <section id="phases">
     <div class="container">
-      <h2><span class="section-num">02</span> Five Acts</h2>
-      <p>90 minutes. Five acts following the Die Hard movie timeline. 26 tasks across the heist.</p>
+      <h2><span class="section-num">02</span> Game Phases</h2>
+      <p>45&ndash;60 minutes. Four phases plus the final seal. Each phase builds on the last.</p>
 
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">Act 1 &middot; 5 tasks &middot; 18:00&ndash;22:00</div>
-          <div class="timeline-title">The Christmas Party</div>
-          <div class="timeline-desc">Recon the building: headcount, locate Takagi, find security gaps, decode Argyle's message, identify vault personnel.</div>
-          <div class="timeline-hint">"40th floor. Just had their Christmas party."</div>
+          <div class="timeline-time">0:00 &ndash; 0:08 &middot; ~8 min</div>
+          <div class="timeline-title">Phase 1 &mdash; Lobby (Infiltration)</div>
+          <div class="timeline-desc">Enter the building's data in Splunk. Prove you have access. Run your first search.</div>
+          <div class="timeline-hint">McClane hint: "Unaccounted for person in building"</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">Act 2 &middot; 5 tasks &middot; 22:00&ndash;22:15</div>
-          <div class="timeline-title">The Takeover</div>
-          <div class="timeline-desc">Cut communications, lock elevators, time guard rotations, secure hostages, intercept 911 calls.</div>
-          <div class="timeline-hint">"Nice suit. John Phillips, London."</div>
+          <div class="timeline-time">0:08 &ndash; 0:18 &middot; ~10 min</div>
+          <div class="timeline-title">Phase 2 &mdash; Reconnaissance</div>
+          <div class="timeline-desc">Map the tower: floors, cameras, guards, restricted areas. Find the vault floor. Build a dashboard.</div>
+          <div class="timeline-hint">McClane hint: "Radio traffic &mdash; unknown unit"</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">Act 3 &middot; 7 tasks &middot; 22:15&ndash;23:15</div>
-          <div class="timeline-title">The Vault</div>
-          <div class="timeline-desc">Crack seven vault seals: lobby override, vault location, Takagi's codes, roof trap, FBI authorization, bearer bonds, and the meta power-cut.</div>
-          <div class="timeline-hint">"You want money? What kind of terrorists are you?"</div>
+          <div class="timeline-time">0:18 &ndash; 0:28 &middot; ~10 min</div>
+          <div class="timeline-title">Phase 3 &mdash; Access Control</div>
+          <div class="timeline-desc">Find a bypass code, badge ID, or time window. Unlock the vault phase. Takagi won't help.</div>
+          <div class="timeline-hint">McClane hint: "Personnel down &mdash; we've lost contact"</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">Act 4 &middot; 5 tasks &middot; 23:15&ndash;23:45</div>
-          <div class="timeline-title">McClane's Counterattack</div>
-          <div class="timeline-desc">Track the fire alarm, count C4 charges, identify Powell, count stolen detonators, find the helicopter ETA.</div>
-          <div class="timeline-hint">"Come out to the coast, we'll get together, have a few laughs."</div>
+          <div class="timeline-time">0:28 &ndash; 0:50 &middot; ~22 min</div>
+          <div class="timeline-title">Phase 4 &mdash; The Vault (Seals 1&ndash;6)</div>
+          <div class="timeline-desc">Open six seals with codes found in Splunk. Use rex, transaction, lookups, and time ranges to extract them.</div>
+          <div class="timeline-hint">McClane hint: "Movement in HVAC" / "Just another American who saw too many movies"</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">Act 5 &middot; 4 tasks &middot; 23:45&ndash;02:00</div>
-          <div class="timeline-title">The Escape</div>
-          <div class="timeline-desc">Locate the getaway ambulance, verify bond inventory, find an exit with no SWAT, confirm the deadline.</div>
-          <div class="timeline-hint">"Yippee-ki-yay."</div>
+          <div class="timeline-time">0:50 &ndash; 1:00 &middot; ~10 min</div>
+          <div class="timeline-title">Seal 7 &mdash; The Meta Solution</div>
+          <div class="timeline-desc">No code in Splunk. The final seal requires a physical trick &mdash; unplug the power, flip a hidden switch, or cut the cable.</div>
+          <div class="timeline-hint">McClane hint: "He's here."</div>
         </div>
       </div>
     </div>
@@ -1248,53 +1248,55 @@
   <!-- 3. Seven Seals -->
   <section id="seals">
     <div class="container">
-      <h2><span class="section-num">03</span> Puzzle Catalogue</h2>
-      <p>26 tasks across five acts. Each answer is a 4-digit code found through Splunk queries, lookup cross-references, cipher decoding, or meta solutions.</p>
+      <h2><span class="section-num">03</span> The Seven Seals</h2>
+      <p>In the film, the Nakatomi vault has seven locks. Our game follows the same idea. Six are cracked with data; the seventh rewards thinking outside the system.</p>
 
       <div class="seals-row">
         <div class="seal">
-          <div class="seal-circle">5</div>
-          <div class="seal-label">Act 1</div>
-          <div class="seal-method">Recon</div>
+          <div class="seal-circle">1</div>
+          <div class="seal-label">Seal 1</div>
+          <div class="seal-method">SPL code</div>
         </div>
         <div class="seal">
-          <div class="seal-circle">5</div>
-          <div class="seal-label">Act 2</div>
-          <div class="seal-method">Takeover</div>
+          <div class="seal-circle">2</div>
+          <div class="seal-label">Seal 2</div>
+          <div class="seal-method">SPL code</div>
         </div>
         <div class="seal">
-          <div class="seal-circle">7</div>
-          <div class="seal-label">Act 3</div>
-          <div class="seal-method">Vault seals</div>
-        </div>
-        <div class="seal">
-          <div class="seal-circle">5</div>
-          <div class="seal-label">Act 4</div>
-          <div class="seal-method">Counter</div>
+          <div class="seal-circle">3</div>
+          <div class="seal-label">Seal 3</div>
+          <div class="seal-method">SPL code</div>
         </div>
         <div class="seal">
           <div class="seal-circle">4</div>
-          <div class="seal-label">Act 5</div>
-          <div class="seal-method">Escape</div>
+          <div class="seal-label">Seal 4</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">5</div>
+          <div class="seal-label">Seal 5</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">6</div>
+          <div class="seal-label">Seal 6</div>
+          <div class="seal-method">SPL code</div>
+        </div>
+        <div class="seal">
+          <div class="seal-circle">?</div>
+          <div class="seal-label">Seal 7</div>
+          <div class="seal-method">Meta solution</div>
         </div>
       </div>
 
       <div class="concept-grid">
         <div class="concept-card">
-          <h4>SPL Queries</h4>
-          <p>Most tasks are solved with SPL: <code>stats dc()</code>, <code>sort</code>, <code>lookup</code>, <code>rex</code>, <code>transaction</code>, time ranges, and cross-references between indexes and lookups. Answers are 4-digit codes entered on the vault keypad.</p>
+          <h4>Seals 1&ndash;6: Data-Driven</h4>
+          <p>Each seal's code is hidden in vault logs, maintenance logs, or Takagi's memos. Players extract them with SPL commands like <code>rex</code>, <code>transaction</code>, <code>lookup</code>, and time-range searches. Codes are entered on the physical model's keypad, dials, or switches.</p>
         </div>
         <div class="concept-card">
-          <h4>Ciphers &amp; Cross-Refs</h4>
-          <p>Some tasks require decoding ROT13 messages, cross-referencing multiple lookups, or combining clues from different data sources. One task is a meta solution &mdash; the power cut from the movie.</p>
-        </div>
-        <div class="concept-card">
-          <h4>Progressive Hints</h4>
-          <p>Each task has four levels of hints: a gentle nudge, a direction, the SPL query, and finally the answer. Using hints reduces your score but keeps you moving forward.</p>
-        </div>
-        <div class="concept-card">
-          <h4>Scoring &amp; Dossier</h4>
-          <p>Points awarded per task based on speed and hint usage. Completing a task reveals a story beat and adds intel to your dossier &mdash; building the narrative as you progress through the heist.</p>
+          <h4>Seal 7: The Movie Twist</h4>
+          <p>The system never tells you how to open the last seal. Options: unplug the vault's power cable (relay detects power loss), find a hidden switch on the model, or "cut" a prop cable. The data might hint: <em>"failsafe: secondary release on power loss"</em>.</p>
         </div>
       </div>
     </div>
@@ -1343,33 +1345,33 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk App <span class="tag live">v2.0</span></h4>
+          <h4>Splunk App <span class="tag live">Deployed</span></h4>
           <ul>
-            <li>4 indexes: <code>nakatomi_access</code>, <code>nakatomi_vault</code>, <code>nakatomi_building</code>, <code>nakatomi_comms</code></li>
-            <li>~2,200 events across 11 sourcetypes</li>
-            <li>7 CSV lookup tables</li>
-            <li>7 dashboards (Mission Brief, Search, Access, Vault, Building, Comms, Terminal)</li>
-            <li>HEC data loader script</li>
+            <li>Index: <code>nakatomi_access</code> (508 events)</li>
+            <li>Index: <code>nakatomi_vault</code> (77 events)</li>
+            <li>Index: <code>nakatomi_building</code> (248 events)</li>
+            <li>App: "Nakatomi Heist" with Mission Brief</li>
+            <li>3 lookups, 7 sourcetypes, HEC loader</li>
           </ul>
         </div>
         <div class="arch-box">
           <h4>Data Generator <span class="tag ready">Ready</span></h4>
           <ul>
             <li>Python script (deterministic seed)</li>
-            <li>~2,200 events across 11 sourcetypes</li>
-            <li>7 CSV lookup tables</li>
-            <li>26 embedded task answers &amp; red herrings</li>
+            <li>833 events across 6 sourcetypes</li>
+            <li>3 CSV lookup tables</li>
+            <li>Embedded codes &amp; red herrings</li>
             <li>HEC-format JSON output</li>
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Game UI <span class="tag ready">v2.0</span></h4>
+          <h4>Game UI <span class="tag ready">Ready</span></h4>
           <ul>
             <li>Dual mode: physical or digital</li>
-            <li>5-act navigation, 26 tasks</li>
-            <li>Progressive hint system (4 levels)</li>
-            <li>Scoring system &amp; dossier panel</li>
-            <li>Story beat overlays &amp; facilitator controls</li>
+            <li>Code entry, seal status, timer</li>
+            <li>Clue card reveals (7 styled cards)</li>
+            <li>Digital Seal 7 (power element)</li>
+            <li>Facilitator controls (F key)</li>
           </ul>
         </div>
 
@@ -1387,8 +1389,8 @@
         <div class="arch-box span-full">
           <h4>Splunk Environment <span class="tag live">Live</span></h4>
           <ul>
-            <li>Search head &mdash; dashboards, searches, knowledge objects</li>
-            <li>Indexer &mdash; ~2,200 events across 4 indexes</li>
+            <li>Search head (rev) &mdash; dashboards, searches, knowledge objects</li>
+            <li>Indexer (mink) &mdash; 833 events indexed across 3 indexes</li>
             <li>HEC ingestion via port 8088</li>
             <li>Splunk 10.2.0 &middot; distributed deployment</li>
           </ul>
@@ -1412,7 +1414,7 @@
   <section id="data">
     <div class="container">
       <h2><span class="section-num">06</span> Data Model</h2>
-      <p>~2,200 synthetic events across 4 indexes and 11 sourcetypes. 7 lookup tables. Answers are embedded so correct SPL produces the intended solution.</p>
+      <p>Synthetic log data tells the story. Answers are embedded so correct SPL produces the intended solution.</p>
 
       <table class="data-table">
         <thead>
@@ -1427,32 +1429,26 @@
           <tr>
             <td>Access Logs</td>
             <td><code>nakatomi_access</code></td>
-            <td><code>badge_id</code>, <code>floor</code>, <code>room</code>, <code>action</code>, <code>outcome</code></td>
-            <td>Badge swipes, door events, overrides, access patterns</td>
+            <td><code>timestamp</code>, <code>floor</code>, <code>room</code>, <code>badge_id</code>, <code>outcome</code></td>
+            <td>Badge events, guard patrols, access patterns</td>
           </tr>
           <tr>
             <td>Vault Logs</td>
             <td><code>nakatomi_vault</code></td>
-            <td><code>session_id</code>, <code>user</code>, <code>action</code>, <code>detail</code>, <code>system</code></td>
-            <td>Code attempts, vault sessions, detonator inventory</td>
+            <td><code>timestamp</code>, <code>action</code>, <code>detail</code>, <code>result</code></td>
+            <td>Code attempts, door status, seal protocols</td>
           </tr>
           <tr>
-            <td>Building Systems</td>
+            <td>Building / Sensor</td>
             <td><code>nakatomi_building</code></td>
-            <td><code>system</code>, <code>floor</code>, <code>event_type</code>, <code>value</code>, <code>status</code></td>
-            <td>HVAC, cameras, elevator, power grid, security events</td>
+            <td><code>timestamp</code>, <code>system</code>, <code>event</code>, <code>floor</code>, <code>value</code></td>
+            <td>Elevator, HVAC, power, camera events</td>
           </tr>
           <tr>
-            <td>Communications</td>
-            <td><code>nakatomi_comms</code></td>
-            <td><code>channel</code>, <code>message</code>, <code>trunk_id</code>, <code>caller_badge</code>, <code>status</code></td>
-            <td>Radio intercepts, phone system, trunk lines</td>
-          </tr>
-          <tr>
-            <td>Lookups (7)</td>
+            <td>Lookup</td>
             <td>&mdash;</td>
-            <td><code>employee_directory</code>, <code>floor_directory</code>, <code>system_codes</code>, <code>radio_channels</code>, <code>camera_coverage</code>, <code>bearer_bonds</code>, <code>vehicle_registry</code></td>
-            <td>Cross-reference tables for puzzles</td>
+            <td><code>floor_id</code> &rarr; <code>name</code></td>
+            <td>Floor names: "Lobby", "Vault Floor", etc.</td>
           </tr>
         </tbody>
       </table>
@@ -1473,7 +1469,7 @@
         </div>
         <div class="fail-card">
           <h4>McClane</h4>
-          <div class="trigger">7 wrong code attempts across all tasks.</div>
+          <div class="trigger">3 wrong seal code attempts on the physical model.</div>
           <div class="quote">"McClane got the drop on you."</div>
         </div>
         <div class="fail-card">
@@ -1596,17 +1592,13 @@ flowchart LR
       <div class="spl-grid">
         <span class="spl-tag">search</span>
         <span class="spl-tag">stats</span>
-        <span class="spl-tag">stats dc()</span>
         <span class="spl-tag">eval</span>
         <span class="spl-tag">rex</span>
         <span class="spl-tag">lookup</span>
-        <span class="spl-tag">inputlookup</span>
         <span class="spl-tag">transaction</span>
         <span class="spl-tag">where</span>
         <span class="spl-tag">sort</span>
-        <span class="spl-tag">head</span>
         <span class="spl-tag">table</span>
-        <span class="spl-tag">delta</span>
         <span class="spl-tag">mvcombine</span>
       </div>
 
@@ -1614,12 +1606,12 @@ flowchart LR
       <div class="spl-grid">
         <span class="spl-tag">time modifiers</span>
         <span class="spl-tag">time-range searches</span>
-        <span class="spl-tag">cross-index correlation</span>
-        <span class="spl-tag">lookup cross-reference</span>
-        <span class="spl-tag">field extraction</span>
-        <span class="spl-tag">distinct count</span>
-        <span class="spl-tag">time-delta analysis</span>
         <span class="spl-tag">dashboards &amp; panels</span>
+        <span class="spl-tag">saved searches</span>
+        <span class="spl-tag">alerts &amp; triggers</span>
+        <span class="spl-tag">drilldown</span>
+        <span class="spl-tag">lookups (CSV)</span>
+        <span class="spl-tag">field extraction</span>
       </div>
     </div>
   </section>
@@ -1693,34 +1685,36 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Data &amp; Puzzles <span class="status done">v2.0</span></h4>
+          <h4>Data &amp; Puzzles <span class="status done">Complete</span></h4>
           <ul>
-            <li class="done">26-task puzzle catalogue across 5 acts</li>
-            <li class="done">11 sourcetypes, 4 indexes, 7 lookups</li>
-            <li class="done">Python data generator (~2,200 events)</li>
-            <li class="done">Progressive hint system (4 levels per task)</li>
-            <li class="done">Scoring system &amp; dossier</li>
-            <li class="done">Red herrings &amp; embedded answers</li>
+            <li class="done">Complete puzzle catalogue (all 7 seals)</li>
+            <li class="done">Data schemas (6 sourcetypes, 3 indexes, 3 lookups)</li>
+            <li class="done">Python data generator (~830 events)</li>
+            <li class="done">Player experience design (dashboard, progression)</li>
+            <li class="done">Seal codes &amp; red herrings specified</li>
+            <li class="done">Splunk config (props/transforms/indexes)</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Game UI <span class="status done">v2.0</span></h4>
+          <h4>Game UI <span class="status done">Complete</span></h4>
           <ul>
-            <li class="done">5-act navigation with 26 task definitions</li>
-            <li class="done">Progressive hints (H key) &amp; scoring</li>
-            <li class="done">Dossier panel (D key) for collected intel</li>
-            <li class="done">Story beat overlays after each task</li>
-            <li class="done">Digital Seal 7 (power element)</li>
-            <li class="done">90-minute timer &amp; 7-error limit</li>
+            <li class="done">Dual-mode support (physical + digital)</li>
+            <li class="done">Digital keypad &amp; code validation</li>
+            <li class="done">Seal status panel (LED-style indicators)</li>
+            <li class="done">Clue card reveals (7 styled compartment cards)</li>
+            <li class="done">Interactive ROT13 decoder (Seal 3)</li>
+            <li class="done">Digital Seal 7 (hidden power element)</li>
+            <li class="done">Timer, game over, victory overlays</li>
             <li class="done">Facilitator controls (F key)</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Splunk App <span class="status done">v2.0</span></h4>
+          <h4>Splunk App <span class="status done">Complete</span></h4>
           <ul>
-            <li class="done">4 indexes (access, vault, building, comms)</li>
-            <li class="done">11 sourcetypes, 7 lookup tables</li>
-            <li class="done">7 dashboards (Mission Brief, Search, Access, Vault, Building, Comms, Terminal)</li>
+            <li class="done">App scaffold (app.conf, metadata)</li>
+            <li class="done">Indexes (access, vault, building)</li>
+            <li class="done">Props &amp; transforms (7 sourcetypes, 3 lookups)</li>
+            <li class="done">Mission Brief dashboard (Dashboard Studio)</li>
             <li class="done">Packaged .spl for install</li>
             <li class="done">HEC data loading script</li>
           </ul>
@@ -1728,11 +1722,11 @@ flowchart LR
         <div class="roadmap-card">
           <h4>Deployment <span class="status done">Complete</span></h4>
           <ul>
-            <li class="done">App deployed to distributed Splunk</li>
-            <li class="done">4 indexes created &amp; ~2,200 events loaded via batch input</li>
-            <li class="done">7 lookup tables populated</li>
-            <li class="done">All dashboards live</li>
-            <li class="done">All 11 sourcetypes parsing correctly</li>
+            <li class="done">App deployed to distributed Splunk (search head + indexer)</li>
+            <li class="done">3 indexes created &amp; 833 events loaded via HEC</li>
+            <li class="done">3 lookup tables populated (73 rows)</li>
+            <li class="done">Mission Brief dashboard live</li>
+            <li class="done">All 7 sourcetypes parsing correctly</li>
           </ul>
         </div>
         <div class="roadmap-card">
@@ -1794,7 +1788,7 @@ flowchart LR
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
     Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
-    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.0.0</button>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v1.0.0</button>
   </footer>
 
   <!-- Release Notes Modal -->
@@ -1808,57 +1802,9 @@ flowchart LR
 
         <div class="rn-version">
           <div class="rn-version-header">
-            <span class="rn-version-num">v2.0.0</span>
-            <span class="rn-version-date">26 Mar 2026</span>
-            <span class="rn-version-tag rn-tag-latest">Full Movie Edition</span>
-          </div>
-          <div class="rn-cat">Game Expansion</div>
-          <ul>
-            <li>Expanded from 7 linear seals to 5 acts with 26 tasks following the Die Hard movie timeline</li>
-            <li>Act 1: The Christmas Party (5 tasks) &mdash; recon, badge counting, security gaps</li>
-            <li>Act 2: The Takeover (5 tasks) &mdash; comms cut, elevator lockdown, hostages</li>
-            <li>Act 3: The Vault (7 tasks) &mdash; the original seven seals with richer context</li>
-            <li>Act 4: McClane's Counterattack (5 tasks) &mdash; fire alarm, C4, Powell, detonators</li>
-            <li>Act 5: The Escape (4 tasks) &mdash; ambulance, bonds, exit route, deadline</li>
-          </ul>
-          <div class="rn-cat">New Data Sources</div>
-          <ul>
-            <li>5 new sourcetypes: nakatomi:comms:radio, nakatomi:comms:phone, nakatomi:security:camera, nakatomi:building:elevator, nakatomi:building:power</li>
-            <li>New nakatomi_comms index for radio intercepts and phone system</li>
-            <li>4 new lookup tables: radio_channels, camera_coverage, bearer_bonds, vehicle_registry</li>
-            <li>~2,200 events (up from ~830) with embedded task answers and red herrings</li>
-          </ul>
-          <div class="rn-cat">Game Mechanics</div>
-          <ul>
-            <li>Progressive hint system with 4 levels per task (press H)</li>
-            <li>Scoring system based on speed and hint usage</li>
-            <li>Dossier panel to review collected intel (press D)</li>
-            <li>Story beat overlays after each task completion</li>
-            <li>90-minute timer (up from 60) and 7-error limit</li>
-          </ul>
-          <div class="rn-cat">Game UI</div>
-          <ul>
-            <li>Thick 80s CRT bezel with authentic monitor housing</li>
-            <li>7-segment LED display over keypad shows entered code digits</li>
-            <li>Task display outside terminal with act progress strip</li>
-            <li>Improved text contrast and terminal readability</li>
-            <li>SPL hint formatting with proper line wrapping</li>
-          </ul>
-          <div class="rn-cat">Splunk App</div>
-          <ul>
-            <li>New Communications Terminal dashboard for nakatomi_comms</li>
-            <li>All dashboards updated for v2.0 data sources and task structure</li>
-            <li>Search Terminal now shows all 26 task objectives with starting queries</li>
-            <li>Mission Brief updated with 5-act structure and new indexes/lookups</li>
-            <li>Per-sourcetype batch input .log files (replaces monolithic JSON)</li>
-            <li>All 26 task answers verified against generated data</li>
-          </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
             <span class="rn-version-num">v1.0.0</span>
             <span class="rn-version-date">25 Mar 2026</span>
+            <span class="rn-version-tag rn-tag-latest">First Major Release</span>
           </div>
           <div class="rn-cat">Splunk App</div>
           <ul>
@@ -1894,47 +1840,6 @@ flowchart LR
             <li>Synthwave hero with Start Game button</li>
             <li>Tower SVG cross-section illustration</li>
             <li>Flow diagrams, timeline, and physical model BOM</li>
-          </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
-            <span class="rn-version-num">v0.9.0</span>
-            <span class="rn-version-date">22 Mar 2026</span>
-          </div>
-          <div class="rn-cat">Splunk App</div>
-          <ul>
-            <li>App scaffold (app.conf, metadata, nav)</li>
-            <li>Index definitions, props.conf, transforms.conf</li>
-            <li>HEC data loader script and data generator</li>
-          </ul>
-          <div class="rn-cat">Game UI</div>
-          <ul>
-            <li>Dual-mode support (physical + digital)</li>
-            <li>Digital keypad and code validation</li>
-            <li>Seal status panel with LED indicators</li>
-            <li>7 styled clue card reveals</li>
-            <li>Interactive ROT13 decoder (Seal 3)</li>
-            <li>Digital Seal 7 (hidden power element)</li>
-            <li>Timer, game over, and victory overlays</li>
-            <li>Facilitator controls (F key)</li>
-          </ul>
-        </div>
-
-        <div class="rn-version">
-          <div class="rn-version-header">
-            <span class="rn-version-num">v0.5.0</span>
-            <span class="rn-version-date">20 Mar 2026</span>
-          </div>
-          <div class="rn-cat">Design</div>
-          <ul>
-            <li>Full design document and story/narrative</li>
-            <li>Complete puzzle catalogue (all 7 seals)</li>
-            <li>Data schemas (6 sourcetypes, 3 indexes, 3 lookups)</li>
-            <li>Python data generator (~830 events)</li>
-            <li>Physical model design (electronics, locks, BOM)</li>
-            <li>Tower SVG cross-section illustration</li>
-            <li>Flow diagrams and timeline</li>
           </ul>
         </div>
 

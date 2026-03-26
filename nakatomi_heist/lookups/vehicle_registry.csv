@@ -1,0 +1,9 @@
+vehicle_id,vehicle_type,make_model,color,parking_bay,owner,status,license_plate
+LIM-0077,limousine,Lincoln Town Car,Black,B2-BAY-1247,Nakatomi Corp,active,CA-7NKT001
+AMB-2819,ambulance,Ford E-350,White,B2-BAY-08,Pacific Ambulance Inc,active,CA-9AMB819
+VAN-4455,utility,Chevrolet Express,White,B2-BAY-12,Nakatomi Facilities,active,CA-5FAC455
+SED-1122,sedan,Toyota Camry,Silver,B2-BAY-15,Nakatomi Corp,active,CA-3NKT122
+SUV-3001,suv,Ford Explorer,Black,STREET-N1,LAPD,active,EXEMPT-3001
+VAN-3002,van,Lenco BearCat,Black,STREET-N2,LAPD SWAT,active,EXEMPT-3002
+HEL-5500,helicopter,Bell 412,Black,AIRBORNE,FBI,active,N5500FBI
+CAT-0088,van,Ford Transit,White,B2-BAY-20,Santos Catering,active,CA-8CAT088

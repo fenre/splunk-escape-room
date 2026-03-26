@@ -34,9 +34,11 @@ yarn-error.log*
 local/
 metadata/local.meta
 
-# Generator output (regenerate with: cd generator && python generate.py)
+# Generator output (regenerate with: python nakatomi_heist/bin/generate.py)
 generator/output/
 generator/.venv/
+nakatomi_heist/bin/output/
+nakatomi_heist/bin/.venv/
 
 # Packaged app (rebuild with: tar czf nakatomi_heist.spl --exclude=node_modules nakatomi_heist/)
 # nakatomi_heist.spl

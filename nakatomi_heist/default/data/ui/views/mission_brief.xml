@@ -17,9 +17,9 @@
             {"name": "EVENTS", "type": "string"}
           ],
           "columns": [
-            ["nakatomi_access", "nakatomi_vault", "nakatomi_building"],
-            ["Badge swipes, door events, physical access control", "Vault terminal sessions, code attempts, system logs", "HVAC, elevator, power, security radio intercepts"],
-            ["~500", "~80", "~250"]
+            ["nakatomi_access", "nakatomi_vault", "nakatomi_building", "nakatomi_comms"],
+            ["Badge swipes, door events, physical access control", "Vault terminal sessions, code attempts, system logs", "HVAC, elevator, power, cameras, security events", "Radio intercepts, phone system, trunk lines"],
+            ["~1200", "~200", "~1800", "~800"]
           ]
         }
       }
@@ -34,26 +34,28 @@
             {"name": "CONTENTS", "type": "string"}
           ],
           "columns": [
-            ["| inputlookup floor_directory.csv", "| inputlookup employee_directory.csv", "| inputlookup system_codes.csv"],
-            ["Floor names, tenants, access restrictions", "Badge IDs, names, departments, clearance levels", "System authorization codes by clearance level"]
+            ["| inputlookup floor_directory.csv", "| inputlookup employee_directory.csv", "| inputlookup system_codes.csv", "| inputlookup radio_channels.csv", "| inputlookup camera_coverage.csv", "| inputlookup bearer_bonds.csv", "| inputlookup vehicle_registry.csv"],
+            ["Floor names, tenants, access restrictions", "Badge IDs, names, departments, clearance levels", "System authorization codes by clearance level", "Radio frequencies, assignments, callsigns, encryption", "Camera IDs, zones, SWAT coverage by floor", "Bond series, denominations, vault drawers", "Vehicle IDs, types, parking bays, owners"]
           ]
         }
       }
     },
-    "ds_seals": {
+    "ds_acts": {
       "type": "ds.test",
-      "name": "Vault Seals",
+      "name": "Act Structure",
       "options": {
         "data": {
           "fields": [
-            {"name": "seal", "type": "string"},
-            {"name": "name", "type": "string"},
-            {"name": "status", "type": "string"}
+            {"name": "ACT", "type": "string"},
+            {"name": "NAME", "type": "string"},
+            {"name": "TASKS", "type": "string"},
+            {"name": "STATUS", "type": "string"}
           ],
           "columns": [
-            ["1", "2", "3", "4", "5", "6", "7"],
-            ["THE LOBBY", "SECURING THE BUILDING", "TAKAGI'S REFUSAL", "THE ROOF TRAP", "THE FBI", "THE BEARER BONDS", "???"],
-            ["LOCKED", "LOCKED", "LOCKED", "LOCKED", "LOCKED", "LOCKED", "???"]
+            ["1", "2", "3", "4", "5"],
+            ["THE CHRISTMAS PARTY", "THE TAKEOVER", "THE VAULT", "McCLANE'S COUNTERATTACK", "THE ESCAPE"],
+            ["5 tasks", "5 tasks", "7 tasks (vault seals)", "5 tasks", "4 tasks"],
+            ["LOCKED", "LOCKED", "LOCKED", "LOCKED", "LOCKED"]
           ]
         }
       }
@@ -63,7 +65,7 @@
     "viz_terminal_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI PLAZA SECURITY TERMINAL v2.1\n> SESSION ACTIVE \u2014 CHRISTMAS EVE \u2014 22:00 PST\n> PRIORITY OVERRIDE ENGAGED\n> \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n```",
+        "markdown": "```\n> NAKATOMI PLAZA SECURITY TERMINAL v2.0\n> SESSION ACTIVE — CHRISTMAS EVE — 22:00 PST\n> PRIORITY OVERRIDE ENGAGED\n> ──────────────────────────────────────────────────────────\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
@@ -79,24 +81,25 @@
     "viz_brief": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "Christmas Eve. Nakatomi Plaza, Los Angeles.\nA tower of glass and steel.\n\nYou're part of the crew. While the rest of the team secures the building, your job is different: **get into Nakatomi's systems**. Their access logs, their building controls, their vault protocols.\n\nThere's a vault in this building. **Seven locks.** Bearer bonds inside \u2014 a fortune. The man who knew the codes isn't giving them up.\n\nSo we crack it ourselves.\n\n**Use the data \u2014 in Splunk \u2014 to find the codes.** Enter them on the vault. Start with the lobby.\n\nOpen the **Search Terminal** to begin your investigation.\n\n*\"Now I have a SPL. Ho-ho-ho.\"*",
+        "markdown": "Christmas Eve. Nakatomi Plaza, Los Angeles.\nA tower of glass and steel.\n\nYou're part of the crew. The building is being taken. Your job: **get into Nakatomi's systems**. Access logs, building controls, communications, vault protocols — all of it.\n\nThere's a vault. **Seven locks.** Bearer bonds inside — $640 million. The man who knew the codes is gone.\n\nSo we crack it ourselves. **Five acts. Twenty-six tasks.**\n\nFrom the Christmas party recon to the final extraction.\n\n**Use the data — in Splunk — to complete each task.** Start with the Search Terminal.\n\n*\"Now I have a SPL. Ho-ho-ho.\"*",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
     },
-    "viz_vault_header": {
+    "viz_acts_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "## > VAULT STATUS",
+        "markdown": "## > OPERATION STATUS",
         "fontColor": "#d4a843",
         "backgroundColor": "#000d00"
       }
     },
-    "viz_vault_display": {
-      "type": "splunk.markdown",
+    "viz_acts_display": {
+      "type": "splunk.table",
+      "title": "FIVE ACTS — 26 TASKS",
+      "dataSources": {"primary": "ds_acts"},
       "options": {
-        "markdown": "```\n\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557\n\u2551  ELECTROMAGNETIC SEAL STATUS      \u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n\u2551                                       \u2551\n\u2551  [\u25a0] SEAL 1  THE LOBBY       LOCKED  \u2551\n\u2551  [\u25a0] SEAL 2  SECURING BLDG   LOCKED  \u2551\n\u2551  [\u25a0] SEAL 3  TAKAGI          LOCKED  \u2551\n\u2551  [\u25a0] SEAL 4  THE ROOF        LOCKED  \u2551\n\u2551  [\u25a0] SEAL 5  THE FBI         LOCKED  \u2551\n\u2551  [\u25a0] SEAL 6  BEARER BONDS    LOCKED  \u2551\n\u2551  [?] SEAL 7  ???              ???    \u2551\n\u2551                                       \u2551\n\u2560\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2563\n\u2551  VAULT: ARMED   POWER: ONLINE      \u2551\n\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d\n```\n\n*Seven seals. One vault. No second chances.*",
-        "fontColor": "#33ff33",
+        "count": 10,
         "backgroundColor": "#000d00"
       }
     },
@@ -114,11 +117,7 @@
       "dataSources": {"primary": "ds_indexes"},
       "options": {
         "count": 10,
-        "backgroundColor": "#000d00",
-        "tableFormat": {
-          "rowBackgroundColors": "> table | seriesByIndex(0) | formatByType(rowBgConfig)",
-          "rowColors": "> table | seriesByIndex(0) | formatByType(rowColorConfig)"
-        }
+        "backgroundColor": "#000d00"
       }
     },
     "viz_lookup_table": {
@@ -141,7 +140,7 @@
     "viz_quickref": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n  Search all access events:   index=nakatomi_access\n  Filter by floor:            index=nakatomi_access | where floor=30\n  Count by field:             index=nakatomi_access | stats count by floor\n  Extract from text:          index=nakatomi_building | rex field=message \"AUTH:(?<auth>\\\\d+)\"\n  Cross-reference:            index=nakatomi_access | lookup employee_directory badge_id\n  Group by session:           index=nakatomi_vault | transaction session_id\n  Read a lookup:              | inputlookup employee_directory.csv\n```",
+        "markdown": "```\n  Search access events:       index=nakatomi_access\n  Search comms:               index=nakatomi_comms\n  Filter by floor:            index=nakatomi_access | where floor=30\n  Count by field:             index=nakatomi_access | stats count by floor\n  Count unique:               index=nakatomi_access | stats dc(badge_id)\n  Extract from text:          index=nakatomi_building | rex field=message \"AUTH:(?<auth>\\\\d+)\"\n  Cross-reference:            index=nakatomi_access | lookup employee_directory badge_id\n  Group by session:           index=nakatomi_vault | transaction session_id\n  Read a lookup:              | inputlookup employee_directory.csv\n  Radio channels:             | inputlookup radio_channels.csv\n  Camera coverage:            | inputlookup camera_coverage.csv\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
@@ -149,7 +148,7 @@
     "viz_warning": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> WARNING: POLICE RESPONSE IMMINENT\n> McCLANE IS IN THE BUILDING\n> THE CLOCK IS RUNNING \u2014 MOVE FAST\n```",
+        "markdown": "```\n> WARNING: POLICE RESPONSE IMMINENT\n> McCLANE IS IN THE BUILDING\n> FBI FIELD COMMAND ON FREQ_14\n> THE CLOCK IS RUNNING — MOVE FAST\n```",
         "fontColor": "#ff3333",
         "backgroundColor": "#0d0000"
       }
@@ -163,15 +162,15 @@
     "structure": [
       {"item": "viz_terminal_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 100}},
       {"item": "viz_brief_header", "type": "block", "position": {"x": 0, "y": 100, "w": 660, "h": 45}},
-      {"item": "viz_brief", "type": "block", "position": {"x": 0, "y": 145, "w": 660, "h": 360}},
-      {"item": "viz_vault_header", "type": "block", "position": {"x": 660, "y": 100, "w": 540, "h": 45}},
-      {"item": "viz_vault_display", "type": "block", "position": {"x": 660, "y": 145, "w": 540, "h": 360}},
-      {"item": "viz_data_header", "type": "block", "position": {"x": 0, "y": 505, "w": 1200, "h": 45}},
-      {"item": "viz_index_table", "type": "block", "position": {"x": 0, "y": 550, "w": 600, "h": 200}},
-      {"item": "viz_lookup_table", "type": "block", "position": {"x": 600, "y": 550, "w": 600, "h": 200}},
-      {"item": "viz_ref_header", "type": "block", "position": {"x": 0, "y": 750, "w": 1200, "h": 45}},
-      {"item": "viz_quickref", "type": "block", "position": {"x": 0, "y": 795, "w": 1200, "h": 210}},
-      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 1005, "w": 1200, "h": 80}}
+      {"item": "viz_brief", "type": "block", "position": {"x": 0, "y": 145, "w": 660, "h": 400}},
+      {"item": "viz_acts_header", "type": "block", "position": {"x": 660, "y": 100, "w": 540, "h": 45}},
+      {"item": "viz_acts_display", "type": "block", "position": {"x": 660, "y": 145, "w": 540, "h": 400}},
+      {"item": "viz_data_header", "type": "block", "position": {"x": 0, "y": 545, "w": 1200, "h": 45}},
+      {"item": "viz_index_table", "type": "block", "position": {"x": 0, "y": 590, "w": 600, "h": 220}},
+      {"item": "viz_lookup_table", "type": "block", "position": {"x": 600, "y": 590, "w": 600, "h": 220}},
+      {"item": "viz_ref_header", "type": "block", "position": {"x": 0, "y": 810, "w": 1200, "h": 45}},
+      {"item": "viz_quickref", "type": "block", "position": {"x": 0, "y": 855, "w": 1200, "h": 260}},
+      {"item": "viz_warning", "type": "block", "position": {"x": 0, "y": 1115, "w": 1200, "h": 80}}
     ]
   }
 }

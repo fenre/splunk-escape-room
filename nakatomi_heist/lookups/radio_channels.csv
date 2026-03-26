@@ -1,0 +1,8 @@
+channel,frequency_mhz,assignment,callsign,encryption,status
+freq_10,462.125,Building Ops,BRAVO-OPS,none,active
+freq_12,462.550,LAPD Tactical,SIERRA-TAC,standard,active
+freq_14,463.175,FBI Field Command,KILO-FOXTROT-BRAVO,encrypted,active
+freq_16,463.500,LAFD Command,DELTA-FIRE,none,active
+freq_18,464.250,Internal Ops,ALPHA-INT,custom,active
+freq_20,464.875,SWAT Tactical,TANGO-SWAT,encrypted,active
+freq_22,465.125,News / Press,MEDIA-1,none,monitored

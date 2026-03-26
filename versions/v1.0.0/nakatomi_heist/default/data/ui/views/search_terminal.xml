@@ -1,0 +1,126 @@
+<dashboard version="2" theme="dark">
+  <label>Search Terminal</label>
+  <description>NAKATOMI PLAZA — DATA QUERY TERMINAL</description>
+  <definition><![CDATA[
+{
+  "title": "Search Terminal",
+  "description": "NAKATOMI PLAZA — DATA QUERY TERMINAL",
+  "dataSources": {
+    "ds_results": {
+      "type": "ds.search",
+      "options": {
+        "query": "$spl_query$ | fields - _bkt _cd _indextime _raw _serial _si _subsecond _sourcetype host index linecount source sourcetype splunk_server",
+        "queryParameters": {
+          "earliest": "0",
+          "latest": "now"
+        }
+      },
+      "name": "Query Results"
+    },
+    "ds_seal_hints": {
+      "type": "ds.test",
+      "name": "Seal Hints",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "SEAL", "type": "string"},
+            {"name": "OBJECTIVE", "type": "string"},
+            {"name": "HINT", "type": "string"}
+          ],
+          "columns": [
+            ["1", "2", "3", "4", "5", "6"],
+            [
+              "Find the security override in the lobby",
+              "Locate the vault floor \u2014 use the blueprint",
+              "Reconstruct Takagi's terminal session",
+              "Decode the message in the HVAC anomaly",
+              "Extract the FBI authorization code",
+              "Cross-reference the badge to find the vault code"
+            ],
+            [
+              "index=nakatomi_access floor=1",
+              "index=nakatomi_access floor>25 | stats count by floor",
+              "index=nakatomi_vault | transaction session_id",
+              "index=nakatomi_building floor=roof system=hvac",
+              "index=nakatomi_building channel=freq_14",
+              "| inputlookup employee_directory.csv | search badge_id=\"NP-4472\""
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> NAKATOMI PLAZA \u2014 DATA QUERY TERMINAL v2.1\n> STATUS: ONLINE    CLEARANCE: OVERRIDE    SESSION: ACTIVE\n> \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n> TYPE SPL QUERY BELOW AND PRESS ENTER\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_results": {
+      "type": "splunk.table",
+      "title": "> QUERY RESULTS",
+      "dataSources": {"primary": "ds_results"},
+      "options": {
+        "count": 50,
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_sidebar_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## > OBJECTIVES\n\n*Current seal targets and suggested starting queries.*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_hints": {
+      "type": "splunk.table",
+      "title": "SEAL OBJECTIVES",
+      "dataSources": {"primary": "ds_seal_hints"},
+      "options": {
+        "count": 10,
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_indexes": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**INDEXES:**\n`nakatomi_access` `nakatomi_vault` `nakatomi_building`\n\n**LOOKUPS:**\n`| inputlookup employee_directory.csv`\n`| inputlookup floor_directory.csv`\n`| inputlookup system_codes.csv`",
+        "fontColor": "#1a9a1a",
+        "backgroundColor": "#000d00"
+      }
+    }
+  },
+  "inputs": {
+    "input_spl": {
+      "type": "input.text",
+      "options": {
+        "token": "spl_query",
+        "defaultValue": "index=nakatomi_access | head 20"
+      },
+      "title": "> ENTER SPL QUERY"
+    }
+  },
+  "defaults": {
+    "tokens": {
+      "spl_query": "index=nakatomi_access | head 20"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "globalInputs": [],
+    "structure": [
+      {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 110}},
+      {"item": "input_spl", "type": "block", "position": {"x": 0, "y": 110, "w": 1200, "h": 70}},
+      {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 180, "w": 820, "h": 580}},
+      {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 180, "w": 380, "h": 80}},
+      {"item": "viz_hints", "type": "block", "position": {"x": 820, "y": 260, "w": 380, "h": 340}},
+      {"item": "viz_indexes", "type": "block", "position": {"x": 820, "y": 600, "w": 380, "h": 160}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>

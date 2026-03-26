@@ -44,7 +44,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI PLAZA — ACCESS CONTROL SYSTEM v2.0\n> INDEX: nakatomi_access\n> SUBSYSTEM: BADGE READERS / DOOR CONTROLLERS / BIOMETRICS\n> ──────────────────────────────────────────────────────────\n> ENTER SPL QUERY BELOW — ALL ACCESS LOGS AVAILABLE\n```",
+        "markdown": "```\n> NAKATOMI PLAZA — ACCESS CONTROL SYSTEM v4.7\n> INDEX: nakatomi_access\n> SUBSYSTEM: BADGE READERS / DOOR CONTROLLERS / BIOMETRICS\n> ──────────────────────────────────────────────────────────\n> ENTER SPL QUERY BELOW — ALL ACCESS LOGS AVAILABLE\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }

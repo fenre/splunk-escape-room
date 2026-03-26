@@ -17,33 +17,73 @@
       },
       "name": "Query Results"
     },
-    "ds_seal_hints": {
+    "ds_task_hints": {
       "type": "ds.test",
-      "name": "Seal Hints",
+      "name": "Task Hints",
       "options": {
         "data": {
           "fields": [
-            {"name": "SEAL", "type": "string"},
+            {"name": "TASK", "type": "string"},
+            {"name": "ACT", "type": "string"},
             {"name": "OBJECTIVE", "type": "string"},
-            {"name": "HINT", "type": "string"}
+            {"name": "START HERE", "type": "string"}
           ],
           "columns": [
-            ["1", "2", "3", "4", "5", "6"],
+            ["1.1", "1.2", "1.3", "1.4", "1.5", "2.1", "2.2", "2.3", "2.4", "2.5", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "4.1", "4.2", "4.3", "4.4", "4.5", "5.1", "5.2", "5.3", "5.4"],
+            ["1", "1", "1", "1", "1", "2", "2", "2", "2", "2", "3", "3", "3", "3", "3", "3", "4", "4", "4", "4", "4", "5", "5", "5", "5"],
             [
-              "Find the security override in the lobby",
-              "Locate the vault floor \u2014 use the blueprint",
+              "Count unique employee badges",
+              "Track Takagi's badge to his floor",
+              "Find the floor with no camera coverage",
+              "Decode Argyle's scrambled radio message",
+              "Find the highest-clearance active employee",
+              "Find the main external trunk line ID",
+              "Find the elevator override code",
+              "Find the patrol gap on floor 30",
+              "Find the busiest floor during the party",
+              "Find who tried calling 911",
+              "Find the lobby security override code",
+              "Find the vault maintenance cycle",
               "Reconstruct Takagi's terminal session",
               "Decode the message in the HVAC anomaly",
               "Extract the FBI authorization code",
-              "Cross-reference the badge to find the vault code"
+              "Cross-reference badge to vault code",
+              "Find which floor the fire alarm came from",
+              "Count C4 charges via HVAC heat signatures",
+              "Find Sgt Powell's badge number",
+              "Count missing detonators",
+              "Find the FBI helicopter ETA",
+              "Find the ambulance vehicle ID",
+              "Count distinct bond series",
+              "Find the exit with power and no SWAT",
+              "Find Hans's deadline"
             ],
             [
-              "index=nakatomi_access floor=1",
-              "index=nakatomi_access floor>25 | stats count by floor",
-              "index=nakatomi_vault | transaction session_id",
-              "index=nakatomi_building floor=roof system=hvac",
+              "index=nakatomi_access sourcetype=\"nakatomi:access:badge\"",
+              "index=nakatomi_access badge_id=\"JT-0001\"",
+              "| inputlookup camera_coverage.csv",
+              "index=nakatomi_comms channel=freq_18",
+              "| inputlookup employee_directory.csv",
+              "index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\"",
+              "index=nakatomi_building sourcetype=\"nakatomi:building:elevator\"",
+              "index=nakatomi_building sourcetype=\"nakatomi:security:camera\" floor=30",
+              "index=nakatomi_access earliest=\"2025-12-24T20:00:00\"",
+              "index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" status=intercepted",
+              "index=nakatomi_access floor=1 action=override",
+              "index=nakatomi_access badge_id=\"JT-0001\" detail=*vault*",
+              "index=nakatomi_vault session_id=\"VS-0042\"",
+              "index=nakatomi_building floor=roof encoded_message=*",
               "index=nakatomi_building channel=freq_14",
-              "| inputlookup employee_directory.csv | search badge_id=\"NP-4472\""
+              "| inputlookup system_codes.csv",
+              "index=nakatomi_building event_type=alarm_trigger",
+              "index=nakatomi_building sourcetype=\"nakatomi:building:hvac\" floor=roof",
+              "index=nakatomi_comms channel=freq_12",
+              "index=nakatomi_vault system=detonator_inventory",
+              "index=nakatomi_comms channel=freq_14",
+              "| inputlookup vehicle_registry.csv",
+              "| inputlookup bearer_bonds.csv",
+              "index=nakatomi_building sourcetype=\"nakatomi:building:power\"",
+              "index=nakatomi_comms channel=freq_14 | search deadline"
             ]
           ]
         }
@@ -54,7 +94,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI PLAZA \u2014 DATA QUERY TERMINAL v2.1\n> STATUS: ONLINE    CLEARANCE: OVERRIDE    SESSION: ACTIVE\n> \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n> TYPE SPL QUERY BELOW AND PRESS ENTER\n```",
+        "markdown": "```\n> NAKATOMI PLAZA — DATA QUERY TERMINAL v2.0\n> STATUS: ONLINE    CLEARANCE: OVERRIDE    SESSION: ACTIVE\n> ──────────────────────────────────────────────────────────\n> TYPE SPL QUERY BELOW AND PRESS ENTER\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
@@ -71,24 +111,24 @@
     "viz_sidebar_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "## > OBJECTIVES\n\n*Current seal targets and suggested starting queries.*",
+        "markdown": "## > TASK OBJECTIVES\n\n*All 26 tasks across 5 acts with starting queries.*",
         "fontColor": "#d4a843",
         "backgroundColor": "#000d00"
       }
     },
     "viz_hints": {
       "type": "splunk.table",
-      "title": "SEAL OBJECTIVES",
-      "dataSources": {"primary": "ds_seal_hints"},
+      "title": "TASK REFERENCE",
+      "dataSources": {"primary": "ds_task_hints"},
       "options": {
-        "count": 10,
+        "count": 26,
         "backgroundColor": "#000d00"
       }
     },
     "viz_indexes": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "**INDEXES:**\n`nakatomi_access` `nakatomi_vault` `nakatomi_building`\n\n**LOOKUPS:**\n`| inputlookup employee_directory.csv`\n`| inputlookup floor_directory.csv`\n`| inputlookup system_codes.csv`",
+        "markdown": "**INDEXES:**\n`nakatomi_access` `nakatomi_vault` `nakatomi_building` `nakatomi_comms`\n\n**LOOKUPS:**\n`| inputlookup employee_directory.csv`\n`| inputlookup floor_directory.csv`\n`| inputlookup system_codes.csv`\n`| inputlookup radio_channels.csv`\n`| inputlookup camera_coverage.csv`\n`| inputlookup bearer_bonds.csv`\n`| inputlookup vehicle_registry.csv`",
         "fontColor": "#1a9a1a",
         "backgroundColor": "#000d00"
       }
@@ -117,8 +157,8 @@
       {"item": "input_spl", "type": "block", "position": {"x": 0, "y": 110, "w": 1200, "h": 70}},
       {"item": "viz_results", "type": "block", "position": {"x": 0, "y": 180, "w": 820, "h": 580}},
       {"item": "viz_sidebar_header", "type": "block", "position": {"x": 820, "y": 180, "w": 380, "h": 80}},
-      {"item": "viz_hints", "type": "block", "position": {"x": 820, "y": 260, "w": 380, "h": 340}},
-      {"item": "viz_indexes", "type": "block", "position": {"x": 820, "y": 600, "w": 380, "h": 160}}
+      {"item": "viz_hints", "type": "block", "position": {"x": 820, "y": 260, "w": 380, "h": 580}},
+      {"item": "viz_indexes", "type": "block", "position": {"x": 820, "y": 840, "w": 380, "h": 260}}
     ]
   }
 }

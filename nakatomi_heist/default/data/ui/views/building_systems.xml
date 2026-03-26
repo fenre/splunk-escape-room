@@ -44,7 +44,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI PLAZA — BUILDING MANAGEMENT SYSTEM v3.4\n> INDEX: nakatomi_building\n> SUBSYSTEMS: HVAC / ELEVATOR / POWER / FIRE / SECURITY RADIO\n> ──────────────────────────────────────────────────────────\n> *** AMBER ALERT: ANOMALOUS READINGS DETECTED ***\n```",
+        "markdown": "```\n> NAKATOMI PLAZA — BUILDING MANAGEMENT SYSTEM v2.0\n> INDEX: nakatomi_building\n> SOURCETYPES: HVAC / SECURITY CAMERA / ELEVATOR / POWER / SECURITY\n> ──────────────────────────────────────────────────────────\n> *** AMBER ALERT: ANOMALOUS READINGS DETECTED ***\n```",
         "fontColor": "#d4a843",
         "backgroundColor": "#0d0800"
       }
@@ -87,7 +87,7 @@
     "viz_fields": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "**AVAILABLE FIELDS:**\n`system` `floor` `event` `value` `message` `channel` `encoded_message`\n\n**SUBSYSTEMS:**\n`hvac` `elevator` `power` `fire_suppression` `security`\n\n**RADIO CHANNELS:**\n`freq_12` (LAPD) `freq_14` (FBI) `freq_16` (FIRE)\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_building floor=roof system=hvac\nindex=nakatomi_building channel=freq_14\nindex=nakatomi_building system=elevator\n  | stats count by floor\nindex=nakatomi_building\n  | rex field=message \"AUTH:(?<auth>\\d+)\"\n```",
+        "markdown": "**SOURCETYPES:**\n`nakatomi:building:hvac` `nakatomi:security:camera`\n`nakatomi:building:elevator` `nakatomi:building:power`\n`nakatomi:building:security`\n\n**KEY FIELDS:**\n`system` `floor` `event` `event_type` `value`\n`message` `encoded_message` `camera_id` `zone`\n`elevator_id` `override_code` `status`\n\n**LOOKUPS:**\n`| inputlookup camera_coverage.csv`\n`| inputlookup floor_directory.csv`\n\n**EXAMPLE QUERIES:**\n```\nindex=nakatomi_building floor=roof\n  sourcetype=\"nakatomi:building:hvac\"\nindex=nakatomi_building\n  sourcetype=\"nakatomi:security:camera\"\n  floor=30 event_type=guard_patrol\nindex=nakatomi_building\n  sourcetype=\"nakatomi:building:elevator\"\n  action=override\nindex=nakatomi_building\n  sourcetype=\"nakatomi:building:power\"\n  status=active\n```",
         "fontColor": "#9a7020",
         "backgroundColor": "#0d0800"
       }
