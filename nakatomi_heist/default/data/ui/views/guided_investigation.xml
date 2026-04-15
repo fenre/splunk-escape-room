@@ -1,0 +1,313 @@
+<dashboard version="2" theme="dark">
+  <label>Guided Investigation</label>
+  <description>Act-by-act guided investigation with suggested searches and data sources</description>
+  <definition><![CDATA[
+{
+  "title": "Guided Investigation",
+  "description": "Act-by-act guided investigation with suggested searches and data sources",
+  "dataSources": {
+    "ds_act1_sources": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "INDEX", "type": "string"},
+            {"name": "USE", "type": "string"}
+          ],
+          "columns": [
+            ["nakatomi_access", "nakatomi_access"],
+            ["Badge swipes, door access — badge_id, floor, action", "Lookups: employee_directory, camera_coverage, floor_directory"]
+          ]
+        }
+      }
+    },
+    "ds_act1_searches": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "TASK", "type": "string"},
+            {"name": "SUGGESTED_SPL", "type": "string"},
+            {"name": "TIP", "type": "string"}
+          ],
+          "columns": [
+            ["1.1 Guest List", "1.2 Find Takagi", "1.3 Security Gaps", "1.4 Parking Garage", "1.5 Party Recon"],
+            ["index=nakatomi_access action=swipe | stats dc(badge_id)", "index=nakatomi_access badge_id=\"JT-0001\" | sort -_time | head 1", "| inputlookup floor_directory.csv | lookup camera_coverage floor", "index=nakatomi_comms channel=freq_18 argyle", "| inputlookup employee_directory.csv | search status=active | sort -clearance_level"],
+            ["Count UNIQUE badges, not total swipes", "Takagi's badge starts with JT", "Cross-reference two lookups — find the missing floor", "The message is encoded — use the cipher toolkit", "Look for the highest clearance among ACTIVE employees"]
+          ]
+        }
+      }
+    },
+    "ds_act2_sources": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "INDEX", "type": "string"},
+            {"name": "USE", "type": "string"}
+          ],
+          "columns": [
+            ["nakatomi_comms", "nakatomi_building", "nakatomi_access"],
+            ["Phone system (trunk lines, intercepts), radio channels", "Elevator overrides, guard patrols, camera feeds", "Badge swipes with time ranges for crowd analysis"]
+          ]
+        }
+      }
+    },
+    "ds_act2_searches": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "TASK", "type": "string"},
+            {"name": "SUGGESTED_SPL", "type": "string"},
+            {"name": "TIP", "type": "string"}
+          ],
+          "columns": [
+            ["2.1 Cut Comms", "2.2 Elevator Lock", "2.3 Guard Rotation", "2.4 Hostage Floor", "2.5 Intercept Call"],
+            ["index=nakatomi_comms trunk_type=external | stats count by trunk_id", "index=nakatomi_building sourcetype=\"nakatomi:building:elevator\" action=override", "index=nakatomi_building floor=30 event_type=guard_patrol | sort _time | delta _time as gap", "index=nakatomi_access earliest=\"2025-12-24T20:00:00\" latest=\"2025-12-24T22:00:00\" | stats dc(badge_id) by floor | sort -dc(badge_id)", "index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" status=intercepted"],
+            ["This is now a TEXT code — enter the full line ID with letters", "Look for override events in the elevator system", "Use delta to compute time gaps between patrol timestamps", "Filter badge activity to party hours only", "Find who tried to call outside"]
+          ]
+        }
+      }
+    },
+    "ds_act3_sources": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "INDEX", "type": "string"},
+            {"name": "USE", "type": "string"}
+          ],
+          "columns": [
+            ["nakatomi_access", "nakatomi_vault", "nakatomi_building"],
+            ["Override events, lobby access", "Vault terminal sessions, code attempts, system inventory", "Roof sensors, HVAC data, FBI tactical intercepts"]
+          ]
+        }
+      }
+    },
+    "ds_act3_searches": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "TASK", "type": "string"},
+            {"name": "SUGGESTED_SPL", "type": "string"},
+            {"name": "TIP", "type": "string"}
+          ],
+          "columns": [
+            ["3.1 Lobby", "3.2 Securing", "3.3 Takagi's Refusal", "3.4 Roof Trap", "3.5 The FBI", "3.6 Bearer Bonds", "3.7 Shoot the Glass"],
+            ["index=nakatomi_access floor=1 action=override", "index=nakatomi_access badge_id=\"JT-0001\" detail=*vault*", "index=nakatomi_vault session_id=\"VS-0042\" action=code_attempt", "index=nakatomi_building floor=roof encoded_message=*", "index=nakatomi_building channel=freq_14 | search AUTH", "| inputlookup system_codes.csv | search clearance_level=\"LEVEL-5\"", "No SPL needed — this is a physical action"],
+            ["Look for overrides on floor 1", "Check Takagi's badge for vault-related events", "Filter for session VS-0042 code attempts", "The message is encoded — use the cipher toolkit (ROT13)", "Find the AUTH code, not the team callsign", "This is a MULTI-STEP task: verify clearance level first, then find the vault auth code", "Click the power LED on the system panel"]
+          ]
+        }
+      }
+    },
+    "ds_act4_sources": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "INDEX", "type": "string"},
+            {"name": "USE", "type": "string"}
+          ],
+          "columns": [
+            ["nakatomi_building", "nakatomi_comms", "nakatomi_vault"],
+            ["Alarms, HVAC sensors, temperature readings", "Police radio (freq_12), FBI tactical (freq_14)", "Detonator inventory tracking"]
+          ]
+        }
+      }
+    },
+    "ds_act5_sources": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "INDEX", "type": "string"},
+            {"name": "USE", "type": "string"}
+          ],
+          "columns": [
+            ["nakatomi_building", "nakatomi_comms"],
+            ["Power grid status, SWAT coverage via camera feeds", "FBI deadline negotiations, radio channels"]
+          ]
+        }
+      }
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> GUIDED INVESTIGATION TERMINAL\n> USE THE ACT SELECTOR BELOW TO VIEW RELEVANT DATA SOURCES AND SUGGESTED SEARCHES\n> ──────────────────────────────────────────────────────────\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act1_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## ACT 1: THE CHRISTMAS PARTY\n*\"40th floor. They're going to need a new bartender.\"*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act1_data_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > DATA SOURCES FOR ACT 1",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act1_data": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act1_sources"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act1_search_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SUGGESTED STARTING SEARCHES",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act1_searches": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act1_searches"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_act2_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## ACT 2: THE TAKEOVER\n*\"Nice suit. John Phillips, London.\"*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act2_data_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > DATA SOURCES FOR ACT 2",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act2_data": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act2_sources"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act2_search_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SUGGESTED STARTING SEARCHES",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act2_searches": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act2_searches"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_act3_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## ACT 3: THE VAULT\n*\"Who said we were terrorists?\"*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act3_data_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > DATA SOURCES FOR ACT 3",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act3_data": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act3_sources"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act3_search_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SUGGESTED STARTING SEARCHES",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act3_searches": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act3_searches"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_act4_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## ACT 4: McCLANE'S COUNTERATTACK\n*\"Come out to the coast, we'll get together, have a few laughs...\"*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act4_data": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act4_sources"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act5_title": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## ACT 5: THE ESCAPE\n*\"Yippee-ki-yay.\"*",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act5_data": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act5_sources"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_lookups_ref": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > LOOKUP QUICK REFERENCE\n```\n| inputlookup employee_directory.csv    — Badge IDs, names, clearance levels\n| inputlookup floor_directory.csv       — Floor names, tenants\n| inputlookup camera_coverage.csv       — Camera IDs, SWAT coverage\n| inputlookup system_codes.csv          — Auth codes by clearance level\n| inputlookup radio_channels.csv        — Frequencies, assignments\n| inputlookup bearer_bonds.csv          — Bond series, denominations\n| inputlookup vehicle_registry.csv      — Vehicle IDs, types, bays\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    }
+  },
+  "inputs": {},
+  "defaults": {},
+  "layout": {
+    "type": "grid",
+    "globalInputs": [],
+    "structure": [
+      {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 80}},
+      {"item": "viz_act1_title", "type": "block", "position": {"x": 0, "y": 80, "w": 1200, "h": 60}},
+      {"item": "viz_act1_data_label", "type": "block", "position": {"x": 0, "y": 140, "w": 400, "h": 35}},
+      {"item": "viz_act1_data", "type": "block", "position": {"x": 0, "y": 175, "w": 400, "h": 120}},
+      {"item": "viz_act1_search_label", "type": "block", "position": {"x": 400, "y": 140, "w": 800, "h": 35}},
+      {"item": "viz_act1_searches", "type": "block", "position": {"x": 400, "y": 175, "w": 800, "h": 250}},
+      {"item": "viz_act2_title", "type": "block", "position": {"x": 0, "y": 425, "w": 1200, "h": 60}},
+      {"item": "viz_act2_data_label", "type": "block", "position": {"x": 0, "y": 485, "w": 400, "h": 35}},
+      {"item": "viz_act2_data", "type": "block", "position": {"x": 0, "y": 520, "w": 400, "h": 130}},
+      {"item": "viz_act2_search_label", "type": "block", "position": {"x": 400, "y": 485, "w": 800, "h": 35}},
+      {"item": "viz_act2_searches", "type": "block", "position": {"x": 400, "y": 520, "w": 800, "h": 250}},
+      {"item": "viz_act3_title", "type": "block", "position": {"x": 0, "y": 770, "w": 1200, "h": 60}},
+      {"item": "viz_act3_data_label", "type": "block", "position": {"x": 0, "y": 830, "w": 400, "h": 35}},
+      {"item": "viz_act3_data", "type": "block", "position": {"x": 0, "y": 865, "w": 400, "h": 130}},
+      {"item": "viz_act3_search_label", "type": "block", "position": {"x": 400, "y": 830, "w": 800, "h": 35}},
+      {"item": "viz_act3_searches", "type": "block", "position": {"x": 400, "y": 865, "w": 800, "h": 340}},
+      {"item": "viz_act4_title", "type": "block", "position": {"x": 0, "y": 1205, "w": 600, "h": 60}},
+      {"item": "viz_act4_data", "type": "block", "position": {"x": 0, "y": 1265, "w": 600, "h": 130}},
+      {"item": "viz_act5_title", "type": "block", "position": {"x": 600, "y": 1205, "w": 600, "h": 60}},
+      {"item": "viz_act5_data", "type": "block", "position": {"x": 600, "y": 1265, "w": 600, "h": 130}},
+      {"item": "viz_lookups_ref", "type": "block", "position": {"x": 0, "y": 1395, "w": 1200, "h": 230}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>

@@ -1,9 +1,11 @@
 <nav search_view="search_terminal" color="#003300">
     <view name="terminal" default="true" />
     <view name="mission_brief" />
+    <view name="guided_investigation" />
     <view name="search_terminal" />
     <view name="access_terminal" />
     <view name="vault_terminal" />
     <view name="building_systems" />
     <view name="comms_terminal" />
+    <view name="progress_tracker" />
 </nav>

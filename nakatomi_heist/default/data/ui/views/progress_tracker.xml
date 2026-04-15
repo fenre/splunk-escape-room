@@ -1,0 +1,144 @@
+<dashboard version="2" theme="dark">
+  <label>Progress Tracker</label>
+  <description>Track vault heist progress across sessions</description>
+  <definition><![CDATA[
+{
+  "title": "Progress Tracker",
+  "description": "Track vault heist progress across sessions",
+  "dataSources": {
+    "ds_progress_summary": {
+      "type": "ds.search",
+      "options": {
+        "query": "| inputlookup vault_progress_lookup | stats max(act) as current_act, dc(task) as tasks_completed, max(score) as score, sum(hints_used) as total_hints, sum(wrong_codes) as total_wrongs, max(elapsed_seconds) as elapsed, latest(difficulty) as difficulty, latest(player_name) as player by session_id | eval elapsed_fmt=tostring(elapsed, \"duration\") | sort -score",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now"
+        }
+      }
+    },
+    "ds_act_progress": {
+      "type": "ds.search",
+      "options": {
+        "query": "| inputlookup vault_progress_lookup | stats count as tasks_done by act | eval act_name=case(act=1,\"Act 1: Christmas Party\",act=2,\"Act 2: Takeover\",act=3,\"Act 3: Vault\",act=4,\"Act 4: Counterattack\",act=5,\"Act 5: Escape\",1=1,\"Unknown\") | table act_name, tasks_done",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now"
+        }
+      }
+    },
+    "ds_recent_completions": {
+      "type": "ds.search",
+      "options": {
+        "query": "| inputlookup vault_progress_lookup | where status=\"completed\" | sort -timestamp | head 20 | eval time=strftime(timestamp, \"%H:%M:%S\") | table time, player_name, task, score, hints_used, wrong_codes",
+        "queryParameters": {
+          "earliest": "-24h@h",
+          "latest": "now"
+        }
+      }
+    },
+    "ds_static_instructions": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "STEP", "type": "string"},
+            {"name": "INSTRUCTION", "type": "string"}
+          ],
+          "columns": [
+            ["1", "2", "3"],
+            ["The game UI can POST progress events to HEC (sourcetype=vault_progress)", "A facilitator can manually add entries via the KV Store REST API", "This dashboard reads from the vault_progress KV Store collection"]
+          ]
+        }
+      }
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> VAULT HEIST PROGRESS TRACKER\n> REAL-TIME SESSION MONITORING\n> ──────────────────────────────────────────────────────────\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_sessions_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > ACTIVE SESSIONS",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_sessions": {
+      "type": "splunk.table",
+      "title": "Session Summary",
+      "dataSources": {"primary": "ds_progress_summary"},
+      "options": {"count": 20, "backgroundColor": "#000d00"}
+    },
+    "viz_acts_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > TASKS COMPLETED PER ACT",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_acts_chart": {
+      "type": "splunk.bar",
+      "title": "Tasks Completed by Act",
+      "dataSources": {"primary": "ds_act_progress"},
+      "options": {
+        "xAxisTitleText": "Act",
+        "yAxisTitleText": "Tasks Completed",
+        "backgroundColor": "#000d00",
+        "seriesColors": ["#33ff33"]
+      }
+    },
+    "viz_recent_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > RECENT TASK COMPLETIONS",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_recent": {
+      "type": "splunk.table",
+      "title": "Latest 20 Completions",
+      "dataSources": {"primary": "ds_recent_completions"},
+      "options": {"count": 20, "backgroundColor": "#000d00"}
+    },
+    "viz_setup_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SETUP INSTRUCTIONS",
+        "fontColor": "#ff8800",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_setup": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_static_instructions"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    }
+  },
+  "inputs": {},
+  "defaults": {},
+  "layout": {
+    "type": "grid",
+    "globalInputs": [],
+    "structure": [
+      {"item": "viz_header", "type": "block", "position": {"x": 0, "y": 0, "w": 1200, "h": 80}},
+      {"item": "viz_sessions_label", "type": "block", "position": {"x": 0, "y": 80, "w": 1200, "h": 35}},
+      {"item": "viz_sessions", "type": "block", "position": {"x": 0, "y": 115, "w": 1200, "h": 300}},
+      {"item": "viz_acts_label", "type": "block", "position": {"x": 0, "y": 415, "w": 600, "h": 35}},
+      {"item": "viz_acts_chart", "type": "block", "position": {"x": 0, "y": 450, "w": 600, "h": 250}},
+      {"item": "viz_recent_label", "type": "block", "position": {"x": 600, "y": 415, "w": 600, "h": 35}},
+      {"item": "viz_recent", "type": "block", "position": {"x": 600, "y": 450, "w": 600, "h": 250}},
+      {"item": "viz_setup_label", "type": "block", "position": {"x": 0, "y": 700, "w": 1200, "h": 35}},
+      {"item": "viz_setup", "type": "block", "position": {"x": 0, "y": 735, "w": 1200, "h": 150}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>

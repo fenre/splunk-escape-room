@@ -28,6 +28,10 @@
       --purple: #b829dd;
       --magenta: #ff00ff;
       --chrome: linear-gradient(135deg, #c0c0c0 0%, #fff 25%, #a0a0a0 50%, #e8e8e8 75%, #808080 100%);
+      --crt-primary: #33ff33;
+      --crt-glow: rgba(51,255,51,0.5);
+      --crt-dim: #33aa33;
+      --crt-bg: rgba(0,5,0,0.97);
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -342,6 +346,428 @@
       animation: insertBlink 1.2s step-end infinite;
     }
     @keyframes insertBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── DIFFICULTY SELECTOR ──────────────────────── */
+    .ms-difficulty {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      position: relative; z-index: 2; margin-bottom: 0.5rem;
+    }
+    .ms-diff-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px; letter-spacing: 0.1em;
+      padding: 0.6rem 1.2rem; cursor: pointer;
+      background: rgba(5,5,20,0.7); color: var(--dim);
+      border: 1px solid var(--border); border-radius: 6px;
+      transition: all 0.3s ease; position: relative;
+    }
+    .ms-diff-btn:hover { color: var(--text); border-color: var(--cyan); }
+    .ms-diff-btn.selected {
+      color: var(--cyan); border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,240,255,0.3), inset 0 0 8px rgba(0,240,255,0.1);
+    }
+    .ms-diff-btn.selected::after {
+      content: ''; position: absolute; inset: -2px;
+      border-radius: 8px; border: 1px solid var(--cyan);
+      opacity: 0.4; pointer-events: none;
+    }
+    .ms-diff-info {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; color: var(--dim); text-align: center;
+      position: relative; z-index: 2;
+      max-width: 400px; line-height: 1.6;
+    }
+    .ms-diff-info b { color: var(--cyan); }
+
+    /* ── RADIO INTERCEPT OVERLAY ──────────────────── */
+    .radio-intercept {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 9000; pointer-events: none;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 60px;
+    }
+    .radio-msg {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; color: var(--amber);
+      background: rgba(0,0,0,0.85);
+      border: 1px solid var(--amber);
+      border-radius: 4px; padding: 0.8rem 1.5rem;
+      box-shadow: 0 0 20px rgba(255,136,0,0.3), inset 0 0 10px rgba(255,136,0,0.05);
+      animation: radioFadeIn 0.3s ease-out, radioFadeOut 0.5s ease-in 4.5s forwards;
+      max-width: 500px; text-align: center;
+    }
+    .radio-msg::before {
+      content: '\u25CF INTERCEPT ';
+      color: var(--red); font-size: 0.7rem;
+      animation: recBlink 0.8s step-end infinite;
+    }
+    @keyframes radioFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes radioFadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ── TRAP CODE WARNING ────────────────────────── */
+    .trap-warning {
+      position: fixed; inset: 0; z-index: 9500;
+      background: rgba(255,0,0,0.08);
+      animation: trapFlash 0.15s ease-in-out 3;
+      pointer-events: none;
+    }
+    @keyframes trapFlash {
+      0%, 100% { background: transparent; }
+      50% { background: rgba(255,0,0,0.15); }
+    }
+
+    /* ── PAUSE OVERLAY ──────────────────────────── */
+    #overlay-pause {
+      position: fixed; inset: 0; z-index: 9500;
+      background: rgba(0,0,0,0.92);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      animation: fadeIn 0.3s;
+    }
+    #overlay-pause h1 {
+      font-size: 1.8rem; color: var(--crt-primary, #33ff33); letter-spacing: 0.15em;
+      text-shadow: 0 0 10px var(--crt-glow, rgba(51,255,51,0.5));
+      animation: victoryGlow 2s ease-in-out infinite;
+    }
+    #overlay-pause .pause-sub {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+      color: var(--crt-dim, #33aa33); margin-top: 1rem;
+    }
+    #overlay-pause .pause-btn {
+      margin-top: 1.5rem; padding: 0.5rem 1.5rem;
+      background: transparent; border: 1px solid var(--crt-primary, #33ff33);
+      color: var(--crt-primary, #33ff33); font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; cursor: pointer; letter-spacing: 0.08em;
+    }
+    #overlay-pause .pause-btn:hover { background: rgba(51,255,51,0.1); }
+
+    /* ── SHORTCUTS HELP OVERLAY ────────────────── */
+    #overlay-shortcuts {
+      position: fixed; inset: 0; z-index: 9400;
+      background: rgba(0,5,0,0.95);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.3s;
+    }
+    .shortcuts-box {
+      background: rgba(10,20,10,0.95); border: 1px solid var(--crt-primary, #33ff33);
+      padding: 1.5rem 2rem; max-width: 420px; width: 90%;
+      font-family: 'Share Tech Mono', monospace; color: var(--crt-primary, #33ff33);
+    }
+    .shortcuts-box h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 0.7rem;
+      margin-bottom: 1rem; letter-spacing: 0.1em;
+      text-shadow: 0 0 8px var(--crt-glow, rgba(51,255,51,0.3));
+    }
+    .sc-row {
+      display: flex; justify-content: space-between; padding: 0.3rem 0;
+      border-bottom: 1px solid rgba(51,255,51,0.1); font-size: 0.75rem;
+    }
+    .sc-key { color: var(--gold); font-weight: bold; min-width: 80px; }
+    .sc-desc { color: var(--crt-dim, #33aa33); text-align: right; }
+    .shortcuts-close {
+      margin-top: 1rem; text-align: center; font-size: 0.65rem;
+      color: var(--crt-dim, #33aa33); opacity: 0.7;
+    }
+
+    /* ── CRT SCREEN SHAKE ──────────────────────── */
+    @keyframes crtShake {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-3px, 1px); }
+      20% { transform: translate(3px, -1px); }
+      30% { transform: translate(-2px, 2px); }
+      40% { transform: translate(2px, -2px); }
+      50% { transform: translate(-1px, 1px); }
+      60% { transform: translate(1px, -1px); }
+      70% { transform: translate(-2px, 0); }
+      80% { transform: translate(2px, 1px); }
+      90% { transform: translate(-1px, -1px); }
+    }
+    .crt-bezel.shaking { animation: crtShake 0.3s ease-out; }
+
+    /* ── LEADERBOARD OVERLAY ───────────────────── */
+    #overlay-leaderboard {
+      position: fixed; inset: 0; z-index: 9400;
+      background: rgba(0,5,0,0.95);
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.3s;
+    }
+    .lb-box {
+      background: rgba(10,20,10,0.95); border: 1px solid var(--crt-primary, #33ff33);
+      padding: 1.5rem 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .lb-box h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 0.7rem;
+      color: var(--crt-primary, #33ff33); margin-bottom: 1rem; text-align: center;
+      letter-spacing: 0.1em; text-shadow: 0 0 8px var(--crt-glow, rgba(51,255,51,0.3));
+    }
+    .lb-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+    .lb-table th {
+      text-align: left; padding: 0.3rem 0.4rem; border-bottom: 1px solid var(--crt-primary, #33ff33);
+      color: var(--crt-primary, #33ff33); font-weight: normal; letter-spacing: 0.05em;
+    }
+    .lb-table td {
+      padding: 0.3rem 0.4rem; border-bottom: 1px solid rgba(51,255,51,0.1);
+      color: var(--crt-dim, #33aa33);
+    }
+    .lb-table tr.lb-highlight td { color: var(--gold); }
+    .lb-empty { color: var(--crt-dim, #33aa33); text-align: center; font-size: 0.75rem; padding: 1rem; }
+    .lb-actions { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; }
+    .lb-actions button {
+      padding: 0.4rem 1rem; background: transparent;
+      border: 1px solid var(--crt-primary, #33ff33); color: var(--crt-primary, #33ff33);
+      font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; cursor: pointer;
+    }
+    .lb-actions button:hover { background: rgba(51,255,51,0.1); }
+    .lb-initials-input {
+      background: transparent; border: 1px solid var(--gold); color: var(--gold);
+      font-family: 'Press Start 2P', monospace; font-size: 1rem;
+      width: 4rem; text-align: center; letter-spacing: 0.3em;
+      padding: 0.3rem; text-transform: uppercase;
+    }
+    .lb-prompt {
+      text-align: center; color: var(--gold); font-size: 0.7rem; margin-bottom: 0.5rem;
+    }
+
+    /* ── VICTORY STATS TABLE ───────────────────── */
+    .stats-toggle {
+      margin-top: 0.5rem; background: none; border: 1px solid #33aa33;
+      color: #33aa33; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      padding: 0.3rem 0.8rem; cursor: pointer; letter-spacing: 0.05em;
+    }
+    .stats-toggle:hover { border-color: #33ff33; color: #33ff33; }
+    .stats-table-wrap {
+      max-height: 300px; overflow-y: auto; margin-top: 0.5rem;
+      border: 1px solid rgba(51,255,51,0.15);
+    }
+    .stats-table {
+      width: 100%; border-collapse: collapse; font-size: 0.6rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .stats-table th {
+      text-align: left; padding: 0.25rem 0.3rem;
+      color: #33ff33; border-bottom: 1px solid rgba(51,255,51,0.3);
+      position: sticky; top: 0; background: rgba(0,5,0,0.95);
+      font-weight: normal; letter-spacing: 0.04em;
+    }
+    .stats-table td {
+      padding: 0.2rem 0.3rem; color: #33aa33;
+      border-bottom: 1px solid rgba(51,255,51,0.08);
+    }
+    .stats-table td.st-fast { color: #39ff14; }
+    .stats-table td.st-slow { color: #ff8800; }
+    .stats-table .st-penalty { color: #ff4444; }
+
+    /* ── TYPEWRITER EFFECT ─────────────────────── */
+    .typewriter-cursor {
+      display: inline-block; width: 0.5em; height: 1em;
+      background: var(--crt-primary, #33ff33); margin-left: 2px;
+      animation: blink 0.7s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    /* ── DECISION POINT OVERLAY ────────────────── */
+    .act-decision {
+      margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;
+    }
+    .act-decision button {
+      padding: 0.5rem 1.2rem; background: transparent;
+      border: 1px solid #33ff33; color: #33ff33;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s;
+    }
+    .act-decision button:hover {
+      background: rgba(51,255,51,0.15);
+      box-shadow: 0 0 12px rgba(51,255,51,0.3);
+    }
+
+    /* ── NUDGE PULSE ───────────────────────────── */
+    @keyframes nudgePulse {
+      0%, 100% { box-shadow: none; }
+      50% { box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(255,136,0,0.3); }
+    }
+    .hint-btn.nudge { animation: nudgePulse 1.5s ease-in-out infinite; }
+
+    /* ── COPY BUTTON FEEDBACK ──────────────────── */
+    .copy-btn {
+      padding: 0.3rem 0.8rem; background: transparent;
+      border: 1px solid #33aa33; color: #33aa33;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: #33ff33; color: #33ff33; }
+    .copy-btn.copied { border-color: var(--gold); color: var(--gold); }
+
+    /* ── CRT THEME PICKER ──────────────────────── */
+    .theme-picker {
+      display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.4rem;
+    }
+    .theme-dot {
+      width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.2s;
+      box-shadow: 0 0 6px rgba(255,255,255,0.1);
+    }
+    .theme-dot:hover { transform: scale(1.2); }
+    .theme-dot.active { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+    .theme-dot-green { background: #33ff33; }
+    .theme-dot-amber { background: #ffb000; }
+    .theme-dot-blue { background: #00b4ff; }
+
+    /* ── McCLANE INTERFERENCE EVENT ──────────── */
+    .mcclane-event {
+      position: fixed; top: 1.2rem; left: 50%; transform: translateX(-50%);
+      z-index: 9200; padding: 0.6rem 1.2rem;
+      background: rgba(40,20,0,0.92); border: 1px solid #cc8800;
+      border-radius: 6px; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; color: #ffaa33;
+      text-shadow: 0 0 8px rgba(255,170,51,0.4);
+      box-shadow: 0 0 20px rgba(204,136,0,0.2);
+      animation: mcclaneIn 0.4s ease-out;
+      pointer-events: none;
+    }
+    .mcclane-event.out { animation: mcclaneOut 0.6s ease-in forwards; }
+    .mcclane-event::before {
+      content: '\u26A0 WARNING ';
+      color: #ff6600; font-size: 0.65rem; font-weight: bold;
+      letter-spacing: 0.1em;
+    }
+    @keyframes mcclaneIn { from { opacity: 0; transform: translateX(-50%) translateY(-15px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes mcclaneOut { from { opacity: 1; } to { opacity: 0; } }
+
+    /* ── ACT TRANSITION CINEMATIC ─────────────── */
+    .act-transition {
+      position: fixed; inset: 0; z-index: 9600;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #000; color: #33ff33;
+      font-family: 'Share Tech Mono', monospace;
+      text-align: center;
+      animation: actTransIn 0.6s ease-out;
+    }
+    .act-transition.out { animation: actTransOut 0.5s ease-in forwards; }
+    .act-trans-num {
+      font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase;
+      color: #33aa33; margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px rgba(51,255,51,0.3);
+    }
+    .act-trans-title {
+      font-size: 2.2rem; font-weight: bold; letter-spacing: 0.08em;
+      color: #33ff33; margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(51,255,51,0.6), 0 0 40px rgba(51,255,51,0.2);
+    }
+    .act-trans-art {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.45rem; line-height: 1.1; letter-spacing: 0.05em;
+      color: #1a6a1a; white-space: pre; margin-bottom: 0.6rem;
+      text-shadow: 0 0 8px rgba(51,255,51,0.15);
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 0.1s forwards;
+    }
+    .act-trans-quote {
+      font-size: 0.85rem; font-style: italic; color: #66aa66;
+      max-width: 500px; line-height: 1.5;
+      opacity: 0; animation: actQuoteFade 0.8s ease-out 0.4s forwards;
+    }
+    .act-trans-border {
+      position: absolute; inset: 1.5rem;
+      border: 1px solid #33ff33;
+      box-shadow: 0 0 15px rgba(51,255,51,0.15), inset 0 0 15px rgba(51,255,51,0.05);
+      animation: actBorderGlow 2s ease-in-out infinite alternate;
+    }
+    @keyframes actTransIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes actTransOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes actQuoteFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes actBorderGlow {
+      from { box-shadow: 0 0 15px rgba(51,255,51,0.15), inset 0 0 15px rgba(51,255,51,0.05); }
+      to { box-shadow: 0 0 25px rgba(51,255,51,0.3), inset 0 0 25px rgba(51,255,51,0.1); }
+    }
+
+    /* ── ACHIEVEMENTS ────────────────────────────── */
+    .achievements-section {
+      margin-top: 1rem; padding-top: 0.8rem;
+      border-top: 1px solid #333;
+    }
+    .achievements-title {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      color: #33aa33; letter-spacing: 0.1em; margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .achievements-row {
+      display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center;
+    }
+    .ach-badge {
+      display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+      padding: 0.4rem 0.6rem; border: 1px solid #333; border-radius: 6px;
+      background: rgba(0,0,0,0.3); min-width: 80px;
+      font-family: 'Share Tech Mono', monospace;
+      transition: all 0.3s;
+    }
+    .ach-badge.earned {
+      border-color: #ffaa33;
+      background: rgba(255,170,51,0.08);
+      box-shadow: 0 0 10px rgba(255,170,51,0.15);
+    }
+    .ach-badge.locked { opacity: 0.35; }
+    .ach-icon { font-size: 1.4rem; }
+    .ach-name {
+      font-size: 0.6rem; color: #999; text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .ach-badge.earned .ach-name { color: #ffaa33; }
+    .ach-new {
+      font-size: 0.5rem; color: #33ff33;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      animation: achPulse 1s ease-in-out infinite alternate;
+    }
+    @keyframes achPulse {
+      from { opacity: 0.6; text-shadow: none; }
+      to { opacity: 1; text-shadow: 0 0 6px rgba(51,255,51,0.5); }
+    }
+
+    /* ── BONUS OBJECTIVES ────────────────────────── */
+    .bonus-subtitle {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      color: #33aa33; margin-bottom: 1rem; font-style: italic;
+    }
+    #bonus-list {
+      display: flex; flex-direction: column; gap: 0.5rem;
+      width: 100%; max-width: 420px; text-align: left;
+    }
+    .bonus-item {
+      padding: 0.5rem 0.75rem; border: 1px solid #1a5a1a;
+      background: rgba(0,20,0,0.3); border-radius: 4px; cursor: pointer;
+      font-family: 'Share Tech Mono', monospace;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .bonus-item:hover { border-color: #33aa33; background: rgba(0,40,0,0.3); }
+    .bonus-item.completed { border-color: #227722; opacity: 0.6; cursor: default; }
+    .bonus-item-name {
+      font-size: 0.8rem; color: #33ff33; font-weight: bold;
+      letter-spacing: 0.04em;
+    }
+    .bonus-item-desc {
+      font-size: 0.7rem; color: #33aa33; margin-top: 0.2rem;
+    }
+    .bonus-item-status {
+      font-size: 0.6rem; color: #227722; margin-top: 0.15rem;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .bonus-question {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; color: #33ff33; margin-bottom: 0.6rem;
+      line-height: 1.5; text-align: center;
+    }
+    .bonus-code-row {
+      display: flex; gap: 0.5rem; align-items: center; justify-content: center;
+    }
+    .bonus-code-input {
+      width: 80px; padding: 0.3rem 0.5rem; text-align: center;
+      font-family: 'Share Tech Mono', monospace; font-size: 1rem;
+      background: #0a0a0a; border: 1px solid #33aa33; color: #33ff33;
+      border-radius: 4px; letter-spacing: 0.15em;
+    }
+    .bonus-code-input:focus { outline: none; border-color: #33ff33; box-shadow: 0 0 8px rgba(51,255,51,0.2); }
+    .bonus-feedback {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      margin-top: 0.5rem; min-height: 1.2em; text-align: center;
+    }
 
     .ms-cards { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 2; }
     .ms-card {
@@ -739,6 +1165,15 @@
       color: #ff4444;
       text-shadow: 0 0 6px rgba(255,68,68,0.5);
     }
+    .gh-mute {
+      background: none; border: 1px solid #33aa33; border-radius: 4px;
+      color: #33ff33; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem; padding: 0.15rem 0.4rem; cursor: pointer;
+      text-shadow: 0 0 6px rgba(51,255,51,0.4);
+      transition: background 0.2s, color 0.2s;
+    }
+    .gh-mute:hover { background: rgba(51,255,51,0.1); }
+    .gh-mute.muted { color: #ff4444; border-color: #aa3333; text-shadow: 0 0 6px rgba(255,68,68,0.4); }
 
     /* Main layout inside CRT — single column now */
     #game-main { flex: 1; display: flex; overflow: hidden; position: relative; z-index: 2; }
@@ -1297,6 +1732,36 @@
       color: #33aa33; font-size: 0.85rem; margin-top: 0.5rem;
       text-shadow: 0 0 3px rgba(34,119,34,0.3);
     }
+    .pd-objective {
+      width: 100%; max-width: 460px; text-align: left;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.8rem;
+      color: #33ff33; line-height: 1.6; padding: 0.5rem 0.75rem;
+      border: 1px solid #1a5a1a; background: rgba(0,20,0,0.4);
+      margin-bottom: 0.5rem;
+    }
+    .pd-objective .pd-task-name {
+      color: #ffaa33; font-size: 0.7rem; letter-spacing: 0.06em;
+      display: block; margin-bottom: 0.3rem; font-weight: bold;
+    }
+    .pd-hints {
+      width: 100%; max-width: 460px; text-align: left;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
+      color: #33aa33; line-height: 1.5; padding: 0 0.75rem;
+    }
+    .pd-hint-line { margin-bottom: 0.2rem; }
+    .pd-hint-line::before { content: '\u25B6 '; color: #227722; font-size: 0.6rem; }
+    .pd-controls {
+      display: flex; gap: 0.6rem; margin-top: 0.3rem;
+    }
+    .pd-ctrl-btn {
+      background: transparent; border: 1px solid #33aa33;
+      color: #33ff33; font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; padding: 0.3rem 0.8rem; cursor: pointer;
+      border-radius: 4px; letter-spacing: 0.04em;
+      text-shadow: 0 0 4px rgba(51,255,51,0.3);
+      transition: background 0.2s;
+    }
+    .pd-ctrl-btn:hover { background: rgba(51,255,51,0.08); }
 
     /* Clue card overlay */
     /* ── CLUE OVERLAY (in-screen terminal program) ── */
@@ -1421,6 +1886,11 @@
     }
     .clue-printout .hl { background: rgba(51,255,51,0.15); padding: 0 2px; color: #66ff66; }
     .clue-printout .pen { color: #66ff66; font-style: italic; text-shadow: 0 0 6px rgba(102,255,102,0.4); }
+    .story-speaker {
+      color: #ffaa33; font-weight: bold; letter-spacing: 0.06em;
+      text-shadow: 0 0 6px rgba(255,170,51,0.4);
+      display: block; margin-bottom: 0.3rem; font-size: 0.7rem;
+    }
 
     .clue-cipher { padding: 0.35rem 0; }
     .cipher-sticky {
@@ -1440,6 +1910,14 @@
     .cipher-input textarea, .cipher-output { width: 100%; padding: 0.4rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; resize: vertical; }
     .cipher-input textarea { background: #000a00; border: 1px solid #1a5a1a; color: #33ff33; min-height: 36px; }
     .cipher-output { background: rgba(51,255,51,0.03); border: 1px solid #1a5a1a; color: #33ff33; margin-top: 0.35rem; min-height: 36px; text-shadow: 0 0 3px rgba(51,255,51,0.3); }
+    .cipher-tab {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      padding: 0.3rem 0.6rem; cursor: pointer;
+      background: rgba(51,255,51,0.05); border: 1px solid #1a5a1a;
+      color: #33aa33; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .cipher-tab:hover { background: rgba(51,255,51,0.1); color: #33ff33; }
+    .cipher-tab.active { background: rgba(51,255,51,0.15); color: #33ff33; border-color: #33ff33; box-shadow: 0 0 6px rgba(51,255,51,0.2); }
 
     .clue-rfcard {
       background: transparent; color: #33ff33; padding: 0.75rem;
@@ -1722,7 +2200,22 @@
     <h1 class="ms-title">Nakatomi Plaza<br>Vault Heist</h1>
     <p class="ms-subtitle">"Now I have a SPL. Ho-ho-ho."</p>
     <div class="retro-line"></div>
-    <div class="ms-insert">SELECT YOUR MODE</div>
+    <div class="ms-insert" style="margin-bottom:0.3rem">DIFFICULTY</div>
+    <div class="ms-difficulty" id="diff-select">
+      <button class="ms-diff-btn" onclick="setDifficulty('rookie')" data-diff="rookie">ROOKIE</button>
+      <button class="ms-diff-btn selected" onclick="setDifficulty('operative')" data-diff="operative">OPERATIVE</button>
+      <button class="ms-diff-btn" onclick="setDifficulty('mastermind')" data-diff="mastermind">MASTERMIND</button>
+    </div>
+    <div class="ms-diff-info" id="diff-info">
+      <b>90 min</b> &middot; 7 errors &middot; all hints &middot; 1x score
+    </div>
+    <div class="ms-insert" style="margin-top:0.6rem">CRT PHOSPHOR</div>
+    <div class="theme-picker">
+      <div class="theme-dot theme-dot-green active" onclick="setCrtTheme('green')" title="Green"></div>
+      <div class="theme-dot theme-dot-amber" onclick="setCrtTheme('amber')" title="Amber"></div>
+      <div class="theme-dot theme-dot-blue" onclick="setCrtTheme('blue')" title="Blue"></div>
+    </div>
+    <div class="ms-insert" style="margin-top:0.6rem">SELECT YOUR MODE</div>
     <div class="ms-cards">
       <div class="ms-card" onclick="selectMode('physical')">
         <span class="icon">&#x1F3DB;</span>
@@ -1735,6 +2228,7 @@
         <p>Play entirely on screen. Enter codes on the digital keypad. Clue cards replace physical compartments.</p>
       </div>
     </div>
+    <button class="overlay-btn" style="margin-top:1rem;font-size:0.65rem;padding:0.4rem 1rem;opacity:0.7" onclick="showLeaderboard()">Leaderboard</button>
   </div>
 
   <!-- GAME SCREEN -->
@@ -1762,12 +2256,14 @@
             <div class="crt-glare"></div>
             <div class="crt-content">
               <header id="game-header">
-                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.0</span></div>
+                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.3</span></div>
                 <div class="gh-stats">
                   <div class="gh-score">PTS: <b id="score-display">0</b></div>
                   <div class="gh-hints" id="hint-counter">HINTS: <b>0</b></div>
                   <div class="gh-timer mono" id="timer">90:00</div>
                   <div class="gh-wrong">ERR: <b id="wrong-count">0</b>/7</div>
+                  <button class="gh-mute" id="mute-btn" onclick="toggleMute()" title="Toggle audio">SND</button>
+                  <button class="gh-mute" onclick="toggleShortcuts()" title="Keyboard shortcuts" style="font-size:0.65rem">?</button>
                 </div>
               </header>
 
@@ -1781,12 +2277,19 @@
                       <div id="hint-display" class="hidden"></div>
                       <button id="hint-btn" class="hint-btn" onclick="requestHint()">HINT (H)</button>
                     </div>
+                    <div id="cipher-toolkit-area" class="hidden"></div>
                     <div id="keypad-area"></div>
                     <div class="crt-prompt" id="crt-prompt">Use keyboard or keypad. Press ENTER to submit. Press H for hints. Press D for dossier.</div>
                   </div>
                   <div id="physical-content" class="hidden">
                     <div id="physical-display">
+                      <div id="pd-objective" class="pd-objective"></div>
                       <div class="pd-seals" id="pd-seals"></div>
+                      <div id="pd-hints" class="pd-hints"></div>
+                      <div class="pd-controls">
+                        <button class="pd-ctrl-btn" onclick="requestHint()">HINT [H]</button>
+                        <button class="pd-ctrl-btn" onclick="toggleDossier()">DOSSIER [D]</button>
+                      </div>
                       <div class="pd-msg">Enter codes on the vault keypad</div>
                     </div>
                   </div>
@@ -1799,7 +2302,7 @@
                   <span class="gf-power-led" id="power-led" onclick="handlePowerClick()" title=""></span>
                   <span id="power-label">ONLINE</span>
                 </div>
-                <div class="gf-version">NAKATOMI-OS 2.0 &middot; 24-DEC-88</div>
+                <div class="gf-version">NAKATOMI-OS 2.3 &middot; 24-DEC-88</div>
               </footer>
               <!-- Clue overlay (inside CRT) -->
               <div id="clue-overlay" class="hidden">
@@ -1910,7 +2413,72 @@
     <div class="time-taken" id="victory-time"></div>
     <div class="time-taken" id="victory-score"></div>
     <div id="victory-breakdown"></div>
-    <button class="overlay-btn" onclick="resetGame()">Play Again</button>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin-top:0.5rem">
+      <button class="overlay-btn" onclick="startBonusMode()">Bonus Objectives</button>
+      <button class="overlay-btn" onclick="resetGame()">Play Again</button>
+    </div>
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin-top:0.3rem">
+      <button class="copy-btn" id="copy-results-btn" onclick="copyResults()">Copy Results</button>
+      <button class="copy-btn" onclick="promptLeaderboard()">Save to Leaderboard</button>
+    </div>
+  </div>
+
+  <div id="overlay-bonus" class="overlay hidden">
+    <h1 style="font-size:1.1rem">BONUS OBJECTIVES</h1>
+    <div class="bonus-subtitle">Post-heist challenges for the ambitious thief</div>
+    <div id="bonus-list"></div>
+    <div id="bonus-input-area" class="hidden">
+      <div id="bonus-question" class="bonus-question"></div>
+      <div class="bonus-code-row">
+        <input type="text" id="bonus-code-input" class="bonus-code-input" maxlength="4" placeholder="----" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault();submitBonusCode();}event.stopPropagation();">
+        <button class="overlay-btn" onclick="submitBonusCode()" style="margin:0">Submit</button>
+      </div>
+      <div id="bonus-feedback" class="bonus-feedback"></div>
+    </div>
+    <button class="overlay-btn" style="margin-top:1rem" onclick="exitBonusMode()">Back to Results</button>
+  </div>
+
+  <!-- PAUSE OVERLAY -->
+  <div id="overlay-pause" class="hidden">
+    <h1>PAUSED</h1>
+    <div class="pause-sub">Timer frozen. Task hidden.</div>
+    <button class="pause-btn" onclick="togglePause()">RESUME [P]</button>
+  </div>
+
+  <!-- SHORTCUTS HELP -->
+  <div id="overlay-shortcuts" class="hidden" onclick="if(event.target===this)toggleShortcuts()">
+    <div class="shortcuts-box">
+      <h2>KEYBOARD SHORTCUTS</h2>
+      <div class="sc-row"><span class="sc-key">0-9</span><span class="sc-desc">Enter digit</span></div>
+      <div class="sc-row"><span class="sc-key">ENTER</span><span class="sc-desc">Submit code</span></div>
+      <div class="sc-row"><span class="sc-key">BACKSPACE</span><span class="sc-desc">Clear code</span></div>
+      <div class="sc-row"><span class="sc-key">H</span><span class="sc-desc">Request hint</span></div>
+      <div class="sc-row"><span class="sc-key">D</span><span class="sc-desc">Toggle dossier</span></div>
+      <div class="sc-row"><span class="sc-key">F</span><span class="sc-desc">Facilitator panel</span></div>
+      <div class="sc-row"><span class="sc-key">P</span><span class="sc-desc">Pause / Resume</span></div>
+      <div class="sc-row"><span class="sc-key">?</span><span class="sc-desc">This help</span></div>
+      <div class="sc-row"><span class="sc-key">ESC</span><span class="sc-desc">Close panel</span></div>
+      <div class="shortcuts-close">Press ? or ESC to close</div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="overlay-leaderboard" class="hidden" onclick="if(event.target===this)hideLeaderboard()">
+    <div class="lb-box">
+      <h2>LEADERBOARD</h2>
+      <div id="lb-prompt-area" class="hidden">
+        <div class="lb-prompt">ENTER YOUR INITIALS</div>
+        <div style="text-align:center;margin-bottom:1rem">
+          <input type="text" id="lb-initials" class="lb-initials-input" maxlength="3" autocomplete="off" spellcheck="false" onkeydown="event.stopPropagation();if(event.key==='Enter'){event.preventDefault();saveLeaderboardEntry();}">
+          <button class="overlay-btn" style="margin-left:0.5rem;font-size:0.7rem;padding:0.3rem 0.8rem" onclick="saveLeaderboardEntry()">OK</button>
+        </div>
+      </div>
+      <div id="lb-content"></div>
+      <div class="lb-actions">
+        <button onclick="hideLeaderboard()">Close</button>
+        <button onclick="clearLeaderboard()">Clear</button>
+      </div>
+    </div>
   </div>
 
   <div id="facilitator" class="hidden">
@@ -1937,7 +2505,7 @@ function runBoot(onComplete) {
   bootEl.classList.remove('hidden');
   document.getElementById('mode-select').classList.add('hidden');
   var lines = [
-    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.0',
+    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.3',
     'COPYRIGHT (C) 1988 NAKATOMI TRADING CORPORATION',
     '', 'BIOS VERSION 2.0.88 — 24 DEC 1988', '',
     'MEMORY TEST.......... 640K OK',
@@ -1948,7 +2516,9 @@ function runBoot(onComplete) {
     '  RF RECEIVER........ OK', '  RADIO INTERCEPT.... OK',
     '  CAMERA FEEDS....... OK', '  PHONE TAP.......... OK', '',
     'LOADING VAULT OS...', '__BAR__', '',
-    'VAULT STATUS: 26 TASKS / 5 ACTS',
+    'VAULT STATUS: 26 TASKS / 5 ACTS / v2.3',
+    'DIFFICULTY: ' + (DIFFICULTY_PRESETS[selectedDifficulty] ? DIFFICULTY_PRESETS[selectedDifficulty].label.toUpperCase() : 'OPERATIVE'),
+    gameSeed ? 'SEED: ' + gameSeed + ' (randomized codes)' : 'CODES: STANDARD',
     'AUTHORIZATION: GRUBER, HANS', '',
     'SYSTEM READY.', '', '> INITIATING HEIST PROTOCOL...'
   ];
@@ -1989,11 +2559,52 @@ function runBoot(onComplete) {
   }, 1000);
 })();
 
-/* ── GAME CONSTANTS ─────────────────────────── */
+/* ── DIFFICULTY PRESETS ─────────────────────── */
+var DIFFICULTY_PRESETS = {
+  rookie:     { timer: 7200, maxWrong: 10, hintLevels: 4, trapCodes: false, scoreMultiplier: 0.5, splHelp: 'always',  label: 'Rookie' },
+  operative:  { timer: 5400, maxWrong: 7,  hintLevels: 3, trapCodes: true,  scoreMultiplier: 1,   splHelp: 'act2',    label: 'Operative' },
+  mastermind: { timer: 3600, maxWrong: 4,  hintLevels: 1, trapCodes: true,  scoreMultiplier: 2,   splHelp: 'never',   label: 'Mastermind' }
+};
+var selectedDifficulty = 'operative';
+
+function setDifficulty(diff) {
+  selectedDifficulty = diff;
+  document.querySelectorAll('.ms-diff-btn').forEach(function(b) {
+    b.classList.toggle('selected', b.getAttribute('data-diff') === diff);
+  });
+  var p = DIFFICULTY_PRESETS[diff];
+  var info = '<b>' + (p.timer / 60) + ' min</b> &middot; ' + p.maxWrong + ' errors &middot; ';
+  if (p.hintLevels === 4) info += 'all hints';
+  else if (p.hintLevels === 3) info += '3 hints (no answer)';
+  else info += '1 hint only';
+  info += ' &middot; ' + p.scoreMultiplier + 'x score';
+  if (p.trapCodes) info += ' &middot; <span style="color:var(--red)">trap codes</span>';
+  document.getElementById('diff-info').innerHTML = info;
+}
+
+/* ── GAME CONSTANTS (set from difficulty) ──── */
 var HINTS_ENABLED = true;
 var SCORING_ENABLED = true;
 var MAX_WRONG = 7;
 var TIMER_SECONDS = 5400;
+var MAX_HINT_LEVELS = 4;
+var TRAP_CODES_ENABLED = false;
+var SCORE_MULTIPLIER = 1;
+var SPL_HELP_MODE = 'always';
+
+function applyDifficulty() {
+  var p = DIFFICULTY_PRESETS[selectedDifficulty];
+  TIMER_SECONDS = p.timer;
+  MAX_WRONG = p.maxWrong;
+  MAX_HINT_LEVELS = p.hintLevels;
+  TRAP_CODES_ENABLED = p.trapCodes;
+  SCORE_MULTIPLIER = p.scoreMultiplier;
+  SPL_HELP_MODE = p.splHelp;
+  var wrongParent = document.querySelector('.gh-wrong');
+  if (wrongParent) {
+    wrongParent.innerHTML = 'ERR: <b id="wrong-count">0</b>/' + MAX_WRONG;
+  }
+}
 
 var SCORING = {
   BASE: 1000,
@@ -2022,7 +2633,7 @@ function totalHintsAvailable() {
   var n = 0;
   for (var a = 0; a < ACTS.length; a++)
     for (var t = 0; t < ACTS[a].tasks.length; t++)
-      n += (ACTS[a].tasks[t].hints || []).length;
+      n += Math.min((ACTS[a].tasks[t].hints || []).length, MAX_HINT_LEVELS);
   return n;
 }
 
@@ -2031,26 +2642,37 @@ var ACTS = [
   { name:'The Christmas Party', quote:'"40th floor. They\'re going to need a new bartender."',
     tasks:[
       { id:'1.1', name:'Guest List', type:'code', code:'0047',
-        objective:'\u201cCount how many unique employees badged into the building tonight. That\'s our headcount.\u201d',
+        trapCodes:['0048','0046','0050'],
+        speaker:'HANS',
+        objective:'\u201cCount how many unique employees badged into the building tonight. That\'s our headcount. Note: the caterer logs show 52 entries, but some are repeated swipes \u2014 we need unique badge IDs only.\u201d',
         spl:'index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)',
         hints:['The badge system logs every swipe. Start there.','Search nakatomi_access for badge events with action=swipe and count unique IDs.','Try: index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)','The answer is 0047.'],
         storyBeat:'47 employees on-site. Good \u2014 we know our headcount. Now find the CEO.' },
       { id:'1.2', name:'Find Takagi', type:'code', code:'0030',
+        trapCodes:['0031','0029'],
+        speaker:'HANS',
         objective:'\u201cTakagi is somewhere in the building. Track his badge to find which floor he\'s on.\u201d',
         spl:'index=nakatomi_access badge_id="JT-0001" | sort -_time | head 1',
         hints:['Takagi\'s badge ID is in the employee directory.','His badge ID is JT-0001. Find his latest swipe.','Try: index=nakatomi_access badge_id="JT-0001" | sort -_time | head 1','Floor 30. Enter 0030.'],
         storyBeat:'Floor 30 \u2014 the Christmas party. That\'s where we take him.' },
       { id:'1.3', name:'Security Gaps', type:'code', code:'0003',
+        trapCodes:['0005','0010'],
+        speaker:'THEO',
         objective:'\u201cCross-reference the camera coverage map with the floor directory. Find the floor with no cameras \u2014 that\'s our blind spot.\u201d',
         spl:'| inputlookup floor_directory.csv | lookup camera_coverage floor OUTPUT camera_id | where isnull(camera_id)',
         hints:['There\'s a camera coverage map in the lookups.','Compare floor_directory with camera_coverage \u2014 one floor is missing.','Try: | inputlookup floor_directory.csv | lookup camera_coverage floor OUTPUT camera_id | where isnull(camera_id)','Floor 3 \u2014 Building Maintenance. Enter 0003.'],
         storyBeat:'Floor 3 \u2014 Maintenance. No cameras. That\'s how we get the equipment up.' },
       { id:'1.4', name:'The Parking Garage', type:'code', code:'1247',
+        trapCodes:['1248','1200'],
+        cipherType:'rot13',
+        speaker:'KARL',
         objective:'\u201cArgyle just radioed in. His message got scrambled by our signal jammer. Decode it to find which parking bay the limo is in.\u201d',
         spl:'index=nakatomi_comms channel=freq_18 argyle',
         hints:['The message was scrambled. Our jammer uses the same encoding as the HVAC system.','It\'s ROT13 \u2014 use the cipher tool.','The radio message on the internal channel contains the bay number.','Bay 1247. Enter 1247.'],
         storyBeat:'Bay 1247. Argyle\'s ready with the limo. That\'s our backup exit.' },
       { id:'1.5', name:'Party Recon', type:'code', code:'4472',
+        trapCodes:['4471','4400'],
+        speaker:'HANS',
         objective:'\u201cWe need someone with vault clearance. Search the employee directory \u2014 find the badge number of the highest-clearance active employee.\u201d',
         spl:'| inputlookup employee_directory.csv | search status=active | sort -clearance_level',
         hints:['The employee directory has clearance levels.','Look for the highest clearance among ACTIVE employees \u2014 Takagi is terminated.','Try: | inputlookup employee_directory.csv | search status=active clearance_level="LEVEL-5"','NP-4472 \u2014 Naomi Park. Enter 4472.'],
@@ -2058,27 +2680,37 @@ var ACTS = [
     ]},
   { name:'The Takeover', quote:'"Nice suit. John Phillips, London."',
     tasks:[
-      { id:'2.1', name:'Cut Communications', type:'code', code:'7700',
-        objective:'\u201cThe phone system logs show which trunk lines are active. Find the main external trunk line ID to cut outside communications.\u201d',
+      { id:'2.1', name:'Cut Communications', type:'code', code:'EXT7700', codeType:'text',
+        trapCodes:['EXT7701','TRUNK'],
+        speaker:'KARL',
+        objective:'\u201cThe phone system logs show which trunk lines are active. Find the external trunk line ID \u2014 enter the full line code (letters and numbers) to cut outside communications.\u201d',
         spl:'index=nakatomi_comms sourcetype="nakatomi:comms:phone" trunk_type=external | stats count by trunk_id',
-        hints:['Phone system logs are in the communications index.','Look for trunk lines marked as "external".','Try: index=nakatomi_comms sourcetype="nakatomi:comms:phone" trunk_type=external | stats count by trunk_id | sort -count','TRUNK-7700. Enter 7700.'],
+        hints:['Phone system logs are in the communications index.','Look for trunk lines marked as "external" \u2014 the ID has both letters and numbers.','Try: index=nakatomi_comms sourcetype="nakatomi:comms:phone" trunk_type=external | stats count by trunk_id | sort -count','EXT-7700. Enter EXT7700.'],
         storyBeat:'Lines are cut. No one\'s calling out. The building is ours.' },
       { id:'2.2', name:'Elevator Lockdown', type:'code', code:'4401',
+        trapCodes:['4400','4402'],
+        speaker:'THEO',
         objective:'\u201cLock down the elevators. The override code is in the building systems. Find it.\u201d',
         spl:'index=nakatomi_building sourcetype="nakatomi:building:elevator" action=override',
         hints:['The elevator system has an override function.','Search for elevator override events in the building index.','Try: index=nakatomi_building sourcetype="nakatomi:building:elevator" override_code=*','Override code 4401. Enter 4401.'],
         storyBeat:'Elevators locked. No one goes up or down without our say.' },
       { id:'2.3', name:'Guard Rotation', type:'code', code:'0012',
-        objective:'\u201cSecurity guards patrol on a schedule. Find the gap between patrols on floor 30 \u2014 that\'s our window, in minutes.\u201d',
+        trapCodes:['0015','0010'],
+        speaker:'HANS',
+        objective:'\u201cSecurity guards patrol on a schedule. Find the gap between patrols on floor 30 \u2014 that\'s our window, in minutes. The shift change log lists 15-minute intervals, but the actual camera timestamps tell a different story.\u201d',
         spl:'index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap',
         hints:['Camera logs show guard patrols \u2014 look for timestamps.','Floor 30 patrols \u2014 check the time between each pass.','Try: index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap','12-minute gap. Enter 0012.'],
         storyBeat:'Twelve minutes. That\'s all we need. Time it right.' },
       { id:'2.4', name:'Hostage Floor', type:'code', code:'0030',
+        trapCodes:['0034','0028'],
+        speaker:'HANS',
         objective:'\u201cWhere should we keep the hostages? Find which floor had the most badge activity during the party (20:00\u201322:00).\u201d',
         spl:'index=nakatomi_access earliest="2025-12-24T20:00:00" latest="2025-12-24T22:00:00" | stats dc(badge_id) by floor | sort -dc(badge_id)',
         hints:['The party drew the biggest crowd \u2014 check badge data.','Look at badge activity between 20:00 and 22:00.','Try: index=nakatomi_access earliest="2025-12-24T20:00:00" latest="2025-12-24T22:00:00" | stats dc(badge_id) by floor | sort -dc(badge_id)','Floor 30 \u2014 the party floor. Enter 0030.'],
         storyBeat:'Floor 30. Everyone\'s already there. Round them up.' },
       { id:'2.5', name:'Intercept the Call', type:'code', code:'1015',
+        trapCodes:['1016','1000'],
+        speaker:'HANS',
         objective:'\u201cSomeone tried calling 911. We intercepted it. The caller\'s badge number is in the phone log \u2014 who tried to reach outside?\u201d',
         spl:'index=nakatomi_comms sourcetype="nakatomi:comms:phone" status=intercepted',
         hints:['Someone tried to reach outside \u2014 check the phone intercepts.','Look for intercepted calls in the phone system logs.','Try: index=nakatomi_comms sourcetype="nakatomi:comms:phone" status=intercepted','Holly Gennaro, HP-1015. Enter 1015.'],
@@ -2087,36 +2719,54 @@ var ACTS = [
   { name:'The Vault', quote:'"Who said we were terrorists?"',
     tasks:[
       { id:'3.1', name:'The Lobby', type:'code', code:'2512',
+        trapCodes:['2500','2513'],
+        speaker:'KARL',
         objective:'\u201cWe\'re in. The lobby is ours. Get into the access system \u2014 find out how security was locked down on Floor 1.\u201d',
         spl:'index=nakatomi_access floor=1 action=override',
         hints:['The access logs record everything that happened in the lobby.','Look for override events on floor 1.','Try: index=nakatomi_access floor=1 action=override','Access code 2512. Enter 2512.'],
         storyBeat:'Lobby override confirmed. Karl reports \u2014 ground floor is secure. Moving up.' },
       { id:'3.2', name:'Securing the Building', type:'code', code:'7439',
+        trapCodes:['7440','7400'],
+        speaker:'HANS',
         objective:'\u201cThe building is ours. Now find the vault. Takagi\'s schedule has a rotation code \u2014 the data will tell you where.\u201d',
         spl:'index=nakatomi_access badge_id="JT-0001" detail=*vault*',
         hints:['The vault location is tied to maintenance schedules.','Takagi\'s calendar has rotation codes \u2014 check his badge events.','Try: index=nakatomi_access badge_id="JT-0001" detail=*vault*','Vault maintenance cycle 7439. Enter 7439.'],
         storyBeat:'Cycle 7439 confirmed. Hans disables cameras on floors 25 through 35 \u2014 no record of what happens next.' },
       { id:'3.3', name:'Takagi\'s Refusal', type:'code', code:'4291',
+        trapCodes:['4290','4292'],
+        speaker:'HANS',
         objective:'\u201cTakagi wouldn\'t talk. But he was at the vault terminal \u2014 session VS-0042. He entered codes. Were they real? Find out what he typed.\u201d',
         spl:'index=nakatomi_vault session_id="VS-0042" action=code_attempt',
         hints:['The vault logs every keystroke during a session.','Filter for session VS-0042 and look at code attempts.','Try: index=nakatomi_vault session_id="VS-0042" action=code_attempt','He typed 4, 2, 9, 1. Enter 4291.'],
         storyBeat:'Takagi entered 4-2-9-1 under duress. He refused to give the real codes. He paid with his life.' },
       { id:'3.4', name:'The Roof Trap', type:'code', code:'8086',
+        trapCodes:['8080','8088'],
+        cipherType:'rot13',
+        speaker:'THEO',
         objective:'\u201cThe crew is rigging the roof. The building\'s systems know something\'s off. Find the message they left in the machine room data.\u201d',
         spl:'index=nakatomi_building floor=roof encoded_message=*',
         hints:['The HVAC system recorded something unusual on the roof.','There\'s an encoded message \u2014 it uses the same shift cipher.','Try: index=nakatomi_building floor=roof encoded_message=*','Decoded: THERE IS NO POWER WITHOUT CODE 8086. Enter 8086.'],
         storyBeat:'HVAC sensors show heat signatures \u2014 four C4 charges positioned along the roof structure. The detonation pattern will bring down the entire helipad.' },
       { id:'3.5', name:'The FBI', type:'code', code:'5765',
-        objective:'\u201cThe feds are here. Their radio chatter is hitting our security intercepts. Find the authorization they\'re using to kill the power.\u201d',
+        trapCodes:['5764','5766','5700'],
+        speaker:'HANS',
+        objective:'\u201cThe feds are here. Their radio chatter is hitting our security intercepts. Find the authorization they\'re using to kill the power. Ignore the tactical callsign BRAVO-5700 \u2014 that\'s their team identifier, not the auth code.\u201d',
         spl:'index=nakatomi_building channel=freq_14 | search AUTH',
         hints:['The FBI broadcasts on freq_14.','Look for authorization codes in their tactical messages.','Try: index=nakatomi_building channel=freq_14 | search AUTH','AUTH:5765. Enter 5765.'],
         storyBeat:'Full FBI tactical plan intercepted: power cut at 23:15, helicopter assault at 23:30. Everything Hans predicted. They\'re playing right into his hands.' },
-      { id:'3.6', name:'The Bearer Bonds', type:'code', code:'3940',
-        objective:'\u201cSix locks down, one to go. The final vault sequence needs an authorized employee\'s code. You have badge NP-4472 \u2014 find the matching vault code.\u201d',
+      { id:'3.6', name:'The Bearer Bonds', type:'multi', code:'3940',
+        trapCodes:['3941','3900'],
+        speaker:'THEO',
+        objective:'\u201cSix locks down, one to go. The vault auth sequence has two steps. First: verify the employee clearance level for badge NP-4472. Second: find the vault auth code for that clearance level.\u201d',
         spl:'| inputlookup system_codes.csv | search clearance_level="LEVEL-5"',
+        steps:[
+          { label:'Step 1: What clearance level is badge NP-4472?', partialCode:'5', hint:'Look up NP-4472 in the employee directory \u2014 their clearance level number is the answer.' },
+          { label:'Step 2: Enter the vault auth code for that clearance level.', partialCode:'3940', hint:'Use the system_codes lookup to find the vault_auth_code for LEVEL-5.' }
+        ],
         hints:['Badge NP-4472 belongs to someone in the employee directory.','Find their clearance level, then match it to the system codes.','Try: | inputlookup system_codes.csv | search clearance_level="LEVEL-5"','vault_auth_code 3940. Enter 3940.'],
         storyBeat:'Bond inventory manifest confirmed \u2014 $640,000,000 in bearer bonds across five series. Serial numbers logged.' },
       { id:'3.7', name:'Shoot the Glass', type:'power', code:null,
+        speaker:'HANS',
         objective:'\u201cThe seventh lock is not in the system.\u201d',
         spl:'',
         hints:['This lock can\'t be cracked with a code.','Think about what holds the vault shut.','What happens when the power goes out?','Click the power LED on the system panel.'],
@@ -2125,26 +2775,36 @@ var ACTS = [
   { name:'McClane\'s Counterattack', quote:'"Come out to the coast, we\'ll get together, have a few laughs..."',
     tasks:[
       { id:'4.1', name:'The Fire Alarm', type:'code', code:'0025',
+        trapCodes:['0024','0026','0030'],
+        speaker:'KARL',
         objective:'\u201cSomeone pulled a fire alarm. Which floor did it come from? Track the cowboy.\u201d',
         spl:'index=nakatomi_building event_type=alarm_trigger | sort -_time | head 1',
         hints:['Check the building security logs for alarm events.','Look for alarm triggers \u2014 which floor was it?','Try: index=nakatomi_building event_type=alarm_trigger | sort -_time | head 1','Floor 25. Enter 0025.'],
         storyBeat:'Floor 25. He\'s getting brave. Send Karl.' },
       { id:'4.2', name:'The C4', type:'code', code:'0004',
-        objective:'\u201cThe C4 charges are planted. Check the HVAC sensors \u2014 abnormal heat signatures reveal the charge locations. How many charges?\u201d',
+        trapCodes:['0003','0005','0006'],
+        speaker:'HANS',
+        objective:'\u201cThe C4 charges are planted. Check the HVAC sensors \u2014 abnormal heat signatures reveal the charge locations. How many charges? The maintenance log mentions 6 HVAC anomalies, but not all are C4 \u2014 filter for explosive-grade heat signatures only.\u201d',
         spl:'index=nakatomi_building sourcetype="nakatomi:building:hvac" floor=roof value>95 | stats count',
         hints:['C4 generates heat \u2014 check HVAC temperature readings.','Look at the roof floor for abnormally high temperatures.','Try: index=nakatomi_building sourcetype="nakatomi:building:hvac" floor=roof value>95 | stats count','4 charges. Enter 0004.'],
         storyBeat:'Four charges \u2014 enough to blow the roof. The FBI won\'t know what hit them.' },
       { id:'4.3', name:'Powell\'s Radio', type:'code', code:'8114',
+        trapCodes:['8115','8100'],
+        speaker:'KARL',
         objective:'\u201cLAPD Sergeant Powell is on the radio \u2014 he\'s talking to McClane. Find his badge number in the police dispatch.\u201d',
         spl:'index=nakatomi_comms channel=freq_12 | search powell',
         hints:['Powell is LAPD \u2014 check their tactical frequency.','Search the radio logs for "powell".','Try: index=nakatomi_comms channel=freq_12 | search powell','Badge 8114. Enter 8114.'],
         storyBeat:'Powell \u2014 badge 8114. He\'s McClane\'s lifeline. If we cut that connection, the cowboy is alone.' },
       { id:'4.4', name:'The Detonators', type:'code', code:'0003',
+        trapCodes:['0002','0004'],
+        speaker:'HANS',
         objective:'\u201cMcClane stole detonators from our stash. The vault system tracks inventory. How many are missing?\u201d',
         spl:'index=nakatomi_vault sourcetype="nakatomi:vault:system" system=detonator_inventory',
         hints:['Our equipment is tracked in the vault system.','Check detonator inventory \u2014 compare original count to current.','Try: index=nakatomi_vault sourcetype="nakatomi:vault:system" system=detonator_inventory','3 detonators missing. Enter 0003.'],
         storyBeat:'Three detonators. He\'s going to use them against us. This changes the timeline.' },
       { id:'4.5', name:'Roof Timing', type:'code', code:'2330',
+        trapCodes:['2300','2345'],
+        speaker:'HANS',
         objective:'\u201cThe FBI helicopter assault is coming. Find the ETA in their tactical comms \u2014 enter it as a 4-digit time (HHMM).\u201d',
         spl:'index=nakatomi_comms channel=freq_14 | search helicopter',
         hints:['The FBI broadcasts on freq_14.','Check their tactical channel for helicopter timing.','Try: index=nakatomi_comms channel=freq_14 | search helicopter','ETA 23:30. Enter 2330.'],
@@ -2152,22 +2812,30 @@ var ACTS = [
     ]},
   { name:'The Escape', quote:'"Yippee-ki-yay."',
     tasks:[
-      { id:'5.1', name:'The Ambulance', type:'code', code:'2819',
-        objective:'\u201cTheo is prepping our exit. Find the ambulance\'s vehicle ID in the parking registry.\u201d',
+      { id:'5.1', name:'The Ambulance', type:'code', code:'AMB2819', codeType:'text',
+        trapCodes:['AMB2818','AMB2820'],
+        speaker:'HANS',
+        objective:'\u201cTheo is prepping our exit. Find the ambulance\'s full vehicle ID in the parking registry. Enter the complete ID (letters and numbers, no dashes).\u201d',
         spl:'| inputlookup vehicle_registry.csv | search vehicle_type=ambulance',
-        hints:['Our getaway vehicle is registered in the parking system.','Look up the vehicle registry for an ambulance.','Try: | inputlookup vehicle_registry.csv | search vehicle_type=ambulance','AMB-2819. Enter 2819.'],
+        hints:['Our getaway vehicle is registered in the parking system.','Look up the vehicle registry for an ambulance \u2014 include the prefix.','Try: | inputlookup vehicle_registry.csv | search vehicle_type=ambulance','AMB-2819. Enter AMB2819.'],
         storyBeat:'The ambulance is ready. $640 million \u2014 let\'s load it up.' },
       { id:'5.2', name:'Bond Transfer', type:'code', code:'0005',
+        trapCodes:['0004','0006'],
+        speaker:'THEO',
         objective:'\u201cVerify the bearer bonds. How many distinct bond series are in the vault?\u201d',
         spl:'| inputlookup bearer_bonds.csv | stats dc(bond_series)',
         hints:['The bonds are catalogued \u2014 check the lookup tables.','Count the distinct bond series in the bearer bonds manifest.','Try: | inputlookup bearer_bonds.csv | stats dc(bond_series)','5 series. Enter 0005.'],
         storyBeat:'Five series confirmed. All $640 million accounted for.' },
       { id:'5.3', name:'Exit Route', type:'code', code:'0002',
-        objective:'\u201cSWAT has the perimeter. Find which floor exit still has power and no SWAT coverage \u2014 check power grid and camera feeds.\u201d',
+        trapCodes:['0001','0003'],
+        speaker:'HANS',
+        objective:'\u201cSWAT has the perimeter. Find which floor exit still has power and no SWAT coverage \u2014 check power grid and camera feeds. The lobby (floor 1) shows power but has heavy SWAT presence. Don\'t confuse an active exit with a safe one.\u201d',
         spl:'index=nakatomi_building sourcetype="nakatomi:building:power" status=active | lookup camera_coverage floor OUTPUT swat_coverage',
         hints:['Some exits are blocked by SWAT, some have lost power.','Cross-reference active power zones with SWAT positions in camera feeds.','Try: index=nakatomi_building sourcetype="nakatomi:building:power" status=active | lookup camera_coverage floor OUTPUT swat_coverage | where swat_coverage!="yes"','Floor 2 \u2014 the loading dock. Enter 0002.'],
         storyBeat:'The loading dock on floor 2. No SWAT coverage. Theo \u2014 bring the ambulance around.' },
       { id:'5.4', name:'Final Extraction', type:'code', code:'0200',
+        trapCodes:['0100','0300'],
+        speaker:'HANS',
         objective:'\u201cThe deadline Hans gave the FBI \u2014 when does the building come down? Find it in the negotiations. Enter the time as HHMM.\u201d',
         spl:'index=nakatomi_comms channel=freq_14 | search deadline',
         hints:['Hans gave the FBI a deadline. It\'s in the communications.','Check the negotiation transcripts \u2014 what time did he threaten?','Try: index=nakatomi_comms channel=freq_14 | search deadline','02:00 AM. Enter 0200.'],
@@ -2175,11 +2843,144 @@ var ACTS = [
     ]}
 ];
 
+/* ── TIMED STORY INTERRUPTIONS ─────────────── */
+var RADIO_INTERCEPTS = [
+  { time: 4800, act: 0, msg: 'RADIO CHATTER: "All units in position. Awaiting confirmation."' },
+  { time: 4200, act: 1, msg: 'INTERCEPT: "McClane has been spotted on floor 34."' },
+  { time: 3600, act: 1, msg: 'LAPD DISPATCH: "Sergeant Powell reporting shots fired at Nakatomi Plaza."' },
+  { time: 3000, act: 2, msg: 'SWAT CHANNEL: "SWAT team assembling at secondary position."' },
+  { time: 2700, act: 2, msg: 'INTERCEPT: "Camera feed lost on floor 33 \u2014 subject disabled the unit."' },
+  { time: 2400, act: 3, msg: 'FBI TACTICAL: "Helicopter inbound. ETA 15 minutes."' },
+  { time: 1800, act: 3, msg: 'INTERCEPT: "Guard radio went silent on channel freq_12."' },
+  { time: 1200, act: 4, msg: 'FBI COMMAND: "Prepare to cut building power on my signal."' },
+  { time: 600,  act: 4, msg: 'KARL: "He\'s on the roof. I have him."' },
+  { time: 300,  act: 4, msg: 'EMERGENCY: "Roof charges armed. Final countdown initiated."' }
+];
+var interceptsShown = {};
+
+/* ── McCLANE INTERFERENCE EVENTS ──────────── */
+var MCCLANE_EVENTS = [
+  { afterAct: 1, msg: 'CAMERA FEED LOST \u2014 Floor 33 went dark' },
+  { afterAct: 1, msg: 'GUARD RADIO SILENT \u2014 Channel 12 no response' },
+  { afterAct: 2, msg: 'ELEVATOR SHAFT BREACH \u2014 Shaft 3 compromised' },
+  { afterAct: 2, msg: 'FIRE ALARM TRIGGERED \u2014 Floor 31 sprinklers active' },
+  { afterAct: 2, msg: 'VENTILATION DUCT ACCESSED \u2014 Duct C4 open' },
+  { afterAct: 3, msg: 'STAIRWELL BLAST \u2014 Explosives detonated on floor 33' },
+  { afterAct: 3, msg: 'RADIO CONTACT LOST \u2014 Karl not responding' },
+  { afterAct: 3, msg: 'GLASS SHATTERED \u2014 Office windows blown out, floor 34' }
+];
+var mcclaneEventsShown = {};
+var lastMcclaneTime = 0;
+
+function checkMcclaneEvents() {
+  if (state.actIdx < 1) return;
+  var elapsed = TIMER_SECONDS - state.timerRemaining;
+  var minInterval = Math.round((180 + Math.random() * 120) * TIMER_SECONDS / 5400);
+  if (elapsed - lastMcclaneTime < minInterval) return;
+  var available = [];
+  for (var i = 0; i < MCCLANE_EVENTS.length; i++) {
+    if (!mcclaneEventsShown[i] && MCCLANE_EVENTS[i].afterAct <= state.actIdx)
+      available.push(i);
+  }
+  if (available.length === 0) return;
+  var pick = available[Math.floor(Math.random() * available.length)];
+  mcclaneEventsShown[pick] = true;
+  lastMcclaneTime = elapsed;
+  showMcclaneEvent(MCCLANE_EVENTS[pick].msg);
+}
+
+function showMcclaneEvent(msg) {
+  ensureAudio(); noise(200, 0.04);
+  tone(220, 150, 'sawtooth', 0.06);
+  var div = document.createElement('div');
+  div.className = 'mcclane-event';
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(function() { div.classList.add('out'); }, 4000);
+  setTimeout(function() { if(div.parentNode) div.remove(); }, 4600);
+}
+
+/* ── CODE RANDOMIZATION (seed-based) ───────── */
+var gameSeed = null;
+function seededRandom(seed) {
+  var s = seed;
+  return function() {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return (s >>> 16) / 32768;
+  };
+}
+function randomizeCodesWithSeed(seed) {
+  if (!seed) return;
+  gameSeed = seed;
+  var rng = seededRandom(seed);
+  for (var a = 0; a < ACTS.length; a++) {
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (task.type === 'power' || !task.code || task.codeType === 'text') continue;
+      var origCode = task.code;
+      var newCode = String(Math.floor(rng() * 10000)).padStart(4, '0');
+      task._origCode = origCode;
+      task.code = newCode;
+      if (task.hints && task.hints.length > 0) {
+        var lastHint = task.hints[task.hints.length - 1];
+        task.hints[task.hints.length - 1] = lastHint.replace(origCode, newCode);
+      }
+      if (task.trapCodes) {
+        task.trapCodes = [];
+        for (var tc = 0; tc < 2; tc++) {
+          var trap = String(Math.floor(rng() * 10000)).padStart(4, '0');
+          if (trap !== newCode) task.trapCodes.push(trap);
+        }
+      }
+    }
+  }
+}
+function restoreOriginalCodes() {
+  for (var a = 0; a < ACTS.length; a++)
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (task._origCode) {
+        if (task.hints && task.hints.length > 0) {
+          var lastHint = task.hints[task.hints.length - 1];
+          task.hints[task.hints.length - 1] = lastHint.replace(task.code, task._origCode);
+        }
+        task.code = task._origCode;
+        delete task._origCode;
+      }
+    }
+}
+function getGameSeedFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  var s = params.get('seed');
+  if (s) return parseInt(s, 10) || null;
+  return null;
+}
+var urlSeed = getGameSeedFromUrl();
+if (urlSeed) randomizeCodesWithSeed(urlSeed);
+
+function filterTrapCodeCollisions() {
+  var allCodes = {};
+  for (var a = 0; a < ACTS.length; a++)
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (task.code) allCodes[task.code] = true;
+    }
+  for (var a = 0; a < ACTS.length; a++)
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (task.trapCodes) {
+        task.trapCodes = task.trapCodes.filter(function(tc) { return !allCodes[tc]; });
+      }
+    }
+}
+filterTrapCodeCollisions();
+
 /* ── GAME STATE ─────────────────────────────── */
 var state;
 function initState() {
   state = {
     mode: null,
+    difficulty: selectedDifficulty,
     actIdx: 0,
     taskIdx: 0,
     completed: {},
@@ -2197,8 +2998,18 @@ function initState() {
     taskScores: {},
     score: 0,
     taskStartTime: null,
-    hintConfirmPending: false
+    taskTimes: {},
+    hintConfirmPending: false,
+    trapTriggered: false,
+    paused: false,
+    totalPauseTime: 0,
+    pauseStart: null,
+    decisions: {},
+    multiStep: {}
   };
+  interceptsShown = {};
+  mcclaneEventsShown = {};
+  lastMcclaneTime = 0;
 }
 initState();
 
@@ -2236,24 +3047,109 @@ function isActUnlocked(actIdx) {
 }
 
 /* ── AUDIO ──────────────────────────────────── */
+var audioMuted = false;
+try { audioMuted = localStorage.getItem('nakatomi_muted') === '1'; } catch(e){}
+function toggleMute() {
+  audioMuted = !audioMuted;
+  try { localStorage.setItem('nakatomi_muted', audioMuted ? '1' : '0'); } catch(e){}
+  var btn = document.getElementById('mute-btn');
+  if (btn) {
+    btn.textContent = audioMuted ? 'MUTE' : 'SND';
+    btn.classList.toggle('muted', audioMuted);
+  }
+  if (audioMuted) stopAmbient();
+  else if (state.gameState === 'playing') startAmbient();
+}
+(function initMuteBtn() {
+  var btn = document.getElementById('mute-btn');
+  if (btn && audioMuted) { btn.textContent = 'MUTE'; btn.classList.add('muted'); }
+})();
 var audioCtx = null;
 function ensureAudio() { if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
-function tone(freq,dur,type,vol) { if(!audioCtx)return; var o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=vol||0.12; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur/1000); o.stop(audioCtx.currentTime+dur/1000); }
-function playKey() { tone(800,60,'sine',0.06); }
+function tone(freq,dur,type,vol) { if(!audioCtx||audioMuted)return; var o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type=type||'sine'; o.frequency.value=freq; g.gain.value=vol||0.12; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur/1000); o.stop(audioCtx.currentTime+dur/1000); }
+function noise(dur,vol) {
+  if(!audioCtx||audioMuted)return;
+  var bufSize=audioCtx.sampleRate*dur/1000;
+  var buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
+  var data=buf.getChannelData(0);
+  for(var i=0;i<bufSize;i++) data[i]=(Math.random()*2-1);
+  var src=audioCtx.createBufferSource();
+  src.buffer=buf;
+  var g=audioCtx.createGain();
+  g.gain.value=vol||0.05;
+  var filt=audioCtx.createBiquadFilter();
+  filt.type='bandpass'; filt.frequency.value=2000; filt.Q.value=0.5;
+  src.connect(filt); filt.connect(g); g.connect(audioCtx.destination);
+  src.start();
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur/1000);
+  src.stop(audioCtx.currentTime+dur/1000);
+}
+function playKey() { tone(800,60,'sine',0.06); tone(2400,30,'square',0.02); }
 function playCorrect() { tone(523,180); setTimeout(function(){tone(659,180);},150); setTimeout(function(){tone(784,300);},300); }
 function playWrong() { tone(300,250,'sawtooth',0.1); setTimeout(function(){tone(200,350,'sawtooth',0.1);},200); }
-function playVictory() { [523,587,659,698,784,880,988,1047].forEach(function(f,i){setTimeout(function(){tone(f,300,undefined,0.1);},i*120);}); }
-function playGameOver() { tone(400,400,'sawtooth',0.08); setTimeout(function(){tone(300,400,'sawtooth',0.08);},350); setTimeout(function(){tone(200,600,'sawtooth',0.08);},700); }
-function playPowerDown() { tone(200,800,'sawtooth',0.08); setTimeout(function(){tone(100,1200,'sawtooth',0.06);},600); }
+function playSealOpen() { tone(440,100,'sine',0.08); setTimeout(function(){tone(554,100,'sine',0.08);},80); setTimeout(function(){tone(659,200,'sine',0.1);},160); setTimeout(function(){tone(880,400,'sine',0.06);},300); noise(200,0.03); }
+function playHintReveal() { noise(150,0.06); setTimeout(function(){tone(600,100,'sine',0.05);},100); }
+function playTrapCode() { for(var i=0;i<6;i++){(function(j){setTimeout(function(){tone(200+j*50,80,'square',0.12);},j*60);})(i);} }
+function playRadioIntercept() { noise(300,0.08); setTimeout(function(){tone(700,60,'sine',0.04);},200); setTimeout(function(){tone(900,60,'sine',0.04);},280); }
+function playHeartbeat() { if(!audioCtx)return; tone(60,120,'sine',0.15); setTimeout(function(){tone(80,100,'sine',0.10);},150); }
+function playVictory() {
+  [523,587,659,698,784,880,988,1047].forEach(function(f,i){setTimeout(function(){tone(f,300,undefined,0.1);},i*120);});
+  setTimeout(function(){ tone(1047,800,'sine',0.08); tone(784,800,'sine',0.06); tone(523,800,'sine',0.04); },960);
+}
+function playGameOver() { tone(400,400,'sawtooth',0.08); setTimeout(function(){tone(300,400,'sawtooth',0.08);},350); setTimeout(function(){tone(200,600,'sawtooth',0.08);},700); setTimeout(function(){tone(100,1000,'sawtooth',0.06);},1100); }
+function playPowerDown() { tone(200,800,'sawtooth',0.08); setTimeout(function(){tone(100,1200,'sawtooth',0.06);},600); noise(500,0.04); }
+
+/* ── AMBIENT SYNTH ────────────────────────── */
+var ambientOsc = null, ambientGain = null;
+function startAmbient() {
+  if(!audioCtx || ambientOsc || audioMuted) return;
+  ambientOsc = audioCtx.createOscillator();
+  ambientGain = audioCtx.createGain();
+  ambientOsc.type = 'sine';
+  ambientOsc.frequency.value = 55;
+  ambientGain.gain.value = 0.02;
+  ambientOsc.connect(ambientGain);
+  ambientGain.connect(audioCtx.destination);
+  ambientOsc.start();
+}
+function updateAmbient() {
+  if(!ambientOsc || !ambientGain) return;
+  var actFreqs = [55, 65, 73, 82, 98];
+  var freq = actFreqs[Math.min(state.actIdx, actFreqs.length-1)];
+  ambientOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 2);
+  var intensity = 0.02 + state.actIdx * 0.005;
+  if(state.timerRemaining < 300) intensity += 0.01;
+  ambientGain.gain.setTargetAtTime(Math.min(intensity, 0.06), audioCtx.currentTime, 1);
+}
+function stopAmbient() {
+  if(ambientOsc) { try{ambientOsc.stop();}catch(e){} ambientOsc=null; }
+  ambientGain=null;
+}
+window.addEventListener('beforeunload', function() { stopAmbient(); });
+
+/* ── HEARTBEAT TIMER WARNING ──────────────── */
+var heartbeatInterval = null;
+function startHeartbeat() {
+  if(heartbeatInterval) return;
+  heartbeatInterval = setInterval(function(){
+    if(state.gameState==='playing' && state.timerRemaining<=300 && state.timerRemaining>0){
+      playHeartbeat();
+    } else if(state.timerRemaining>300 || state.gameState!=='playing') {
+      clearInterval(heartbeatInterval); heartbeatInterval=null;
+    }
+  }, 1000);
+}
 
 /* ── GAME FLOW ──────────────────────────────── */
 function selectMode(mode) {
   ensureAudio();
+  applyDifficulty();
   runBoot(function() { enterGame(mode); });
 }
 
 function enterGame(mode) {
   state.mode = mode;
+  state.difficulty = selectedDifficulty;
   state.gameState = 'playing';
   state.startTime = Date.now();
   state.taskStartTime = Date.now();
@@ -2272,6 +3168,7 @@ function enterGame(mode) {
     document.querySelector('.monitor-housing').style.borderRadius = '22px';
     buildPhysicalDisplay();
   }
+  startAmbient();
   buildTaskPanel();
   startTimer();
   render();
@@ -2283,9 +3180,18 @@ function startTimer() {
   state.timerInterval = setInterval(tickTimer, 1000);
 }
 function tickTimer() {
-  if (state.gameState !== 'playing') return;
+  if (state.gameState !== 'playing' || state.paused) return;
   state.timerRemaining--;
-  if (state.timerRemaining <= 0) { state.timerRemaining = 0; triggerGameOver('timer'); }
+  if (state.timerRemaining <= 0) { state.timerRemaining = 0; triggerGameOver('timer'); return; }
+  var ROOF_DEADLINE = Math.round(900 * TIMER_SECONDS / 5400);
+  if (state.timerRemaining <= ROOF_DEADLINE && state.actIdx < 4) {
+    triggerGameOver('roof'); return;
+  }
+  if (state.timerRemaining <= 300) startHeartbeat();
+  checkRadioIntercepts();
+  checkMcclaneEvents();
+  checkNudge();
+  updateAmbient();
   renderTimer();
 }
 function renderTimer() {
@@ -2295,13 +3201,44 @@ function renderTimer() {
   el.classList.toggle('urgent', state.timerRemaining <= 300);
 }
 
+/* ── RADIO INTERCEPTS ──────────────────────── */
+function checkRadioIntercepts() {
+  for (var i = 0; i < RADIO_INTERCEPTS.length; i++) {
+    var ri = RADIO_INTERCEPTS[i];
+    var threshold = Math.round(ri.time * TIMER_SECONDS / 5400);
+    if (state.timerRemaining <= threshold && !interceptsShown[i]) {
+      interceptsShown[i] = true;
+      showRadioIntercept(ri.msg);
+      break;
+    }
+  }
+}
+function showRadioIntercept(msg) {
+  ensureAudio(); playRadioIntercept();
+  var div = document.createElement('div');
+  div.className = 'radio-intercept';
+  div.innerHTML = '<div class="radio-msg">' + escHTML(msg) + '</div>';
+  document.body.appendChild(div);
+  setTimeout(function() { if(div.parentNode) div.parentNode.removeChild(div); }, 5500);
+}
+
 /* ── CODE ENTRY ─────────────────────────────── */
 function enterDigit(d) {
   if (state.gameState !== 'playing' || state.mode !== 'digital') return;
   var task = currentTask();
-  if (task.type === 'power' || state.codeInput.length >= 4) return;
+  if (task.type === 'power') return;
+  var maxLen = task.codeType === 'text' ? 8 : 4;
+  if (state.codeInput.length >= maxLen) return;
   ensureAudio(); playKey();
   state.codeInput += d;
+  renderCodeDisplay();
+}
+function enterTextChar(c) {
+  if (state.gameState !== 'playing' || state.mode !== 'digital') return;
+  var task = currentTask();
+  if (task.type === 'power' || state.codeInput.length >= 8) return;
+  ensureAudio(); playKey();
+  state.codeInput += c;
   renderCodeDisplay();
 }
 function clearCode() {
@@ -2312,17 +3249,54 @@ function clearCode() {
 }
 function submitCode() {
   if (state.gameState !== 'playing' || state.mode !== 'digital') return;
-  if (state.codeInput.length !== 4) return;
   var task = currentTask();
   if (task.type === 'power') return;
+
+  if (task.type === 'multi' && task.steps) {
+    var stepIdx = state.multiStep[task.id] || 0;
+    var step = task.steps[stepIdx];
+    if (!step || state.codeInput.length === 0) return;
+    var sd = document.getElementById('seg-digits');
+    if (state.codeInput === step.partialCode) {
+      sd.classList.add('correct');
+      playCorrect();
+      state.multiStep[task.id] = stepIdx + 1;
+      state.codeInput = '';
+      if (stepIdx + 1 >= task.steps.length) {
+        setTimeout(function() { sd.classList.remove('correct'); completeCurrentTask(); }, 600);
+      } else {
+        setTimeout(function() { sd.classList.remove('correct'); render(); renderCodeDisplay(); }, 600);
+      }
+    } else {
+      state.wrongCount++;
+      state.taskWrongs[task.id] = (state.taskWrongs[task.id] || 0) + 1;
+      if (SCORING_ENABLED) { state.score = Math.max(0, state.score - SCORING.WRONG_PENALTY); showScoreDelta(-SCORING.WRONG_PENALTY); }
+      sd.classList.add('wrong'); playWrong(); shakeScreen();
+      setTimeout(function() { sd.classList.remove('wrong'); }, 500);
+      document.getElementById('wrong-count').textContent = state.wrongCount;
+      if (state.wrongCount >= MAX_WRONG) { setTimeout(function() { triggerGameOver('mcclane'); }, 800); }
+      state.codeInput = '';
+      setTimeout(renderCodeDisplay, 600);
+    }
+    return;
+  }
+
+  var isText = task.codeType === 'text';
+  if (!isText && state.codeInput.length !== 4) return;
+  if (isText && state.codeInput.length === 0) return;
   var sd = document.getElementById('seg-digits');
-  if (state.codeInput === task.code) {
+  var inputMatch = isText ? state.codeInput.toUpperCase() === task.code.toUpperCase() : state.codeInput === task.code;
+  if (inputMatch) {
     sd.classList.add('correct');
-    playCorrect();
+    playSealOpen();
     setTimeout(function() {
       sd.classList.remove('correct');
       completeCurrentTask();
     }, 600);
+  } else if (TRAP_CODES_ENABLED && task.trapCodes && (isText ?
+    task.trapCodes.some(function(tc) { return tc.toUpperCase() === state.codeInput.toUpperCase(); }) :
+    task.trapCodes.indexOf(state.codeInput) !== -1)) {
+    handleTrapCode(sd);
   } else {
     state.wrongCount++;
     state.taskWrongs[task.id] = (state.taskWrongs[task.id] || 0) + 1;
@@ -2332,6 +3306,7 @@ function submitCode() {
     }
     sd.classList.add('wrong');
     playWrong();
+    shakeScreen();
     setTimeout(function() { sd.classList.remove('wrong'); }, 500);
     document.getElementById('wrong-count').textContent = state.wrongCount;
     render();
@@ -2344,36 +3319,83 @@ function submitCode() {
   setTimeout(renderCodeDisplay, 600);
 }
 
+function handleTrapCode(sd) {
+  var preset = DIFFICULTY_PRESETS[state.difficulty];
+  if (state.difficulty === 'mastermind') {
+    sd.classList.add('wrong');
+    playTrapCode();
+    showTrapWarning();
+    setTimeout(function() { sd.classList.remove('wrong'); triggerGameOver('trap'); }, 1200);
+  } else {
+    state.wrongCount += 2;
+    state.taskWrongs[currentTask().id] = (state.taskWrongs[currentTask().id] || 0) + 2;
+    if (SCORING_ENABLED) {
+      var penalty = SCORING.WRONG_PENALTY * 3;
+      state.score = Math.max(0, state.score - penalty);
+      showScoreDelta(-penalty);
+    }
+    sd.classList.add('wrong');
+    playTrapCode();
+    showTrapWarning();
+    shakeScreen();
+    setTimeout(function() { sd.classList.remove('wrong'); }, 500);
+    document.getElementById('wrong-count').textContent = state.wrongCount;
+    render();
+    if (state.wrongCount >= MAX_WRONG) {
+      setTimeout(function() { triggerGameOver('mcclane'); }, 800);
+    }
+  }
+}
+
+function showTrapWarning() {
+  var flash = document.createElement('div');
+  flash.className = 'trap-warning';
+  document.body.appendChild(flash);
+  setTimeout(function() { if(flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
+  showRadioIntercept('SECURITY ALERT: Decoy code detected! Police notified of vault intrusion attempt.');
+}
+
 /* ── TASK COMPLETION ────────────────────────── */
 function completeCurrentTask() {
   var task = currentTask();
   state.completed[task.id] = true;
 
+  var taskElapsed = (Date.now() - state.taskStartTime) / 1000;
+  state.taskTimes[task.id] = Math.round(taskElapsed);
+
   var taskPts = 0;
   var timeBonus = 0;
+  var answerRevealed = (state.hintsUsed[task.id] || 0) >= 4;
   if (SCORING_ENABLED) {
-    var elapsed = (Date.now() - state.taskStartTime) / 1000;
-    taskPts = SCORING.BASE;
-    if (elapsed < SCORING.TIME_BONUS_WINDOW) {
-      timeBonus = Math.round(SCORING.TIME_BONUS_MAX * (1 - elapsed / SCORING.TIME_BONUS_WINDOW));
-      taskPts += timeBonus;
+    if (answerRevealed) {
+      taskPts = 0;
+      timeBonus = 0;
+    } else {
+      var elapsed = taskElapsed;
+      taskPts = SCORING.BASE;
+      if (elapsed < SCORING.TIME_BONUS_WINDOW) {
+        timeBonus = Math.round(SCORING.TIME_BONUS_MAX * (1 - elapsed / SCORING.TIME_BONUS_WINDOW));
+        taskPts += timeBonus;
+      }
+      if (taskPts < 0) taskPts = 0;
     }
-    if (taskPts < 0) taskPts = 0;
     state.score += taskPts;
     var hPen = totalHintPenalty(task.id);
     var wPen = (state.taskWrongs[task.id] || 0) * SCORING.WRONG_PENALTY;
     state.taskScores[task.id] = {
-      base: SCORING.BASE,
+      base: answerRevealed ? 0 : SCORING.BASE,
       timeBonus: timeBonus,
       hintPenalty: hPen,
       wrongPenalty: wPen,
-      net: taskPts - hPen - wPen
+      net: answerRevealed ? 0 : (taskPts - hPen - wPen),
+      answerRevealed: answerRevealed
     };
-    showScoreDelta(taskPts);
+    if (taskPts > 0) showScoreDelta(taskPts);
     showTaskScorePopup(task, taskPts, timeBonus);
   }
+  if (state.mode !== 'digital') playSealOpen();
 
-  state.dossier.push({ id: task.id, name: task.name, text: task.storyBeat, score: state.taskScores[task.id] || null });
+  state.dossier.push({ id: task.id, name: task.name, text: task.storyBeat, speaker: task.speaker || null, score: state.taskScores[task.id] || null });
 
   if (state.mode === 'digital') {
     showStoryBeat(task);
@@ -2385,6 +3407,7 @@ function completeCurrentTask() {
   }
 
   advanceTask();
+  updateAmbient();
   render();
   if (state.mode === 'physical') buildPhysicalDisplay();
 }
@@ -2394,13 +3417,120 @@ function advanceTask() {
   if (state.taskIdx < act.tasks.length - 1) {
     state.taskIdx++;
   } else if (state.actIdx < ACTS.length - 1) {
+    var prevAct = state.actIdx;
     state.actIdx++;
     state.taskIdx = 0;
+    showActTransition(state.actIdx);
   }
   state.taskStartTime = Date.now();
   state.hintConfirmPending = false;
   var hcb = document.getElementById('hint-confirm-box');
   if (hcb) hcb.remove();
+}
+
+var ACT_ASCII_ART = [
+  null,
+  '       _______________\n' +
+  '      |  ___________  |\n' +
+  '      | |  NAKATOMI | |\n' +
+  '      | |   PLAZA   | |\n' +
+  '      | |___________| |\n' +
+  '      |  ___________  |\n' +
+  '      | |  |  |  |  | |\n' +
+  '      | |__|__|__|__| |\n' +
+  '      | |  |  |  |  | |\n' +
+  '      |_|__|__|__|__|_|\n' +
+  '     /|               |\\\n' +
+  '    /_|_______________|_\\',
+  '      _____________\n' +
+  '     |  _________  |\n' +
+  '     | |  VAULT  | |\n' +
+  '     | |  .--.   | |\n' +
+  '     | | ( ** )  | |\n' +
+  '     | |  `--\'   | |\n' +
+  '     | | [SEAL]  | |\n' +
+  '     | | [SEAL]  | |\n' +
+  '     | | [SEAL]  | |\n' +
+  '     | |_________| |\n' +
+  '     |_____________|',
+  '          _.._\n' +
+  '        .` -- `.\n' +
+  '       / ======\\\\\n' +
+  '      |  ======  |\n' +
+  '      |  ======  |\n' +
+  '       \\\\ ====== /\n' +
+  '      __`-.  .-`__\n' +
+  '     /____`--`____\\\\\n' +
+  '    |  FBI  |  FBI  |\n' +
+  '    |_______|_______|',
+  '       . * .  *  . *\n' +
+  '     *  .\\ | / .  *\n' +
+  '    . * --\\|/-- * .\n' +
+  '    * . * -||- . * .\n' +
+  '      .  / | \\  .\n' +
+  '     * ./  |  \\. *\n' +
+  '      __________\n' +
+  '     |__ESCAPE__|'
+];
+
+function showActTransition(actIdx) {
+  var act = ACTS[actIdx];
+  if (!act) return;
+  var artHtml = ACT_ASCII_ART[actIdx] ?
+    '<div class="act-trans-art">' + escHTML(ACT_ASCII_ART[actIdx]) + '</div>' : '';
+
+  var prevActIdx = actIdx - 1;
+  var decision = null;
+  for (var di = 0; di < DECISION_POINTS.length; di++) {
+    if (DECISION_POINTS[di].afterAct === prevActIdx) { decision = DECISION_POINTS[di]; break; }
+  }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'act-transition';
+  overlay.innerHTML =
+    '<div class="act-trans-border"></div>' +
+    artHtml +
+    '<div class="act-trans-num">ACT ' + (actIdx + 1) + '</div>' +
+    '<div class="act-trans-title">' + escHTML(act.name) + '</div>' +
+    '<div class="act-trans-quote">' + escHTML(act.quote || '') + '</div>';
+
+  if (decision && !state.decisions[prevActIdx]) {
+    var decDiv = document.createElement('div');
+    decDiv.className = 'act-decision';
+    decDiv.innerHTML =
+      '<button onclick="makeDecision(' + prevActIdx + ',\'A\',this.parentNode.parentNode)">' + escHTML(decision.optionA) + '</button>' +
+      '<button onclick="makeDecision(' + prevActIdx + ',\'B\',this.parentNode.parentNode)">' + escHTML(decision.optionB) + '</button>';
+    overlay.appendChild(decDiv);
+    var questionDiv = document.createElement('div');
+    questionDiv.style.cssText = 'font-size:0.75rem;color:#33aa33;margin-top:0.6rem;opacity:0;animation:actQuoteFade 0.5s ease-out 0.3s forwards';
+    questionDiv.textContent = decision.question;
+    overlay.insertBefore(questionDiv, decDiv);
+    document.body.appendChild(overlay);
+    playRadioIntercept();
+  } else {
+    document.body.appendChild(overlay);
+    playRadioIntercept();
+    setTimeout(function() {
+      overlay.classList.add('out');
+      setTimeout(function() { overlay.remove(); }, 500);
+    }, 3000);
+  }
+}
+
+function makeDecision(actIdx, choice, overlay) {
+  state.decisions[actIdx] = choice;
+  var dp = null;
+  for (var i = 0; i < DECISION_POINTS.length; i++) {
+    if (DECISION_POINTS[i].afterAct === actIdx) { dp = DECISION_POINTS[i]; break; }
+  }
+  if (dp) {
+    var flavor = choice === 'A' ? dp.flavorA : dp.flavorB;
+    state.dossier.push({ id: 'DEC', name: (choice === 'A' ? dp.optionA : dp.optionB), text: flavor, speaker: 'HANS', score: null });
+  }
+  if (overlay) {
+    overlay.classList.add('out');
+    setTimeout(function() { overlay.remove(); }, 500);
+  }
 }
 
 /* ── POWER CUT (Seal 7 / Task 3.7) ─────────── */
@@ -2430,19 +3560,25 @@ function triggerPowerCut() {
 function triggerGameOver(reason) {
   state.gameState = 'gameover';
   clearInterval(state.timerInterval);
+  if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}
+  stopAmbient();
   playGameOver();
   var reasons = {
     mcclane: { text: 'McClane got the drop on you.', quote: '"Just another American who saw too many movies."' },
-    timer: { text: 'Time\'s up. The FBI moved in.', quote: '"No more table. Where are my detonators?"' }
+    timer: { text: 'Time\'s up. The FBI moved in.', quote: '"No more table. Where are my detonators?"' },
+    trap: { text: 'You triggered a decoy code. Police breached the building.', quote: '"You asked for a miracle. I give you the F... B... I."' },
+    roof: { text: 'The roof charges detonated. The FBI helicopter went down.', quote: '"We\'re gonna need some more FBI guys."' }
   };
   var r = reasons[reason] || reasons.mcclane;
   document.getElementById('gameover-reason').textContent = r.text;
   document.getElementById('gameover-quote').textContent = r.quote;
   if (SCORING_ENABLED) {
-    var maxScore = totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX);
+    var finalScore = Math.round(state.score * SCORE_MULTIPLIER);
+    var maxScore = Math.round(totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX) * SCORE_MULTIPLIER);
+    var diffLabel = DIFFICULTY_PRESETS[state.difficulty] ? DIFFICULTY_PRESETS[state.difficulty].label : 'Operative';
     document.getElementById('gameover-score').textContent =
-      'Score: ' + state.score + ' / ' + maxScore + ' \u2014 ' +
-      completedCount() + '/' + totalTasks() + ' tasks completed';
+      'Score: ' + finalScore + ' / ' + maxScore + ' \u2014 ' +
+      completedCount() + '/' + totalTasks() + ' tasks \u2014 ' + diffLabel;
     document.getElementById('gameover-score').style.display = '';
   } else {
     document.getElementById('gameover-score').style.display = 'none';
@@ -2450,20 +3586,197 @@ function triggerGameOver(reason) {
   document.getElementById('overlay-gameover').classList.remove('hidden');
 }
 
+/* ── ACHIEVEMENTS ──────────────────────────── */
+var ACHIEVEMENTS = [
+  { id: 'no_hints',    icon: '\u{1F910}', name: 'No Hints',      test: function() { for (var k in state.hintsUsed) { if (state.hintsUsed[k] > 0) return false; } return true; } },
+  { id: 'speed_demon', icon: '\u26A1',     name: 'Speed Demon',   test: function() { return (Date.now() - state.startTime) < 2700000; } },
+  { id: 'perfect',     icon: '\u2B50',     name: 'Perfect Score', test: function() { var max = totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX); return state.score >= max; } },
+  { id: 'glass_walk',  icon: '\u{1F463}',  name: 'Glass Walker',  test: function() { return state.wrongCount === 0; } },
+  { id: 'yippee',      icon: '\u{1F525}',  name: 'Yippee-ki-yay', test: function() { return state.difficulty === 'mastermind'; } },
+  { id: 'bonus_hunter',icon: '\u{1F3AF}',  name: 'Bonus Hunter',  test: function() { var b = loadBonusState(); return BONUS_TASKS.every(function(t) { return !!b[t.id]; }); } }
+];
+
+function loadAchievements() {
+  try { return JSON.parse(localStorage.getItem('nakatomi_achievements') || '{}'); } catch(e) { return {}; }
+}
+
+function saveAchievements(earned) {
+  try { localStorage.setItem('nakatomi_achievements', JSON.stringify(earned)); } catch(e) {}
+}
+
+function evaluateAchievements() {
+  var stored = loadAchievements();
+  var newlyEarned = [];
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    var ach = ACHIEVEMENTS[i];
+    if (ach.test()) {
+      if (!stored[ach.id]) newlyEarned.push(ach.id);
+      stored[ach.id] = stored[ach.id] || Date.now();
+    }
+  }
+  saveAchievements(stored);
+  return { stored: stored, newlyEarned: newlyEarned };
+}
+
+function renderAchievements(container) {
+  var result = evaluateAchievements();
+  var html = '<div class="achievements-section">' +
+    '<div class="achievements-title">Achievements</div>' +
+    '<div class="achievements-row">';
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    var ach = ACHIEVEMENTS[i];
+    var earned = !!result.stored[ach.id];
+    var isNew = result.newlyEarned.indexOf(ach.id) !== -1;
+    html += '<div class="ach-badge ' + (earned ? 'earned' : 'locked') + '">' +
+      '<div class="ach-icon">' + ach.icon + '</div>' +
+      '<div class="ach-name">' + ach.name + '</div>' +
+      (isNew ? '<div class="ach-new">NEW!</div>' : '') +
+      '</div>';
+  }
+  html += '</div></div>';
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+/* ── BONUS OBJECTIVES ──────────────────────── */
+var BONUS_TASKS = [
+  {
+    id: 'bonus_trivia_1',
+    name: 'Die Hard Trivia',
+    desc: 'Answer 3 movie questions to prove you know the source material.',
+    questions: [
+      { q: 'What floor is the Nakatomi Christmas party on?', code: '0030' },
+      { q: 'How many terrorists does Hans bring to the heist?', code: '0012' },
+      { q: 'What year was Die Hard released?', code: '1988' }
+    ]
+  },
+  {
+    id: 'bonus_easter',
+    name: 'Easter Egg Hunt',
+    desc: 'A secret code is hidden in the boot sequence. Find it.',
+    questions: [
+      { q: 'What year appears in the boot sequence copyright notice?', code: '1988' }
+    ]
+  },
+  {
+    id: 'bonus_speed',
+    name: 'Speed Run Challenge',
+    desc: 'Your best completion time as a 4-digit number (MMSS). Can you beat 30 minutes?',
+    questions: [
+      { q: 'Enter your completion time from the main game as MMSS (e.g., 45 min 30 sec = 4530).', code: null }
+    ]
+  }
+];
+var bonusState = { completed: {}, currentTask: null, questionIdx: 0 };
+
+function loadBonusState() {
+  try { var s = JSON.parse(localStorage.getItem('nakatomi_bonus') || '{}'); return s; } catch(e) { return {}; }
+}
+function saveBonusState() {
+  try { localStorage.setItem('nakatomi_bonus', JSON.stringify(bonusState.completed)); } catch(e) {}
+}
+
+function startBonusMode() {
+  bonusState.completed = loadBonusState();
+  bonusState.currentTask = null;
+  bonusState.questionIdx = 0;
+  document.getElementById('overlay-victory').classList.add('hidden');
+  renderBonusList();
+  document.getElementById('overlay-bonus').classList.remove('hidden');
+}
+
+function exitBonusMode() {
+  document.getElementById('overlay-bonus').classList.add('hidden');
+  document.getElementById('overlay-victory').classList.remove('hidden');
+}
+
+function renderBonusList() {
+  var list = document.getElementById('bonus-list');
+  var html = '';
+  for (var i = 0; i < BONUS_TASKS.length; i++) {
+    var bt = BONUS_TASKS[i];
+    var done = !!bonusState.completed[bt.id];
+    html += '<div class="bonus-item' + (done ? ' completed' : '') + '" ' +
+      (done ? '' : 'onclick="selectBonusTask(' + i + ')"') + '>' +
+      '<div class="bonus-item-name">' + escHTML(bt.name) + '</div>' +
+      '<div class="bonus-item-desc">' + escHTML(bt.desc) + '</div>' +
+      '<div class="bonus-item-status">' + (done ? '\u2713 COMPLETED' : '\u25B6 START') + '</div>' +
+      '</div>';
+  }
+  list.innerHTML = html;
+  document.getElementById('bonus-input-area').classList.add('hidden');
+}
+
+function selectBonusTask(idx) {
+  var bt = BONUS_TASKS[idx];
+  if (bonusState.completed[bt.id]) return;
+  bonusState.currentTask = idx;
+  bonusState.questionIdx = 0;
+  showBonusQuestion();
+}
+
+function showBonusQuestion() {
+  var bt = BONUS_TASKS[bonusState.currentTask];
+  var q = bt.questions[bonusState.questionIdx];
+  var qNum = bt.questions.length > 1 ?
+    ' (' + (bonusState.questionIdx + 1) + '/' + bt.questions.length + ')' : '';
+  document.getElementById('bonus-question').textContent = bt.name + qNum + ': ' + q.q;
+  document.getElementById('bonus-code-input').value = '';
+  document.getElementById('bonus-feedback').textContent = '';
+  document.getElementById('bonus-feedback').style.color = '';
+  document.getElementById('bonus-input-area').classList.remove('hidden');
+  setTimeout(function() { document.getElementById('bonus-code-input').focus(); }, 50);
+}
+
+function submitBonusCode() {
+  var bt = BONUS_TASKS[bonusState.currentTask];
+  var q = bt.questions[bonusState.questionIdx];
+  var input = document.getElementById('bonus-code-input').value.trim();
+  if (!input) return;
+
+  if (q.code === null || input === q.code) {
+    bonusState.questionIdx++;
+    if (bonusState.questionIdx >= bt.questions.length) {
+      bonusState.completed[bt.id] = Date.now();
+      saveBonusState();
+      document.getElementById('bonus-feedback').textContent = 'COMPLETE! \u2014 ' + bt.name + ' finished.';
+      document.getElementById('bonus-feedback').style.color = '#33ff33';
+      ensureAudio(); playCorrect();
+      setTimeout(function() { renderBonusList(); }, 1500);
+    } else {
+      document.getElementById('bonus-feedback').textContent = 'Correct! Next question...';
+      document.getElementById('bonus-feedback').style.color = '#33ff33';
+      ensureAudio(); playCorrect();
+      setTimeout(showBonusQuestion, 1000);
+    }
+  } else {
+    document.getElementById('bonus-feedback').textContent = 'Wrong. Try again.';
+    document.getElementById('bonus-feedback').style.color = '#ff4444';
+    ensureAudio(); playWrong();
+    document.getElementById('bonus-code-input').value = '';
+  }
+}
+
 function triggerVictory() {
   if (state.gameState === 'victory') return;
   state.gameState = 'victory';
   clearInterval(state.timerInterval);
+  if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}
+  stopAmbient();
   playVictory();
-  var elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  launchConfetti();
+  var elapsed = Math.floor((Date.now() - state.startTime - state.totalPauseTime) / 1000);
   var em = Math.floor(elapsed / 60), es = elapsed % 60;
+  var diffLabel = DIFFICULTY_PRESETS[state.difficulty] ? DIFFICULTY_PRESETS[state.difficulty].label : 'Operative';
   document.getElementById('victory-time').textContent =
     'Completed in ' + em + 'm ' + String(es).padStart(2,'0') + 's \u2014 ' +
-    state.wrongCount + ' wrong code' + (state.wrongCount !== 1 ? 's' : '');
+    state.wrongCount + ' wrong code' + (state.wrongCount !== 1 ? 's' : '') +
+    ' \u2014 ' + diffLabel + ' difficulty';
   if (SCORING_ENABLED) {
-    var maxScore = totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX);
+    var finalScore = Math.round(state.score * SCORE_MULTIPLIER);
+    var maxScore = Math.round(totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX) * SCORE_MULTIPLIER);
     document.getElementById('victory-score').textContent =
-      'Final Score: ' + state.score + ' / ' + maxScore;
+      'Final Score: ' + finalScore + ' / ' + maxScore +
+      (SCORE_MULTIPLIER !== 1 ? ' (' + SCORE_MULTIPLIER + 'x ' + diffLabel + ')' : '');
     var totalHints = 0, totalWrongs = 0, totalTimeBonus = 0, totalBase = 0, totalHintPen = 0, totalWrongPen = 0;
     for (var tid in state.taskScores) {
       var ts = state.taskScores[tid];
@@ -2481,17 +3794,31 @@ function triggerVictory() {
       '<div class="vb-row"><span class="vb-label">Speed bonuses</span><span class="vb-value">+' + totalTimeBonus + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Hint penalties (' + totalHints + ' used)</span><span class="vb-value penalty">-' + totalHintPen + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Error penalties (' + totalWrongs + ' wrong)</span><span class="vb-value penalty">-' + totalWrongPen + '</span></div>' +
-      '<div class="vb-row vb-total"><span class="vb-label">TOTAL</span><span class="vb-value">' + state.score + '</span></div>';
+      (SCORE_MULTIPLIER !== 1 ? '<div class="vb-row"><span class="vb-label">Difficulty multiplier</span><span class="vb-value">\u00d7' + SCORE_MULTIPLIER + '</span></div>' : '') +
+      '<div class="vb-row vb-total"><span class="vb-label">TOTAL</span><span class="vb-value">' + finalScore + '</span></div>' +
+      '<button class="stats-toggle" onclick="toggleStatsTable()">Detailed Stats \u25BC</button>' +
+      '<div id="stats-table-wrap" class="stats-table-wrap" style="display:none">' + buildStatsTable() + '</div>';
+    renderAchievements(bd);
+  } else {
+    var bd = document.getElementById('victory-breakdown');
+    bd.className = 'victory-breakdown';
+    bd.innerHTML = '';
+    renderAchievements(bd);
   }
   document.getElementById('overlay-victory').classList.remove('hidden');
 }
 
 function resetGame() {
   clearInterval(state.timerInterval);
+  if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}
+  stopAmbient();
   initState();
   document.getElementById('overlay-gameover').classList.add('hidden');
   document.getElementById('overlay-victory').classList.add('hidden');
   document.getElementById('overlay-powerdown').classList.add('hidden');
+  document.getElementById('overlay-pause').classList.add('hidden');
+  document.getElementById('overlay-shortcuts').classList.add('hidden');
+  document.getElementById('overlay-leaderboard').classList.add('hidden');
   document.getElementById('clue-overlay').classList.add('hidden');
   document.getElementById('dossier-panel').classList.add('hidden');
   document.getElementById('facilitator').classList.add('hidden');
@@ -2516,6 +3843,13 @@ function resetGame() {
   if (popup) popup.remove();
   var hcb = document.getElementById('hint-confirm-box');
   if (hcb) hcb.remove();
+  var cta = document.getElementById('cipher-toolkit-area');
+  if (cta) { cta.innerHTML = ''; cta.removeAttribute('data-task'); }
+  if (urlSeed) {
+    restoreOriginalCodes();
+    randomizeCodesWithSeed(urlSeed + Date.now());
+    filterTrapCodeCollisions();
+  }
   renderTimer();
 }
 
@@ -2525,11 +3859,12 @@ function requestHint() {
   var task = currentTask();
   if (!task.hints || task.hints.length === 0) return;
   var used = state.hintsUsed[task.id] || 0;
-  if (used >= task.hints.length) return;
+  var maxAvail = Math.min(task.hints.length, MAX_HINT_LEVELS);
+  if (used >= maxAvail) return;
   var penalty = hintPenaltyFor(used);
   if (SCORING_ENABLED && penalty > 0 && !state.hintConfirmPending) {
     state.hintConfirmPending = true;
-    showHintConfirm(used + 1, task.hints.length, penalty);
+    showHintConfirm(used + 1, maxAvail, penalty);
     return;
   }
   state.hintConfirmPending = false;
@@ -2538,6 +3873,7 @@ function requestHint() {
     state.score = Math.max(0, state.score - penalty);
     showScoreDelta(-penalty);
   }
+  ensureAudio(); playHintReveal();
   renderHints();
   render();
 }
@@ -2550,13 +3886,14 @@ function renderHints() {
     btn.style.display = 'none';
     return;
   }
+  var maxAvail = Math.min(task.hints.length, MAX_HINT_LEVELS);
   var used = state.hintsUsed[task.id] || 0;
   btn.style.display = '';
   var levelClasses = ['hint-free', 'hint-lv2', 'hint-lv3', 'hint-answer'];
   if (used === 0) {
     hd.classList.add('hidden');
     var nextPen = hintPenaltyFor(0);
-    btn.textContent = 'HINT 1/' + task.hints.length + (nextPen === 0 ? ' (free)' : ' (-' + nextPen + ')') + ' (H)';
+    btn.textContent = 'HINT 1/' + maxAvail + (nextPen === 0 ? ' (free)' : ' (-' + nextPen + ')') + ' (H)';
     btn.classList.remove('exhausted');
   } else {
     var html = '';
@@ -2566,13 +3903,15 @@ function renderHints() {
     }
     hd.innerHTML = html;
     hd.classList.remove('hidden');
-    if (used >= task.hints.length) {
+    if (used >= maxAvail) {
       btn.textContent = 'ALL HINTS REVEALED';
       btn.classList.add('exhausted');
     } else {
       var nextPen = hintPenaltyFor(used);
-      btn.textContent = 'HINT ' + (used+1) + '/' + task.hints.length +
-        (nextPen === 0 ? ' (free)' : ' (-' + nextPen + ' pts)') + ' (H)';
+      var isNextAnswer = (used + 1 === 4);
+      var costLabel = nextPen === 0 ? ' (free)' : ' (-' + nextPen + ' pts)';
+      if (isNextAnswer) costLabel = ' (0 pts for task)';
+      btn.textContent = (isNextAnswer ? 'ANSWER' : 'HINT ' + (used+1)) + '/' + maxAvail + costLabel + ' (H)';
       btn.classList.remove('exhausted');
     }
   }
@@ -2580,14 +3919,20 @@ function renderHints() {
 function showHintConfirm(hintNum, hintTotal, penalty) {
   var existing = document.getElementById('hint-confirm-box');
   if (existing) existing.remove();
+  var isAnswer = (hintNum === 4);
   var isLast = (hintNum === hintTotal);
   var costText = SCORING_ENABLED && penalty > 0 ? ' (-' + penalty + ' pts)' : '';
+  var warningText = '';
+  if (isAnswer) {
+    warningText = '<div style="color:var(--red);font-size:0.7rem;margin-top:0.3rem">' +
+      'WARNING: Revealing the answer will score this task at 0 points.</div>';
+  }
   var box = document.createElement('div');
   box.className = 'hint-confirm';
   box.id = 'hint-confirm-box';
   box.innerHTML = '<div class="hint-confirm-text">' +
-    (isLast ? 'Reveal the answer?' : 'Reveal hint ' + hintNum + '/' + hintTotal + '?') +
-    costText + '</div>' +
+    (isAnswer ? 'Reveal the answer?' : (isLast ? 'Reveal final hint?' : 'Reveal hint ' + hintNum + '/' + hintTotal + '?')) +
+    costText + '</div>' + warningText +
     '<div class="hint-confirm-btns">' +
     '<button class="hc-yes" onclick="confirmHint(true)">YES</button>' +
     '<button class="hc-no" onclick="confirmHint(false)">NO</button></div>';
@@ -2622,20 +3967,27 @@ function showTaskScorePopup(task, pts, timeBonus) {
   if (!SCORING_ENABLED) return;
   var existing = document.getElementById('task-score-popup');
   if (existing) existing.remove();
-  var hPen = totalHintPenalty(task.id);
-  var wPen = (state.taskWrongs[task.id] || 0) * SCORING.WRONG_PENALTY;
-  var net = pts - hPen - wPen;
-  var breakdown = '';
-  breakdown += '<span class="tsp-bonus">BASE +' + SCORING.BASE + '</span>';
-  if (timeBonus > 0) breakdown += ' &middot; <span class="tsp-bonus">SPEED +' + timeBonus + '</span>';
-  if (hPen > 0) breakdown += ' &middot; <span class="tsp-penalty">HINTS -' + hPen + '</span>';
-  if (wPen > 0) breakdown += ' &middot; <span class="tsp-penalty">ERRORS -' + wPen + '</span>';
+  var answerRevealed = (state.hintsUsed[task.id] || 0) >= 4;
   var popup = document.createElement('div');
   popup.className = 'task-score-popup';
   popup.id = 'task-score-popup';
-  popup.innerHTML = '<div class="tsp-label">TASK ' + task.id + ' COMPLETE</div>' +
-    '<div class="tsp-points">+' + Math.max(0, net) + '</div>' +
-    '<div class="tsp-breakdown">' + breakdown + '</div>';
+  if (answerRevealed) {
+    popup.innerHTML = '<div class="tsp-label">TASK ' + task.id + ' COMPLETE</div>' +
+      '<div class="tsp-points" style="color:var(--dim)">+0</div>' +
+      '<div class="tsp-breakdown"><span class="tsp-penalty">ANSWER REVEALED \u2014 0 PTS</span></div>';
+  } else {
+    var hPen = totalHintPenalty(task.id);
+    var wPen = (state.taskWrongs[task.id] || 0) * SCORING.WRONG_PENALTY;
+    var net = pts - hPen - wPen;
+    var breakdown = '';
+    breakdown += '<span class="tsp-bonus">BASE +' + SCORING.BASE + '</span>';
+    if (timeBonus > 0) breakdown += ' &middot; <span class="tsp-bonus">SPEED +' + timeBonus + '</span>';
+    if (hPen > 0) breakdown += ' &middot; <span class="tsp-penalty">HINTS -' + hPen + '</span>';
+    if (wPen > 0) breakdown += ' &middot; <span class="tsp-penalty">ERRORS -' + wPen + '</span>';
+    popup.innerHTML = '<div class="tsp-label">TASK ' + task.id + ' COMPLETE</div>' +
+      '<div class="tsp-points">+' + Math.max(0, net) + '</div>' +
+      '<div class="tsp-breakdown">' + breakdown + '</div>';
+  }
   document.body.appendChild(popup);
   setTimeout(function() { var el = document.getElementById('task-score-popup'); if (el) el.remove(); }, 2200);
 }
@@ -2643,9 +3995,20 @@ function showTaskScorePopup(task, pts, timeBonus) {
 /* ── STORY BEATS / CLUES ────────────────────── */
 function showStoryBeat(task) {
   document.getElementById('clue-title').textContent = task.id + ' \u2014 ' + task.name;
-  document.getElementById('clue-content').innerHTML =
-    '<div class="clue-printout" style="white-space:normal;line-height:1.8">' +
-    escHTML(task.storyBeat) + '</div>';
+  var speakerHtml = task.speaker ? '<span class="story-speaker">' + escHTML(task.speaker) + ':</span> ' : '';
+  var printout = document.createElement('div');
+  printout.className = 'clue-printout';
+  printout.style.whiteSpace = 'normal';
+  printout.style.lineHeight = '1.8';
+  if (speakerHtml) printout.innerHTML = speakerHtml;
+  var contentEl = document.getElementById('clue-content');
+  contentEl.innerHTML = '';
+  contentEl.appendChild(printout);
+  typewriterText(printout, task.storyBeat, function() {
+    if (task.cipherType) {
+      contentEl.insertAdjacentHTML('beforeend', buildCipherToolkit());
+    }
+  });
   document.getElementById('clue-overlay').classList.remove('hidden');
 }
 function hideClue() { document.getElementById('clue-overlay').classList.add('hidden'); }
@@ -2663,6 +4026,69 @@ function decodeCipher() {
     return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
   });
   document.getElementById('cipher-out').textContent = decoded;
+}
+
+/* ── MULTI-CIPHER TOOLKIT ──────────────────── */
+function buildCipherToolkit() {
+  return '<div class="clue-cipher">' +
+    '<div class="cipher-sticky">CIPHER TOOLKIT \u2014 Multiple decode methods</div>' +
+    '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.5rem 0">' +
+    '<button class="cipher-tab active" onclick="switchCipher(\'rot13\',this)">ROT13</button>' +
+    '<button class="cipher-tab" onclick="switchCipher(\'hex\',this)">HEX\u2192ASCII</button>' +
+    '<button class="cipher-tab" onclick="switchCipher(\'base64\',this)">BASE64</button>' +
+    '<button class="cipher-tab" onclick="switchCipher(\'binary\',this)">BINARY</button>' +
+    '<button class="cipher-tab" onclick="switchCipher(\'num2letter\',this)">A=1 B=2</button>' +
+    '</div>' +
+    '<div class="cipher-input">' +
+    '<label>Encoded text:</label>' +
+    '<textarea id="cipher-in" oninput="runActiveCipher()" placeholder="Paste encoded message here\u2026"></textarea>' +
+    '<label style="margin-top:0.5rem">Decoded:</label>' +
+    '<div class="cipher-output mono" id="cipher-out"></div>' +
+    '</div></div>';
+}
+
+var activeCipher = 'rot13';
+function switchCipher(type, btn) {
+  activeCipher = type;
+  document.querySelectorAll('.cipher-tab').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  runActiveCipher();
+}
+function runActiveCipher() {
+  var input = document.getElementById('cipher-in');
+  if(!input) return;
+  var val = input.value;
+  var out = '';
+  switch(activeCipher) {
+    case 'rot13':
+      out = val.replace(/[A-Za-z]/g, function(c) {
+        var base = c <= 'Z' ? 65 : 97;
+        return String.fromCharCode((c.charCodeAt(0) - base + 13) % 26 + base);
+      });
+      break;
+    case 'hex':
+      out = val.replace(/[0-9a-fA-F]{2}/g, function(h) {
+        return String.fromCharCode(parseInt(h, 16));
+      });
+      break;
+    case 'base64':
+      try { out = atob(val.trim()); } catch(e) { out = '[Invalid Base64]'; }
+      break;
+    case 'binary':
+      out = val.replace(/[01]{8}/g, function(b) {
+        return String.fromCharCode(parseInt(b, 2));
+      });
+      break;
+    case 'num2letter':
+      out = val.replace(/\d+/g, function(n) {
+        var num = parseInt(n, 10);
+        if(num >= 1 && num <= 26) return String.fromCharCode(64 + num);
+        return n;
+      });
+      break;
+  }
+  var outEl = document.getElementById('cipher-out');
+  if(outEl) outEl.textContent = out;
 }
 
 /* ── DOSSIER ────────────────────────────────── */
@@ -2689,19 +4115,31 @@ function renderDossier() {
     html += '<div class="dossier-entry">' +
       '<div class="dossier-entry-id">' + escHTML(d.id + ' \u2014 ' + d.name);
     if (SCORING_ENABLED && d.score) {
-      var net = Math.max(0, d.score.net);
-      html += '<span class="dossier-entry-score">+' + net + ' pts</span>';
+      if (d.score.answerRevealed) {
+        html += '<span class="dossier-entry-score" style="color:var(--dim)">0 pts (answer)</span>';
+      } else {
+        var net = Math.max(0, d.score.net);
+        html += '<span class="dossier-entry-score">+' + net + ' pts</span>';
+      }
     }
-    html += '</div>' +
-      '<div class="dossier-entry-text">' + escHTML(d.text) + '</div>';
+    html += '</div>';
+    if (d.speaker) {
+      html += '<div class="dossier-entry-text"><span class="story-speaker" style="display:inline;margin-right:0.4rem">' + escHTML(d.speaker) + ':</span>' + escHTML(d.text) + '</div>';
+    } else {
+      html += '<div class="dossier-entry-text">' + escHTML(d.text) + '</div>';
+    }
     if (SCORING_ENABLED && d.score) {
       var s = d.score;
-      var parts = [];
-      parts.push('base:' + s.base);
-      if (s.timeBonus > 0) parts.push('speed:+' + s.timeBonus);
-      if (s.hintPenalty > 0) parts.push('hints:-' + s.hintPenalty);
-      if (s.wrongPenalty > 0) parts.push('errors:-' + s.wrongPenalty);
-      html += '<div class="dossier-entry-score-detail">' + parts.join(' · ') + '</div>';
+      if (s.answerRevealed) {
+        html += '<div class="dossier-entry-score-detail" style="color:var(--dim)">answer revealed \u2014 0 pts awarded</div>';
+      } else {
+        var parts = [];
+        parts.push('base:' + s.base);
+        if (s.timeBonus > 0) parts.push('speed:+' + s.timeBonus);
+        if (s.hintPenalty > 0) parts.push('hints:-' + s.hintPenalty);
+        if (s.wrongPenalty > 0) parts.push('errors:-' + s.wrongPenalty);
+        html += '<div class="dossier-entry-score-detail">' + parts.join(' · ') + '</div>';
+      }
     }
     html += '</div>';
   }
@@ -2789,6 +4227,25 @@ function buildPhysicalDisplay() {
       div.innerHTML = '<div class="pd-led"></div><span>' + escHTML(label) + '</span>';
       c.appendChild(div);
     }
+  }
+  var task = currentTask();
+  var objEl = document.getElementById('pd-objective');
+  if (task && !state.completed[task.id]) {
+    objEl.innerHTML = '<span class="pd-task-name">' + escHTML(task.id + ' \u2014 ' + task.name) + '</span>' +
+      escHTML(task.objective || '');
+  } else {
+    objEl.innerHTML = '<span class="pd-task-name">ALL TASKS COMPLETE</span>';
+  }
+  var hintsEl = document.getElementById('pd-hints');
+  if (task && !state.completed[task.id]) {
+    var used = state.hintsUsed[task.id] || 0;
+    var html = '';
+    for (var h = 0; h < used && h < (task.hints || []).length; h++) {
+      html += '<div class="pd-hint-line">' + escHTML(task.hints[h]) + '</div>';
+    }
+    hintsEl.innerHTML = html || '';
+  } else {
+    hintsEl.innerHTML = '';
   }
 }
 
@@ -2901,19 +4358,75 @@ function render() {
   if (state.mode === 'digital') {
     var task = currentTask();
     document.getElementById('obj-title').textContent = task.id + ' \u2014 ' + task.name.toUpperCase();
-    document.getElementById('obj-text').textContent = task.objective;
+    if (task.type === 'multi' && task.steps) {
+      var stepIdx = state.multiStep[task.id] || 0;
+      var stepLabel = stepIdx < task.steps.length ? task.steps[stepIdx].label : 'All steps complete!';
+      document.getElementById('obj-text').textContent = task.objective + '\n\n' + stepLabel +
+        ' (' + stepIdx + '/' + task.steps.length + ' completed)';
+    } else {
+      document.getElementById('obj-text').textContent = task.objective;
+    }
     var h = document.getElementById('obj-hint');
-    h.innerHTML = task.spl ? 'Try: <code class="mono">' + escHTML(task.spl) + '</code>' : '';
+    var showSpl = (SPL_HELP_MODE === 'always') || (SPL_HELP_MODE === 'act2' && state.actIdx < 2);
+    h.innerHTML = (task.spl && showSpl) ? 'Try: <code class="mono">' + escHTML(task.spl) + '</code>' : '';
     document.getElementById('seg-display').style.display = task.type === 'power' ? 'none' : '';
     document.getElementById('crt-prompt').style.display = task.type === 'power' ? 'none' : '';
-    document.getElementById('hint-btn').style.display = (HINTS_ENABLED && task.hints && task.hints.length > 0) ? '' : 'none';
+    var kp = document.getElementById('keypad');
+    if (task.codeType === 'text' && kp && !kp.querySelector('.key-alpha')) {
+      kp.innerHTML =
+        '<button class="key-alpha" onclick="enterTextChar(\'A\')">A</button><button class="key-alpha" onclick="enterTextChar(\'B\')">B</button><button class="key-alpha" onclick="enterTextChar(\'C\')">C</button>' +
+        '<button class="key-alpha" onclick="enterTextChar(\'D\')">D</button><button class="key-alpha" onclick="enterTextChar(\'E\')">E</button><button class="key-alpha" onclick="enterTextChar(\'F\')">F</button>' +
+        '<button class="key-alpha" onclick="enterTextChar(\'G\')">G</button><button class="key-alpha" onclick="enterTextChar(\'H\')">H</button><button class="key-alpha" onclick="enterTextChar(\'I\')">I</button>' +
+        '<button onclick="enterDigit(\'1\')">1</button><button onclick="enterDigit(\'2\')">2</button><button onclick="enterDigit(\'3\')">3</button>' +
+        '<button onclick="enterDigit(\'4\')">4</button><button onclick="enterDigit(\'5\')">5</button><button onclick="enterDigit(\'6\')">6</button>' +
+        '<button onclick="enterDigit(\'7\')">7</button><button onclick="enterDigit(\'8\')">8</button><button onclick="enterDigit(\'9\')">9</button>' +
+        '<button class="key-fn" onclick="clearCode()">CLR</button><button onclick="enterDigit(\'0\')">0</button><button class="key-fn key-enter" onclick="submitCode()">ENT</button>';
+    } else if (task.codeType !== 'text' && kp && kp.querySelector('.key-alpha')) {
+      kp.innerHTML =
+        '<button onclick="enterDigit(\'1\')">1</button><button onclick="enterDigit(\'2\')">2</button><button onclick="enterDigit(\'3\')">3</button>' +
+        '<button onclick="enterDigit(\'4\')">4</button><button onclick="enterDigit(\'5\')">5</button><button onclick="enterDigit(\'6\')">6</button>' +
+        '<button onclick="enterDigit(\'7\')">7</button><button onclick="enterDigit(\'8\')">8</button><button onclick="enterDigit(\'9\')">9</button>' +
+        '<button class="key-fn" onclick="clearCode()">CLR</button><button onclick="enterDigit(\'0\')">0</button><button class="key-fn key-enter" onclick="submitCode()">ENT</button>';
+    }
+    var maxAvail = Math.min((task.hints||[]).length, MAX_HINT_LEVELS);
+    document.getElementById('hint-btn').style.display = (HINTS_ENABLED && maxAvail > 0) ? '' : 'none';
+    var cta = document.getElementById('cipher-toolkit-area');
+    if (task.cipherType) {
+      if (cta.getAttribute('data-task') !== task.id) {
+        cta.innerHTML = buildCipherToolkit();
+        cta.setAttribute('data-task', task.id);
+      }
+      cta.classList.remove('hidden');
+    } else {
+      if (cta.getAttribute('data-task')) {
+        cta.innerHTML = '';
+        cta.removeAttribute('data-task');
+      }
+      cta.classList.add('hidden');
+    }
     renderHints();
+  } else if (state.mode === 'physical') {
+    buildPhysicalDisplay();
   }
-  document.getElementById('wrong-count').textContent = state.wrongCount;
+  var wrongEl = document.getElementById('wrong-count');
+  if (wrongEl) wrongEl.textContent = state.wrongCount;
 }
 function renderCodeDisplay() {
+  var task = currentTask();
+  var sd = document.getElementById('seg-digits');
+  if (task && task.codeType === 'text') {
+    sd.innerHTML = '';
+    var maxLen = 8;
+    for (var i = 0; i < maxLen; i++) {
+      var span = document.createElement('span');
+      span.className = 'seg-digit' + (i < state.codeInput.length ? ' filled' : '');
+      span.textContent = state.codeInput[i] || '_';
+      sd.appendChild(span);
+    }
+    return;
+  }
   var digits = document.querySelectorAll('.seg-digit');
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < digits.length && i < 4; i++) {
     var c = state.codeInput[i];
     digits[i].textContent = c || '8';
     digits[i].classList.toggle('filled', !!c);
@@ -2923,9 +4436,378 @@ function escHTML(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+/* ── PAUSE ──────────────────────────────────── */
+function togglePause() {
+  if (state.gameState !== 'playing' && !state.paused) return;
+  if (state.paused) {
+    state.paused = false;
+    var pauseDuration = Date.now() - state.pauseStart;
+    state.totalPauseTime += pauseDuration;
+    state.taskStartTime += pauseDuration;
+    state.gameState = 'playing';
+    document.getElementById('overlay-pause').classList.add('hidden');
+  } else {
+    state.paused = true;
+    state.pauseStart = Date.now();
+    state.gameState = 'paused';
+    document.getElementById('overlay-pause').classList.remove('hidden');
+  }
+}
+
+/* ── SHORTCUTS HELP ────────────────────────── */
+function toggleShortcuts() {
+  var el = document.getElementById('overlay-shortcuts');
+  el.classList.toggle('hidden');
+}
+
+/* ── CRT THEME ─────────────────────────────── */
+var CRT_THEMES = {
+  green: { primary: '#33ff33', glow: 'rgba(51,255,51,0.5)', dim: '#33aa33', bg: 'rgba(0,5,0,0.97)' },
+  amber: { primary: '#ffb000', glow: 'rgba(255,176,0,0.5)', dim: '#aa7700', bg: 'rgba(5,3,0,0.97)' },
+  blue:  { primary: '#00b4ff', glow: 'rgba(0,180,255,0.5)', dim: '#0077aa', bg: 'rgba(0,2,5,0.97)' }
+};
+var currentCrtTheme = 'green';
+try { currentCrtTheme = localStorage.getItem('nakatomi_crt_theme') || 'green'; } catch(e) {}
+
+function setCrtTheme(theme) {
+  currentCrtTheme = theme;
+  try { localStorage.setItem('nakatomi_crt_theme', theme); } catch(e) {}
+  var t = CRT_THEMES[theme] || CRT_THEMES.green;
+  document.documentElement.style.setProperty('--crt-primary', t.primary);
+  document.documentElement.style.setProperty('--crt-glow', t.glow);
+  document.documentElement.style.setProperty('--crt-dim', t.dim);
+  document.documentElement.style.setProperty('--crt-bg', t.bg);
+  document.querySelectorAll('.theme-dot').forEach(function(d) {
+    d.classList.toggle('active', d.classList.contains('theme-dot-' + theme));
+  });
+}
+setCrtTheme(currentCrtTheme);
+
+/* ── SCREEN SHAKE ──────────────────────────── */
+function shakeScreen() {
+  var bezel = document.querySelector('.crt-bezel');
+  if (!bezel) return;
+  bezel.classList.remove('shaking');
+  void bezel.offsetWidth;
+  bezel.classList.add('shaking');
+  setTimeout(function() { bezel.classList.remove('shaking'); }, 300);
+}
+
+/* ── LEADERBOARD ───────────────────────────── */
+function loadLeaderboard() {
+  try { return JSON.parse(localStorage.getItem('nakatomi_leaderboard') || '[]'); } catch(e) { return []; }
+}
+function saveLeaderboard(board) {
+  try { localStorage.setItem('nakatomi_leaderboard', JSON.stringify(board)); } catch(e) {}
+}
+function clearLeaderboard() {
+  saveLeaderboard([]);
+  renderLeaderboardTable();
+}
+
+var pendingLbEntry = null;
+function promptLeaderboard() {
+  if (!SCORING_ENABLED) return;
+  var elapsed = Math.floor((Date.now() - state.startTime - state.totalPauseTime) / 1000);
+  var finalScore = Math.round(state.score * SCORE_MULTIPLIER);
+  pendingLbEntry = {
+    name: '???',
+    score: finalScore,
+    time: elapsed,
+    difficulty: state.difficulty,
+    date: new Date().toISOString().slice(0, 10),
+    seed: urlSeed || 'standard',
+    tasks: completedCount() + '/' + totalTasks()
+  };
+  document.getElementById('lb-prompt-area').classList.remove('hidden');
+  document.getElementById('overlay-leaderboard').classList.remove('hidden');
+  document.getElementById('overlay-victory').classList.add('hidden');
+  renderLeaderboardTable();
+  setTimeout(function() { document.getElementById('lb-initials').focus(); }, 50);
+}
+
+function saveLeaderboardEntry() {
+  var input = document.getElementById('lb-initials');
+  var name = input.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!name) name = '???';
+  if (name.length > 3) name = name.slice(0, 3);
+  if (!pendingLbEntry) return;
+  pendingLbEntry.name = name;
+  var board = loadLeaderboard();
+  board.push(pendingLbEntry);
+  board.sort(function(a, b) { return b.score - a.score || a.time - b.time; });
+  if (board.length > 10) board = board.slice(0, 10);
+  saveLeaderboard(board);
+  pendingLbEntry = null;
+  document.getElementById('lb-prompt-area').classList.add('hidden');
+  renderLeaderboardTable();
+}
+
+function showLeaderboard() {
+  document.getElementById('lb-prompt-area').classList.add('hidden');
+  pendingLbEntry = null;
+  renderLeaderboardTable();
+  document.getElementById('overlay-leaderboard').classList.remove('hidden');
+}
+function hideLeaderboard() {
+  document.getElementById('overlay-leaderboard').classList.add('hidden');
+  if (state.gameState === 'victory') {
+    document.getElementById('overlay-victory').classList.remove('hidden');
+  }
+}
+
+function renderLeaderboardTable() {
+  var board = loadLeaderboard();
+  var c = document.getElementById('lb-content');
+  if (board.length === 0) {
+    c.innerHTML = '<div class="lb-empty">No runs recorded yet.</div>';
+    return;
+  }
+  var html = '<table class="lb-table"><tr><th>#</th><th>NAME</th><th>SCORE</th><th>TIME</th><th>DIFF</th><th>DATE</th></tr>';
+  for (var i = 0; i < board.length; i++) {
+    var e = board[i];
+    var m = Math.floor(e.time / 60), s = e.time % 60;
+    var isNew = pendingLbEntry && e.name === pendingLbEntry.name && e.score === pendingLbEntry.score;
+    html += '<tr' + (isNew ? ' class="lb-highlight"' : '') + '>' +
+      '<td>' + (i + 1) + '</td><td>' + escHTML(e.name) + '</td>' +
+      '<td>' + e.score + '</td><td>' + m + ':' + String(s).padStart(2, '0') + '</td>' +
+      '<td>' + escHTML((e.difficulty || '').slice(0, 4).toUpperCase()) + '</td>' +
+      '<td>' + escHTML(e.date || '') + '</td></tr>';
+  }
+  html += '</table>';
+  c.innerHTML = html;
+}
+
+/* ── COPY RESULTS ──────────────────────────── */
+function copyResults() {
+  var elapsed = Math.floor((Date.now() - state.startTime - state.totalPauseTime) / 1000);
+  var em = Math.floor(elapsed / 60), es = elapsed % 60;
+  var diffLabel = DIFFICULTY_PRESETS[state.difficulty] ? DIFFICULTY_PRESETS[state.difficulty].label : 'Operative';
+  var finalScore = SCORING_ENABLED ? Math.round(state.score * SCORE_MULTIPLIER) : 0;
+  var maxScore = SCORING_ENABLED ? Math.round(totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX) * SCORE_MULTIPLIER) : 0;
+  var text = 'NAKATOMI PLAZA: VAULT HEIST\n' +
+    'Difficulty: ' + diffLabel + ' | Time: ' + em + 'm ' + String(es).padStart(2, '0') + 's\n';
+  if (SCORING_ENABLED) {
+    text += 'Score: ' + finalScore + ' / ' + maxScore +
+      (SCORE_MULTIPLIER !== 1 ? ' (' + SCORE_MULTIPLIER + 'x)' : '') + '\n';
+  }
+  text += 'Tasks: ' + completedCount() + '/' + totalTasks() +
+    ' | Wrong Codes: ' + state.wrongCount +
+    ' | Hints: ' + totalHintsUsed() + '\n';
+  var result = evaluateAchievements();
+  var achNames = [];
+  for (var i = 0; i < ACHIEVEMENTS.length; i++) {
+    if (result.stored[ACHIEVEMENTS[i].id]) achNames.push(ACHIEVEMENTS[i].name);
+  }
+  if (achNames.length > 0) text += 'Achievements: ' + achNames.join(', ') + '\n';
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copy-results-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() { btn.textContent = 'Copy Results'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+/* ── VICTORY CONFETTI ──────────────────────── */
+function launchConfetti() {
+  var canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;z-index:10000;pointer-events:none';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  document.body.appendChild(canvas);
+  var ctx = canvas.getContext('2d');
+  var colors = ['#ffd700', '#33ff33', '#ff4444', '#ffffff', '#00b4ff', '#ff2a6d', '#b829dd'];
+  var particles = [];
+  for (var i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width * Math.random(),
+      y: canvas.height * -0.1 - Math.random() * canvas.height * 0.3,
+      vx: (Math.random() - 0.5) * 8,
+      vy: Math.random() * 3 + 2,
+      w: Math.random() * 8 + 3,
+      h: Math.random() * 4 + 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      rv: (Math.random() - 0.5) * 0.15,
+      life: 1
+    });
+  }
+  var start = Date.now();
+  function frame() {
+    var t = (Date.now() - start) / 1000;
+    if (t > 4) { canvas.remove(); return; }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.vx;
+      p.vy += 0.12;
+      p.y += p.vy;
+      p.rot += p.rv;
+      p.life = Math.max(0, 1 - t / 3.5);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ── TYPEWRITER EFFECT ─────────────────────── */
+var typewriterTimer = null;
+function typewriterText(container, text, callback) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  var idx = 0;
+  var span = document.createElement('span');
+  span.className = 'tw-text';
+  var cursor = document.createElement('span');
+  cursor.className = 'typewriter-cursor';
+  container.appendChild(span);
+  container.appendChild(cursor);
+  var skipFn = function() {
+    if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+    span.textContent = text;
+    cursor.remove();
+    container.removeEventListener('click', skipFn);
+    document.removeEventListener('keydown', skipKeyFn);
+    if (callback) callback();
+  };
+  var skipKeyFn = function(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') skipFn();
+  };
+  container.addEventListener('click', skipFn);
+  document.addEventListener('keydown', skipKeyFn, { once: true });
+  typewriterTimer = setInterval(function() {
+    if (idx >= text.length) {
+      clearInterval(typewriterTimer);
+      typewriterTimer = null;
+      cursor.remove();
+      container.removeEventListener('click', skipFn);
+      if (callback) callback();
+      return;
+    }
+    span.textContent += text[idx];
+    idx++;
+    if (!audioMuted && audioCtx) tone(2400, 15, 'square', 0.015);
+  }, 30);
+}
+
+/* ── DETAILED STATS TABLE ──────────────────── */
+function buildStatsTable() {
+  var html = '<table class="stats-table"><tr><th>TASK</th><th>TIME</th><th>HINTS</th><th>ERR</th><th>PTS</th></tr>';
+  var fastest = null, slowest = null;
+  var allIds = [];
+  for (var a = 0; a < ACTS.length; a++) {
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (!state.completed[task.id]) continue;
+      allIds.push(task.id);
+      var time = state.taskTimes[task.id] || 0;
+      if (fastest === null || time < fastest) fastest = time;
+      if (slowest === null || time > slowest) slowest = time;
+    }
+  }
+  for (var a = 0; a < ACTS.length; a++) {
+    for (var t = 0; t < ACTS[a].tasks.length; t++) {
+      var task = ACTS[a].tasks[t];
+      if (!state.completed[task.id]) continue;
+      var time = state.taskTimes[task.id] || 0;
+      var hints = state.hintsUsed[task.id] || 0;
+      var wrongs = state.taskWrongs[task.id] || 0;
+      var sc = state.taskScores[task.id];
+      var pts = sc ? Math.max(0, sc.answerRevealed ? 0 : sc.net) : 0;
+      var tm = Math.floor(time / 60), ts = time % 60;
+      var timeClass = '';
+      if (allIds.length > 2) {
+        if (time === fastest) timeClass = ' class="st-fast"';
+        else if (time === slowest) timeClass = ' class="st-slow"';
+      }
+      html += '<tr><td>' + escHTML(task.id + ' ' + task.name) + '</td>' +
+        '<td' + timeClass + '>' + tm + ':' + String(ts).padStart(2, '0') + '</td>' +
+        '<td>' + hints + '</td><td>' + wrongs + '</td>' +
+        '<td>' + (sc && sc.answerRevealed ? '<span class="st-penalty">0</span>' : pts) + '</td></tr>';
+    }
+  }
+  var avgTime = 0;
+  if (allIds.length > 0) {
+    var total = 0;
+    for (var i = 0; i < allIds.length; i++) total += (state.taskTimes[allIds[i]] || 0);
+    avgTime = Math.round(total / allIds.length);
+  }
+  var am = Math.floor(avgTime / 60), as2 = avgTime % 60;
+  html += '<tr style="border-top:1px solid rgba(51,255,51,0.3)"><td><b>AVG</b></td>' +
+    '<td><b>' + am + ':' + String(as2).padStart(2, '0') + '</b></td><td></td><td></td><td></td></tr>';
+  html += '</table>';
+  return html;
+}
+function toggleStatsTable() {
+  var wrap = document.getElementById('stats-table-wrap');
+  if (!wrap) return;
+  var visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : '';
+  var btn = wrap.previousElementSibling;
+  if (btn) btn.textContent = visible ? 'Detailed Stats \u25BC' : 'Detailed Stats \u25B2';
+}
+
+/* ── DYNAMIC NUDGE SYSTEM ──────────────────── */
+var nudgeState = { lastTask: null, nudged: false };
+function checkNudge() {
+  if (state.gameState !== 'playing' || !HINTS_ENABLED) return;
+  var task = currentTask();
+  if (nudgeState.lastTask !== task.id) {
+    nudgeState.lastTask = task.id;
+    nudgeState.nudged = false;
+  }
+  if (nudgeState.nudged) return;
+  var elapsed = (Date.now() - state.taskStartTime) / 1000;
+  var nudgeThresholds = { rookie: 300, operative: 480, mastermind: 0 };
+  var threshold = nudgeThresholds[state.difficulty] || 0;
+  if (threshold <= 0) return;
+  var used = state.hintsUsed[task.id] || 0;
+  var maxAvail = Math.min((task.hints || []).length, MAX_HINT_LEVELS);
+  if (used >= maxAvail) return;
+  if (elapsed >= threshold) {
+    nudgeState.nudged = true;
+    var btn = document.getElementById('hint-btn');
+    if (btn && !btn.classList.contains('exhausted')) {
+      btn.classList.add('nudge');
+      setTimeout(function() { btn.classList.remove('nudge'); }, 10000);
+    }
+    if (state.difficulty === 'rookie' && elapsed >= threshold * 2.4 && used === 0) {
+      requestHint();
+    }
+  }
+}
+
+/* ── DECISION POINTS ───────────────────────── */
+var DECISION_POINTS = [
+  { afterAct: 0, question: 'How do you ascend?',
+    optionA: 'Take the elevator', optionB: 'Take the stairs',
+    flavorA: 'The elevator hums softly. Quick, but exposed.', flavorB: 'Thirty flights. Silent, but grueling.' },
+  { afterAct: 1, question: 'The hostages are secure. What next?',
+    optionA: 'Secure the vault first', optionB: 'Sweep for McClane first',
+    flavorA: 'The vault is the prize. Everything else is a distraction.', flavorB: '"Find that cowboy and bring him to me."' },
+  { afterAct: 2, question: 'The FBI cut the power. Your move?',
+    optionA: 'Wait for their entry', optionB: 'Blow the roof now',
+    flavorA: 'Patience. Let them come to us.', flavorB: '"When they touch down, we blow the roof."' },
+  { afterAct: 3, question: 'Final preparations. How do you exit?',
+    optionA: 'Through the parking garage', optionB: 'Via the ambulance out front',
+    flavorA: 'Quiet exit through the underground.', flavorB: '"We go out the front door."' }
+];
+
 /* ── KEYBOARD ───────────────────────────────── */
 document.addEventListener('keydown', function(e) {
+  if (state.paused) {
+    if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
+    return;
+  }
+  if (e.key === '?' && state.gameState === 'playing') { toggleShortcuts(); return; }
   if (state.gameState !== 'playing') return;
+  if (e.key === 'p' || e.key === 'P') { togglePause(); return; }
   if (e.key === 'f' || e.key === 'F') {
     toggleFacilitator();
     return;
@@ -2933,6 +4815,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'd' || e.key === 'D') { toggleDossier(); return; }
   if (e.key === 'h' || e.key === 'H') { requestHint(); return; }
   if (e.key === 'Escape') {
+    if (!document.getElementById('overlay-shortcuts').classList.contains('hidden')) { toggleShortcuts(); return; }
     if (state.hintConfirmPending) { confirmHint(false); return; }
     if (!document.getElementById('dossier-panel').classList.contains('hidden')) { toggleDossier(); return; }
     if (!document.getElementById('clue-overlay').classList.contains('hidden')) { hideClue(); return; }
@@ -2942,6 +4825,15 @@ document.addEventListener('keydown', function(e) {
   if (state.mode !== 'digital') return;
   var task = currentTask();
   if (task.type === 'power') return;
+  if (task.codeType === 'text') {
+    if (e.key === 'Backspace' || e.key === 'Delete') { clearCode(); return; }
+    if (e.key === 'Enter') { submitCode(); return; }
+    if (e.key.length === 1 && /[A-Za-z0-9]/.test(e.key) && state.codeInput.length < 8) {
+      enterTextChar(e.key.toUpperCase());
+      return;
+    }
+    return;
+  }
   if (e.key >= '0' && e.key <= '9') enterDigit(e.key);
   else if (e.key === 'Backspace' || e.key === 'Delete') clearCode();
   else if (e.key === 'Enter') submitCode();
