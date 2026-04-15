@@ -4932,11 +4932,14 @@ document.addEventListener('keydown', function(e) {
   }
   if (e.key === 'd' || e.key === 'D') { toggleDossier(); return; }
   if (e.key === 'h' || e.key === 'H') { requestHint(); return; }
+  if (!document.getElementById('clue-overlay').classList.contains('hidden')) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); hideClue(); return; }
+    return;
+  }
   if (e.key === 'Escape') {
     if (!document.getElementById('overlay-shortcuts').classList.contains('hidden')) { toggleShortcuts(); return; }
     if (state.hintConfirmPending) { confirmHint(false); return; }
     if (!document.getElementById('dossier-panel').classList.contains('hidden')) { toggleDossier(); return; }
-    if (!document.getElementById('clue-overlay').classList.contains('hidden')) { hideClue(); return; }
     if (!document.getElementById('fac-pin-overlay').classList.contains('hidden')) { hideFacPinPrompt(); return; }
     if (state.facVisible) { state.facVisible = false; document.getElementById('facilitator').classList.add('hidden'); return; }
   }
