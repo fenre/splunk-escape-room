@@ -679,6 +679,62 @@
       to { box-shadow: 0 0 25px rgba(51,255,51,0.3), inset 0 0 25px rgba(51,255,51,0.1); }
     }
 
+    /* ── MISSION BRIEFING ────────────────────────── */
+    .mission-briefing {
+      position: fixed; inset: 0; z-index: 9700;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #000; color: #33ff33;
+      font-family: 'Share Tech Mono', monospace;
+      text-align: center; padding: 2rem;
+      animation: actTransIn 0.8s ease-out;
+    }
+    .mission-briefing.out { animation: actTransOut 0.5s ease-in forwards; }
+    .mb-border {
+      position: absolute; inset: 1.5rem;
+      border: 1px solid #33ff33;
+      box-shadow: 0 0 15px rgba(51,255,51,0.15), inset 0 0 15px rgba(51,255,51,0.05);
+      animation: actBorderGlow 2s ease-in-out infinite alternate;
+    }
+    .mb-classified {
+      font-size: 0.7rem; letter-spacing: 0.4em; text-transform: uppercase;
+      color: #993333; margin-bottom: 1.2rem;
+      text-shadow: 0 0 10px rgba(255,50,50,0.3);
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 0.2s forwards;
+    }
+    .mb-title {
+      font-size: 1.6rem; font-weight: bold; letter-spacing: 0.1em;
+      color: #33ff33; margin-bottom: 0.3rem;
+      text-shadow: 0 0 20px rgba(51,255,51,0.6), 0 0 40px rgba(51,255,51,0.2);
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 0.4s forwards;
+    }
+    .mb-subtitle {
+      font-size: 0.8rem; color: #33aa33; margin-bottom: 1.5rem;
+      letter-spacing: 0.15em;
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 0.6s forwards;
+    }
+    .mb-text {
+      font-size: 0.75rem; color: #88cc88; max-width: 560px;
+      line-height: 1.9; text-align: left; margin-bottom: 1.5rem;
+      opacity: 0; animation: actQuoteFade 0.6s ease-out 0.8s forwards;
+    }
+    .mb-text b { color: #33ff33; }
+    .mb-params {
+      font-size: 0.65rem; color: #33aa33;
+      letter-spacing: 0.05em; margin-bottom: 1.5rem;
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 1.2s forwards;
+    }
+    .mb-params span { color: #33ff33; }
+    .mb-continue {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem; letter-spacing: 0.15em;
+      color: #33ff33; background: transparent;
+      border: 1px solid #33ff33; padding: 0.6rem 2rem;
+      cursor: pointer; text-transform: uppercase;
+      opacity: 0; animation: actQuoteFade 0.5s ease-out 1.5s forwards;
+      transition: background 0.2s, color 0.2s;
+    }
+    .mb-continue:hover { background: #33ff33; color: #000; }
+
     /* ── ACHIEVEMENTS ────────────────────────────── */
     .achievements-section {
       margin-top: 1rem; padding-top: 0.8rem;
@@ -3144,7 +3200,57 @@ function startHeartbeat() {
 function selectMode(mode) {
   ensureAudio();
   applyDifficulty();
-  runBoot(function() { enterGame(mode); });
+  runBoot(function() { showMissionBriefing(mode); });
+}
+
+function showMissionBriefing(mode) {
+  var preset = DIFFICULTY_PRESETS[selectedDifficulty];
+  var minutes = Math.floor(preset.timer / 60);
+  var overlay = document.createElement('div');
+  overlay.className = 'mission-briefing';
+  overlay.innerHTML =
+    '<div class="mb-border"></div>' +
+    '<div class="mb-classified">\u2588\u2588 CLASSIFIED \u2014 EYES ONLY \u2588\u2588</div>' +
+    '<div class="mb-title">OPERATION: VAULT HEIST</div>' +
+    '<div class="mb-subtitle">NAKATOMI PLAZA \u2014 CENTURY CITY, LOS ANGELES</div>' +
+    '<div class="mb-text">' +
+      'It\'s <b>Christmas Eve, 1988</b>. The Nakatomi Corporation\'s holiday party is ' +
+      'in full swing on the 30th floor. In exactly <b>' + minutes + ' minutes</b>, the FBI will ' +
+      'cut power to the building \u2014 and with it, the final electromagnetic seal on the vault.<br><br>' +
+      'Your team has infiltrated the building disguised as guests. ' +
+      '<b>Hans Gruber</b> is coordinating from the 30th floor. <b>Karl</b> is handling security. ' +
+      '<b>Theo</b> is on vault systems.<br><br>' +
+      'Your job: use Nakatomi\'s own data against them. Search the logs. Crack the codes. ' +
+      'Open all <b>five acts</b> worth of seals before time runs out.<br><br>' +
+      'One problem: <b>John McClane</b> is somewhere in the building. ' +
+      'And he\'s already barefoot.' +
+    '</div>' +
+    '<div class="mb-params">' +
+      'DIFFICULTY: <span>' + preset.label.toUpperCase() + '</span> &middot; ' +
+      'TIME: <span>' + minutes + ' MIN</span> &middot; ' +
+      'ERRORS: <span>' + preset.maxWrong + ' MAX</span> &middot; ' +
+      'TASKS: <span>26</span>' +
+    '</div>' +
+    '<button class="mb-continue" id="mb-start-btn">BEGIN HEIST</button>';
+  document.body.appendChild(overlay);
+  playRadioIntercept();
+
+  function dismissBriefing() {
+    overlay.classList.add('out');
+    setTimeout(function() {
+      overlay.remove();
+      enterGame(mode);
+    }, 500);
+  }
+  document.getElementById('mb-start-btn').addEventListener('click', dismissBriefing);
+  var kHandler = function(e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+      e.preventDefault();
+      document.removeEventListener('keydown', kHandler);
+      dismissBriefing();
+    }
+  };
+  document.addEventListener('keydown', kHandler);
 }
 
 function enterGame(mode) {
@@ -3170,6 +3276,7 @@ function enterGame(mode) {
   }
   startAmbient();
   buildTaskPanel();
+  showActTransition(0);
   startTimer();
   render();
 }
@@ -3429,7 +3536,18 @@ function advanceTask() {
 }
 
 var ACT_ASCII_ART = [
-  null,
+  '     *  .  *  . *  .  *\n' +
+  '    .  *    *  .  *  .\n' +
+  '       __|___|___|__\n' +
+  '      |  _ _ _ _ _  |\n' +
+  '      | |_|_|_|_|_| |\n' +
+  '      | |_|_|_|_|_| |\n' +
+  '      | |_|_|_|_|_| |\n' +
+  '      | |_|_|_|_|_| |\n' +
+  '      | |_|_|_|_|_| |\n' +
+  '      |_|_|_|_|_|_|_|\n' +
+  '     /___NAKATOMI____\\\\\n' +
+  '    |_________________|',
   '       _______________\n' +
   '      |  ___________  |\n' +
   '      | |  NAKATOMI | |\n' +
