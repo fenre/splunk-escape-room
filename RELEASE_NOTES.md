@@ -8,6 +8,89 @@ Versioning follows [Semantic Versioning](https://semver.org/): **MAJOR.MINOR.PAT
 
 ---
 
+## 2.3.0 — 2026-04-15
+
+### Added — Game (game.html)
+- **Pause system** — Press P to pause; timer freezes, task content hidden, resume overlay displayed.
+- **Keyboard shortcuts help** — Press ? or click [?] button in header for full keyboard shortcut reference.
+- **Per-task timing** — Each task's solve time is tracked individually; feeds into post-game stats.
+- **Detailed post-game statistics** — Expandable table on victory screen showing per-task time, hints used, wrong codes, and points earned. Highlights fastest/slowest tasks with color coding.
+- **Screen shake** — CRT bezel shakes on wrong code and trap code entry for tactile feedback.
+- **Victory confetti** — Canvas-based confetti particle animation on heist completion.
+- **Typewriter effect** — Story beat text now types character by character with click/key to skip.
+- **CRT phosphor theme picker** — Choose green, amber, or blue CRT colors on mode select screen. Persisted in localStorage.
+- **Local leaderboard** — Top 10 scores with arcade-style 3-character initials. Accessible from mode select and victory screen. Stored in localStorage.
+- **Shareable results** — "Copy Results" button generates formatted text summary to clipboard (difficulty, time, score, achievements).
+- **Text code answer format** — Tasks 2.1 (Cut Communications → EXT7700) and 5.1 (The Ambulance → AMB2819) now accept alphanumeric text input. Keypad expands with letter buttons for these tasks.
+- **Multi-step composite task** — Task 3.6 (The Bearer Bonds) converted to 2-step puzzle: verify clearance level first, then enter vault auth code.
+- **Red herring enrichment** — Misdirection text added to 5 task descriptions (1.1, 2.3, 3.5, 4.2, 5.3) to increase difficulty.
+- **Cosmetic decision points** — 4 binary narrative choices appear between acts (stored in dossier, no gameplay impact).
+- **Dynamic nudge system** — Hint button glows after extended time on a task (5 min Rookie, 8 min Operative). Auto-reveals first hint for Rookie after 12 min.
+
+### Added — Splunk App (nakatomi_heist)
+- **Guided Investigation dashboard** — New Dashboard Studio view with act-by-act data sources, suggested SPL queries, and tips for each task.
+- **Progress Tracker dashboard** — New Dashboard Studio view backed by KV Store collection (`vault_progress`) for session monitoring, per-act completion charts, and recent task completions.
+- **Alert-based puzzle integration** — 3 saved searches in `savedsearches.conf` with embedded clues: unauthorized access patterns, encrypted radio intercepts, and HVAC anomaly analysis.
+- `collections.conf` — KV Store collection definition for `vault_progress`.
+- `transforms.conf` — Added `vault_progress_lookup` external lookup definition.
+- `default.xml` — Navigation updated with Guided Investigation and Progress Tracker views.
+
+### Changed
+- Version bumped to 2.3.0 across game header, boot sequence, footer, and `app.conf`.
+
+---
+
+## 2.0.0 — 2026-03-26
+
+### Added — Game (game.html)
+- **Five-act structure** — Expanded from 7 seals to 26 tasks across 5 acts (The Christmas Party, The Takeover, The Vault, McClane's Counterattack, The Escape).
+- **Difficulty presets** — Rookie (120 min, 10 errors, all hints, 0.5x), Operative (90 min, 7 errors, 3 hints, 1x), Mastermind (60 min, 4 errors, 1 hint, 2x).
+- **Scoring system** — Base points + speed bonuses + hint/error penalties per task, with difficulty multiplier.
+- **Trap codes** — Specific wrong codes that trigger penalties (Operative: +2 errors, Mastermind: instant game over).
+- **Hint system** — Tiered hints per task with escalating score penalties; 4th hint reveals answer at 0 points.
+- **Dossier** — Collected intel panel (D key) showing completed task story beats with score breakdowns.
+- **Multi-cipher toolkit** — ROT13, Hex-to-ASCII, Base64, Binary, Number-to-Letter decode tools.
+- **Radio intercepts** — Timed story messages during gameplay, proportionally scaled to difficulty timer.
+- **McClane interference events** — Random amber-tinted warnings after Act 2.
+- **Act transition cinematics** — Full-screen overlays with ASCII art, act titles, and quotes.
+- **Character dialogue** — Speaker attribution (Hans, Karl, Theo) for all task story beats.
+- **Seeded randomization** — URL `?seed=N` parameter randomizes codes for replayable sessions.
+- **Achievements** — 6 badges awarded for specific accomplishments (No Hints, Speed Demon, Perfect Score, etc.).
+- **Bonus objectives** — Post-victory challenges (Die Hard trivia, Easter egg hunt, speed run).
+- **Physical mode parity** — Objective display, hints, and control buttons in physical vault mode.
+- **Roof deadline** — Secondary fail condition if Act 4 isn't reached in time.
+- **Boot sequence** — BIOS-style startup with progress bar, hardware detection, and game configuration display.
+- **Retro CRT effects** — Scanlines, film grain, VHS tracking line, VCR HUD, monitor housing, glare.
+- **Web Audio API** — Synthesized sounds for keypress, correct/wrong, seal open, hints, traps, heartbeat, victory, game over, ambient drone.
+- **Facilitator PIN gate** — PIN-protected facilitator panel (F key → enter PIN to unlock).
+
+### Added — Splunk App (nakatomi_heist)
+- **8 dashboards** — Terminal (React), Mission Brief, Search Terminal, Access Terminal, Vault Terminal, Building Systems, Comms Terminal.
+- **4 indexes** — `nakatomi_access`, `nakatomi_vault`, `nakatomi_building`, `nakatomi_comms`.
+- **7 lookup tables** — employee_directory, floor_directory, system_codes, radio_channels, camera_coverage, bearer_bonds, vehicle_registry.
+- **React terminal** — Custom terminal page built with @splunk/create and @splunk/react-ui.
+
+### Changed
+- Complete game rewrite from 7-seal linear structure to 5-act, 26-task branching narrative.
+
+---
+
+## 1.0.0 — 2026-03-25
+
+### Added
+- **First playable release** — Complete game loop from boot to victory/game over.
+- **Standalone game** — `game.html` works entirely self-contained with no server dependencies.
+- **7-seal structure** — Original linear puzzle progression through 7 vault seals.
+- **Dual mode** — Physical vault display and digital keypad modes.
+- **Sound effects** — Web Audio API synthesized tones for all game events.
+- **60-minute timer** — Countdown with heartbeat warning in final 5 minutes.
+- **3 wrong code limit** — Game over after 3 incorrect entries.
+- **Power-cut Seal 7** — Lateral thinking puzzle (click power LED, not enter a code).
+- **Facilitator controls** — F key to manually complete any seal.
+- **Packaged Splunk app** — `nakatomi_heist.spl` for one-click install.
+
+---
+
 ## 0.7.0 — 2026-03-25
 
 ### Added
