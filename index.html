@@ -1135,7 +1135,7 @@
       <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
       <span class="badge"><span class="dot green"></span> 5 Acts &middot; 26 Tasks</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
-      <span class="badge"><span class="dot green"></span> v2.0 &middot; Playable</span>
+      <span class="badge"><span class="dot green"></span> v2.3 &middot; Playable</span>
     </div>
 
     <div class="hero-line"></div>
@@ -1249,7 +1249,7 @@
   <section id="seals">
     <div class="container">
       <h2><span class="section-num">03</span> Puzzle Catalogue</h2>
-      <p>26 tasks across five acts. Each answer is a 4-digit code found through Splunk queries, lookup cross-references, cipher decoding, or meta solutions.</p>
+      <p>26 tasks across five acts. Most answers are 4-digit codes; some are alphanumeric text codes. Found through Splunk queries, lookup cross-references, cipher decoding, multi-step puzzles, or meta solutions.</p>
 
       <div class="seals-row">
         <div class="seal">
@@ -1282,19 +1282,19 @@
       <div class="concept-grid">
         <div class="concept-card">
           <h4>SPL Queries</h4>
-          <p>Most tasks are solved with SPL: <code>stats dc()</code>, <code>sort</code>, <code>lookup</code>, <code>rex</code>, <code>transaction</code>, time ranges, and cross-references between indexes and lookups. Answers are 4-digit codes entered on the vault keypad.</p>
+          <p>Most tasks are solved with SPL: <code>stats dc()</code>, <code>sort</code>, <code>lookup</code>, <code>rex</code>, <code>transaction</code>, time ranges, and cross-references between indexes and lookups. Answers are numeric codes or alphanumeric text entered on the vault keypad.</p>
         </div>
         <div class="concept-card">
-          <h4>Ciphers &amp; Cross-Refs</h4>
-          <p>Some tasks require decoding ROT13 messages, cross-referencing multiple lookups, or combining clues from different data sources. One task is a meta solution &mdash; the power cut from the movie.</p>
+          <h4>Ciphers, Cross-Refs &amp; Multi-Step</h4>
+          <p>Tasks may require ROT13 decoding, cross-referencing multiple lookups, multi-step composite puzzles (solve two sub-objectives in sequence), or even a meta power-cut solution from the movie.</p>
         </div>
         <div class="concept-card">
-          <h4>Progressive Hints</h4>
-          <p>Each task has four levels of hints: a gentle nudge, a direction, the SPL query, and finally the answer. Using hints reduces your score but keeps you moving forward.</p>
+          <h4>Progressive Hints &amp; Nudges</h4>
+          <p>Each task has up to four hint levels. A dynamic nudge system glows the hint button if you're stuck too long. Using hints reduces your score; the 4th hint reveals the answer at 0 points.</p>
         </div>
         <div class="concept-card">
-          <h4>Scoring &amp; Dossier</h4>
-          <p>Points awarded per task based on speed and hint usage. Completing a task reveals a story beat and adds intel to your dossier &mdash; building the narrative as you progress through the heist.</p>
+          <h4>Scoring, Traps &amp; Dossier</h4>
+          <p>Points awarded per task based on speed and hint usage. Trap codes trigger extra penalties. Completing a task reveals a character-attributed story beat and adds intel to your dossier.</p>
         </div>
       </div>
     </div>
@@ -1343,12 +1343,13 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk App <span class="tag live">v2.0</span></h4>
+          <h4>Splunk App <span class="tag live">v2.3</span></h4>
           <ul>
             <li>4 indexes: <code>nakatomi_access</code>, <code>nakatomi_vault</code>, <code>nakatomi_building</code>, <code>nakatomi_comms</code></li>
             <li>~2,200 events across 11 sourcetypes</li>
-            <li>7 CSV lookup tables</li>
-            <li>7 dashboards (Mission Brief, Search, Access, Vault, Building, Comms, Terminal)</li>
+            <li>7 CSV lookup tables + KV Store collection</li>
+            <li>9 dashboards (incl. Guided Investigation &amp; Progress Tracker)</li>
+            <li>3 alert-based puzzle clues (savedsearches.conf)</li>
             <li>HEC data loader script</li>
           </ul>
         </div>
@@ -1363,13 +1364,14 @@
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Game UI <span class="tag ready">v2.0</span></h4>
+          <h4>Game UI <span class="tag ready">v2.3</span></h4>
           <ul>
             <li>Dual mode: physical or digital</li>
-            <li>5-act navigation, 26 tasks</li>
-            <li>Progressive hint system (4 levels)</li>
-            <li>Scoring system &amp; dossier panel</li>
-            <li>Story beat overlays &amp; facilitator controls</li>
+            <li>Mission briefing intro &amp; act transition cinematics</li>
+            <li>3 difficulty modes, scoring, leaderboard</li>
+            <li>Pause, CRT themes, typewriter text, confetti</li>
+            <li>Text codes, multi-step tasks, trap codes</li>
+            <li>Achievements, dossier, decision points</li>
           </ul>
         </div>
 
@@ -1467,24 +1469,24 @@
 
       <div class="fail-grid">
         <div class="fail-card">
-          <h4>Police Breach</h4>
-          <div class="trigger">Player triggers an external alert (wrong search, trap code, or milestone tied to the movie).</div>
-          <div class="quote">"SWAT has the building. You're arrested."</div>
+          <h4>Trap Code</h4>
+          <div class="trigger">Specific decoy codes trigger police breach. Operative: +2 errors. Mastermind: instant game over.</div>
+          <div class="quote">"You asked for a miracle. I give you the F.B.I."</div>
         </div>
         <div class="fail-card">
           <h4>McClane</h4>
-          <div class="trigger">7 wrong code attempts across all tasks.</div>
+          <div class="trigger">Too many wrong codes (Rookie: 10, Operative: 7, Mastermind: 4).</div>
           <div class="quote">"McClane got the drop on you."</div>
         </div>
         <div class="fail-card">
-          <h4>Roof Early</h4>
-          <div class="trigger">Player enters a decoy/trap code during Phase 4 that triggers the roof charges.</div>
-          <div class="quote">"You triggered the charges early."</div>
+          <h4>Roof Deadline</h4>
+          <div class="trigger">If Act 4 isn't reached in time, the roof charges detonate with the FBI helicopter.</div>
+          <div class="quote">"We're gonna need some more FBI guys."</div>
         </div>
         <div class="fail-card">
-          <h4>Roof Late</h4>
-          <div class="trigger">Timer expires (0:55&ndash;1:00) before all 7 seals are open.</div>
-          <div class="quote">"The charges blew. You never got the vault."</div>
+          <h4>Timer</h4>
+          <div class="trigger">Clock hits zero (Rookie: 120 min, Operative: 90, Mastermind: 60).</div>
+          <div class="quote">"No more table. Where are my detonators?"</div>
         </div>
       </div>
     </div>
@@ -1496,45 +1498,42 @@
       <h2><span class="section-num">08</span> Flow Diagrams</h2>
 
       <div class="mermaid-wrap">
-        <h4>Full Game Flow (Success + Failures)</h4>
+        <h4>Full Game Flow (5 Acts + Fail Conditions)</h4>
         <div class="mermaid">
 flowchart TD
-  Intro[Intro] --> P1[Phase 1 Lobby]
-  P1 --> P2[Phase 2 Recon]
-  P2 --> P3[Phase 3 Access]
-  P3 --> P4[Phase 4 Vault]
-  P4 --> S1[Seal 1] --> S2[Seal 2] --> S3[Seal 3] --> S4[Seal 4] --> S5[Seal 5] --> S6[Seal 6] --> S7[Seal 7 meta] --> Win[Vault open - Win]
+  Boot[Boot Sequence] --> Brief[Mission Briefing]
+  Brief --> A1[Act 1: Christmas Party\n5 tasks]
+  A1 -->|Decision| A2[Act 2: The Takeover\n5 tasks]
+  A2 -->|Decision| A3[Act 3: The Vault\n7 tasks incl. Seal 7]
+  A3 -->|Decision| A4[Act 4: Counterattack\n5 tasks]
+  A4 -->|Decision| A5[Act 5: The Escape\n4 tasks]
+  A5 --> Win[Heist Complete]
 
-  P1 -->|Police trigger| Hans
-  P2 -->|Police trigger| Hans
-  P3 -->|Police trigger| Hans
-  P4 -->|Police trigger| Hans
-  P4 -->|McClane / Roof early| Hans
-  P4 -->|Roof late| Hans
-  S1 -->|McClane / Roof late| Hans
-  S2 -->|McClane / Roof late| Hans
-  S3 -->|McClane / Roof late| Hans
-  S4 -->|McClane / Roof late| Hans
-  S5 -->|McClane / Roof late| Hans
-  S6 -->|McClane / Roof late| Hans
+  A1 -->|Trap code| Fail
+  A2 -->|Trap code| Fail
+  A3 -->|Too many errors| Fail
+  A4 -->|Roof deadline| Fail
+  A5 -->|Timer expires| Fail
 
-  Hans["Game over: Hans's fate"]
+  Fail["Game Over"]
         </div>
       </div>
 
       <div class="mermaid-wrap">
-        <h4>Core Game Loop</h4>
+        <h4>Core Game Loop (Per Task)</h4>
         <div class="mermaid">
 flowchart LR
-  A["Objective\n(narrative)"] --> B["Investigation\n(Splunk SPL)"]
-  B --> C["Discovery\n(code/sequence)"]
-  C --> D["Submission\n(physical model)"]
+  A["Objective\n+ Story Beat"] --> B["Investigation\n(Splunk SPL)"]
+  B --> C["Discovery\n(code / text)"]
+  C --> D["Submission\n(keypad / text)"]
   D --> E{"Correct?"}
-  E -->|Yes| F["Seal Opens\n+ Next Phase"]
-  E -->|No| G["Wrong Code\nCounter +1"]
-  G -->|"< 3 wrong"| A
-  G -->|"3 wrong"| H["Game Over"]
-  F --> A
+  E -->|Yes| F["Task Complete\n+ Score + Dossier"]
+  E -->|No / Trap| G["Error +1\nor Trap Penalty"]
+  G -->|Under limit| A
+  G -->|Limit reached| H["Game Over"]
+  F -->|Next task| A
+  F -->|Act complete| I["Act Transition\n+ Decision Point"]
+  I --> A
         </div>
       </div>
 
@@ -1544,7 +1543,7 @@ flowchart LR
 flowchart TD
   subgraph digital [Digital Layer]
     DG[Data Generator\nPython] -->|synthetic logs| SP[Splunk Instance]
-    SP -->|dashboards, searches| PL[Players]
+    SP -->|9 dashboards\nGuided Investigation\nProgress Tracker| PL[Players]
     PL -->|SPL queries| SP
   end
 
@@ -1553,34 +1552,34 @@ flowchart TD
     VM -->|LED/servo feedback| PL
   end
 
-  subgraph orchestration [Game Orchestration]
-    GO[Game Engine] -->|narrative, timer| PL
-    GO -->|phase control| SP
+  subgraph orchestration [Game Orchestration — game.html]
+    GO[Game Engine v2.3] -->|briefing, acts, scoring\ntimer, hints, leaderboard| PL
+    GO -->|task progression| SP
     VM -->|seal status| GO
   end
         </div>
       </div>
 
       <div class="mermaid-wrap">
-        <h4>Timeline (Phases Over 0&ndash;60 min)</h4>
+        <h4>Game Flow Timeline (Operative &mdash; 90 min)</h4>
         <div class="mermaid">
 flowchart LR
-  subgraph timeline [0-60 min]
-    T0["0"] --- T8["8"] --- T18["18"] --- T28["28"] --- T50["50"] --- T60["60"]
+  subgraph timeline [0-90 min]
+    T0["0:00"] --- T15["~15:00"] --- T30["~30:00"] --- T55["~55:00"] --- T75["~75:00"] --- T90["90:00"]
   end
-  subgraph phases [Phases]
-    Lobby[Lobby]
-    Recon[Recon]
-    Access[Access]
-    Vault[Vault + Seals 1-6]
-    S7[Seal 7]
+  subgraph acts [Five Acts]
+    Act1[Act 1\nChristmas Party]
+    Act2[Act 2\nThe Takeover]
+    Act3[Act 3\nThe Vault]
+    Act4[Act 4\nCounterattack]
+    Act5[Act 5\nThe Escape]
   end
-  T0 --> Lobby
-  T8 --> Recon
-  T18 --> Access
-  T28 --> Vault
-  T50 --> S7
-  T60 --> End[Vault open or Game over]
+  T0 --> Act1
+  T15 --> Act2
+  T30 --> Act3
+  T55 --> Act4
+  T75 --> Act5
+  T90 --> End[Heist complete\nor Game over]
         </div>
       </div>
     </div>
@@ -1693,34 +1692,34 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Data &amp; Puzzles <span class="status done">v2.0</span></h4>
+          <h4>Data &amp; Puzzles <span class="status done">v2.3</span></h4>
           <ul>
             <li class="done">26-task puzzle catalogue across 5 acts</li>
             <li class="done">11 sourcetypes, 4 indexes, 7 lookups</li>
             <li class="done">Python data generator (~2,200 events)</li>
-            <li class="done">Progressive hint system (4 levels per task)</li>
-            <li class="done">Scoring system &amp; dossier</li>
-            <li class="done">Red herrings &amp; embedded answers</li>
+            <li class="done">Progressive hint system (4 levels + dynamic nudges)</li>
+            <li class="done">Scoring, trap codes, red herring enrichment</li>
+            <li class="done">Text codes &amp; multi-step composite tasks</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Game UI <span class="status done">v2.0</span></h4>
+          <h4>Game UI <span class="status done">v2.3</span></h4>
           <ul>
-            <li class="done">5-act navigation with 26 task definitions</li>
-            <li class="done">Progressive hints (H key) &amp; scoring</li>
-            <li class="done">Dossier panel (D key) for collected intel</li>
-            <li class="done">Story beat overlays after each task</li>
-            <li class="done">Digital Seal 7 (power element)</li>
-            <li class="done">90-minute timer &amp; 7-error limit</li>
-            <li class="done">Facilitator controls (F key)</li>
+            <li class="done">Mission briefing intro &amp; act cinematics</li>
+            <li class="done">3 difficulty modes (Rookie / Operative / Mastermind)</li>
+            <li class="done">Pause (P), shortcuts (?), CRT theme picker</li>
+            <li class="done">Local leaderboard (top 10, arcade initials)</li>
+            <li class="done">Achievements, decision points, shareable results</li>
+            <li class="done">Confetti, screen shake, typewriter text</li>
+            <li class="done">Detailed post-game statistics table</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Splunk App <span class="status done">v2.0</span></h4>
+          <h4>Splunk App <span class="status done">v2.3</span></h4>
           <ul>
-            <li class="done">4 indexes (access, vault, building, comms)</li>
-            <li class="done">11 sourcetypes, 7 lookup tables</li>
-            <li class="done">7 dashboards (Mission Brief, Search, Access, Vault, Building, Comms, Terminal)</li>
+            <li class="done">9 dashboards (incl. Guided Investigation &amp; Progress Tracker)</li>
+            <li class="done">KV Store collection for session tracking</li>
+            <li class="done">3 alert-based puzzle clues (savedsearches.conf)</li>
             <li class="done">Packaged .spl for install</li>
             <li class="done">HEC data loading script</li>
           </ul>
@@ -1778,8 +1777,12 @@ flowchart LR
           <p>Dashboard wireframes, phase progression, hint delivery, fail/win states, digital mode, and app structure.</p>
         </a>
         <a href="game.html" class="doc-link">
-          <h4>Game UI</h4>
-          <p>Dual-mode game interface &mdash; digital keypad, clue cards, timer, Seal 7 power element. Open to play.</p>
+          <h4>Game UI v2.3</h4>
+          <p>Full game with mission briefing, 3 difficulties, scoring, leaderboard, CRT themes, achievements, and 26 tasks across 5 acts.</p>
+        </a>
+        <a href="RELEASE_NOTES.md" class="doc-link">
+          <h4>Release Notes</h4>
+          <p>Full version history from v0.0.1 through v2.3.0 with detailed changelogs.</p>
         </a>
         <a href="docs/flow.html" class="doc-link">
           <h4>Flow Diagrams (standalone)</h4>
@@ -1794,7 +1797,7 @@ flowchart LR
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
     Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
-    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.0.0</button>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.3.0</button>
   </footer>
 
   <!-- Release Notes Modal -->
@@ -1808,9 +1811,44 @@ flowchart LR
 
         <div class="rn-version">
           <div class="rn-version-header">
+            <span class="rn-version-num">v2.3.0</span>
+            <span class="rn-version-date">15 Apr 2026</span>
+            <span class="rn-version-tag rn-tag-latest">Complete Polish</span>
+          </div>
+          <div class="rn-cat">Game Features</div>
+          <ul>
+            <li>Mission briefing intro screen with narrative and difficulty display</li>
+            <li>Act 1 cinematic with ASCII art shown on game start</li>
+            <li>Pause system (P key) with timer freeze and content hiding</li>
+            <li>Keyboard shortcuts help overlay (? key)</li>
+            <li>CRT phosphor theme picker (green, amber, blue)</li>
+            <li>Local leaderboard (top 10, arcade-style initials, localStorage)</li>
+            <li>Shareable results (copy-to-clipboard formatted summary)</li>
+            <li>Victory confetti canvas animation and screen shake on errors</li>
+            <li>Typewriter effect for story beat text</li>
+            <li>Detailed post-game statistics table (per-task breakdown)</li>
+            <li>Dynamic hint nudge system (time-based, difficulty-scaled)</li>
+            <li>Cosmetic decision points between acts (4 narrative choices)</li>
+          </ul>
+          <div class="rn-cat">Task Mechanics</div>
+          <ul>
+            <li>Text code answers (alphanumeric input for 2 tasks)</li>
+            <li>Multi-step composite task (Task 3.6 &mdash; 2 sequential sub-objectives)</li>
+            <li>Red herring enrichment (misdirection in 5 task descriptions)</li>
+          </ul>
+          <div class="rn-cat">Splunk App</div>
+          <ul>
+            <li>Guided Investigation dashboard (act-by-act data sources and SPL tips)</li>
+            <li>Progress Tracker dashboard (KV Store backed session monitoring)</li>
+            <li>3 alert-based puzzle clues in savedsearches.conf</li>
+            <li>KV Store collection (vault_progress) for session tracking</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
             <span class="rn-version-num">v2.0.0</span>
             <span class="rn-version-date">26 Mar 2026</span>
-            <span class="rn-version-tag rn-tag-latest">Full Movie Edition</span>
           </div>
           <div class="rn-cat">Game Expansion</div>
           <ul>
