@@ -1,0 +1,311 @@
+<dashboard version="2" theme="dark">
+  <label>Facilitator Board</label>
+  <description>Live booth view (1920x1080) — active teams, leaderboard, act funnel, trap log, hint distribution. Drilldown opens per-team timeline.</description>
+  <definition><![CDATA[
+{
+  "title": "Facilitator Board",
+  "description": "Live booth view (1920x1080) — active teams, leaderboard, act funnel, trap log, hint distribution. Drilldown opens per-team timeline.",
+  "dataSources": {
+    "ds_active_teams": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats latest(event_type) as last_event, latest(act) as act, latest(score) as score, latest(completed_tasks) as done, latest(total_tasks) as total, latest(wrong_count) as wrongs, latest(hints_used) as hints, latest(difficulty) as difficulty, latest(mode) as mode, max(_time) as last_ts by team_code | eval idle_seconds=round(now()-last_ts), state=case(last_event=\"session_end\",\"COMPLETE\", idle_seconds>180,\"STALLED\", idle_seconds>60,\"SLOW\", 1=1,\"ACTIVE\"), progress=tostring(coalesce(done,0)).\"/\".tostring(coalesce(total,26)) | sort -score | table team_code, state, act, progress, score, wrongs, hints, difficulty, mode, idle_seconds",
+        "queryParameters": {"earliest": "-1h@m", "latest": "now"}
+      }
+    },
+    "ds_leaderboard": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_end outcome=victory | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | dedup team_code sortby -_time | sort -score_scaled | head 10 | streamstats count as rank | eval time=tostring(elapsed_seconds, \"duration\") | table rank, team_code, score_scaled, time, difficulty",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_act_funnel": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=act_start | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats dc(team_code) as teams_reached by act | sort act | eval act_label=case(act=1,\"1: Christmas Party\", act=2,\"2: The Takeover\", act=3,\"3: The Vault\", act=4,\"4: Counterattack\", act=5,\"5: The Escape\", 1=1,\"Act \".act) | table act_label, teams_reached",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_trap_log": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=trap_hit | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | sort -_time | head 25 | eval ts=strftime(_time,\"%H:%M:%S\") | table ts, team_code, act, task_id, trap_code, difficulty",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_hint_distribution": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hint_used | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as hint_count by hint_level | sort hint_level | eval level_label=case(hint_level=1,\"1 (Free)\", hint_level=2,\"2 (-50)\", hint_level=3,\"3 (-150)\", hint_level=4,\"4 (Answer)\", 1=1,\"Lvl \".hint_level) | table level_label, hint_count",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_outcome_dist": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_end | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval outcome=upper(coalesce(outcome,\"unknown\")) | stats count by outcome",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_active": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats latest(event_type) as last_ev by team_code | search NOT last_ev=session_end | stats count as active_teams",
+        "queryParameters": {"earliest": "-15m", "latest": "now"}
+      }
+    },
+    "ds_kpi_completed_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_end outcome=victory | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | dedup team_code sortby -_time | stats count as completed_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_kpi_failed_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_end outcome=loss | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | dedup team_code sortby -_time | stats count as failed_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_kpi_avg_time": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_end outcome=victory | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | dedup team_code sortby -_time | stats avg(elapsed_seconds) as avg_sec | eval avg_time=tostring(round(avg_sec), \"duration\")",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_setup": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "STEP", "type": "string"},
+            {"name": "INSTRUCTION", "type": "string"}
+          ],
+          "columns": [
+            ["1", "2", "3", "4"],
+            [
+              "Confirm telemetry: open game.html → mode-select pill should read 'Telemetry: ... booth=<id>'",
+              "Filter to one booth via 'Booth ID' input (top-right). Leave blank for all booths.",
+              "Click any team_code row in 'Active Teams' to drill into a per-team timeline (planned for next iteration)",
+              "Treat 'STALLED' (>3 min idle) as a cue to walk over to the booth and offer help"
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "visualizations": {
+    "viz_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> NAKATOMI HEIST  ·  FACILITATOR BOARD  ·  v2.4.0\n> LIVE BOOTH OVERVIEW  ·  AUTO-REFRESH 15s  ·  EXPECT ~10s LAG FROM HEC\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_kpi_active": {
+      "type": "splunk.singlevalue",
+      "title": "Active Teams (last 15 min)",
+      "dataSources": {"primary": "ds_kpi_active"},
+      "options": {
+        "majorColor": "#33ff33",
+        "backgroundColor": "#000d00",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_kpi_completed": {
+      "type": "splunk.singlevalue",
+      "title": "Completed Today",
+      "dataSources": {"primary": "ds_kpi_completed_today"},
+      "options": {
+        "majorColor": "#66ff66",
+        "backgroundColor": "#000d00",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_kpi_failed": {
+      "type": "splunk.singlevalue",
+      "title": "Failed Today",
+      "dataSources": {"primary": "ds_kpi_failed_today"},
+      "options": {
+        "majorColor": "#ff5555",
+        "backgroundColor": "#000d00",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_kpi_avg_time": {
+      "type": "splunk.singlevalue",
+      "title": "Avg Win Time Today",
+      "dataSources": {"primary": "ds_kpi_avg_time"},
+      "options": {
+        "majorColor": "#d4a843",
+        "backgroundColor": "#000d00",
+        "trendDisplay": "off",
+        "unit": "",
+        "numberPrecision": 0
+      }
+    },
+    "viz_active_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > ACTIVE TEAMS  ·  LIVE STATUS",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_active_teams": {
+      "type": "splunk.table",
+      "title": "Click a team_code to drill into its timeline",
+      "dataSources": {"primary": "ds_active_teams"},
+      "options": {"count": 25, "backgroundColor": "#000d00"}
+    },
+    "viz_leaderboard_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > LEADERBOARD  ·  LAST 24H WINS",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_leaderboard": {
+      "type": "splunk.table",
+      "title": "Top 10 by score (scaled)",
+      "dataSources": {"primary": "ds_leaderboard"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_funnel_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > ACT FUNNEL  ·  TEAMS REACHED",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act_funnel": {
+      "type": "splunk.bar",
+      "title": "Distinct teams reaching each act",
+      "dataSources": {"primary": "ds_act_funnel"},
+      "options": {
+        "xAxisTitleText": "Act",
+        "yAxisTitleText": "Teams",
+        "backgroundColor": "#000d00",
+        "seriesColors": ["#33ff33"]
+      }
+    },
+    "viz_trap_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > TRAP LOG  ·  RECENT DECOY HITS",
+        "fontColor": "#ff5555",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_trap_log": {
+      "type": "splunk.table",
+      "title": "Last 25 trap hits",
+      "dataSources": {"primary": "ds_trap_log"},
+      "options": {"count": 25, "backgroundColor": "#000d00"}
+    },
+    "viz_hint_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > HINT DISTRIBUTION  ·  USE BY LEVEL",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_hint_dist": {
+      "type": "splunk.column",
+      "title": "Hint requests by escalation level",
+      "dataSources": {"primary": "ds_hint_distribution"},
+      "options": {
+        "xAxisTitleText": "Hint Level",
+        "yAxisTitleText": "Requests",
+        "backgroundColor": "#000d00",
+        "seriesColors": ["#d4a843"]
+      }
+    },
+    "viz_outcome_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > OUTCOME MIX (24H)",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_outcome_pie": {
+      "type": "splunk.pie",
+      "title": "Win vs loss",
+      "dataSources": {"primary": "ds_outcome_dist"},
+      "options": {
+        "backgroundColor": "#000d00",
+        "seriesColors": ["#66ff66", "#ff5555"]
+      }
+    },
+    "viz_setup_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > FACILITATOR NOTES",
+        "fontColor": "#ff8800",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_setup": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_setup"},
+      "options": {"count": 5, "backgroundColor": "#000d00"}
+    }
+  },
+  "inputs": {
+    "input_booth": {
+      "type": "input.text",
+      "options": {
+        "defaultValue": "",
+        "token": "booth_token"
+      },
+      "title": "Booth ID (blank = all booths)"
+    }
+  },
+  "layout": {
+    "type": "absolute",
+    "options": {
+      "width": 1920,
+      "height": 1080,
+      "display": "auto-scale"
+    },
+    "globalInputs": ["input_booth"],
+    "structure": [
+      {"item": "viz_header",          "type": "block", "position": {"x":   0, "y":   0, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_active",      "type": "block", "position": {"x":   0, "y":  90, "w":  470, "h": 130}},
+      {"item": "viz_kpi_completed",   "type": "block", "position": {"x": 480, "y":  90, "w":  470, "h": 130}},
+      {"item": "viz_kpi_failed",      "type": "block", "position": {"x": 960, "y":  90, "w":  470, "h": 130}},
+      {"item": "viz_kpi_avg_time",    "type": "block", "position": {"x":1440, "y":  90, "w":  470, "h": 130}},
+
+      {"item": "viz_active_label",    "type": "block", "position": {"x":   0, "y": 230, "w": 1280, "h":  30}},
+      {"item": "viz_active_teams",    "type": "block", "position": {"x":   0, "y": 260, "w": 1280, "h": 380}},
+
+      {"item": "viz_leaderboard_label", "type": "block", "position": {"x":1290, "y": 230, "w":  620, "h":  30}},
+      {"item": "viz_leaderboard",     "type": "block", "position": {"x":1290, "y": 260, "w":  620, "h": 380}},
+
+      {"item": "viz_funnel_label",    "type": "block", "position": {"x":   0, "y": 650, "w":  640, "h":  30}},
+      {"item": "viz_act_funnel",      "type": "block", "position": {"x":   0, "y": 680, "w":  640, "h": 230}},
+
+      {"item": "viz_hint_label",      "type": "block", "position": {"x": 650, "y": 650, "w":  630, "h":  30}},
+      {"item": "viz_hint_dist",       "type": "block", "position": {"x": 650, "y": 680, "w":  630, "h": 230}},
+
+      {"item": "viz_trap_label",      "type": "block", "position": {"x":1290, "y": 650, "w":  620, "h":  30}},
+      {"item": "viz_trap_log",        "type": "block", "position": {"x":1290, "y": 680, "w":  620, "h": 230}},
+
+      {"item": "viz_outcome_label",   "type": "block", "position": {"x":   0, "y": 920, "w":  640, "h":  30}},
+      {"item": "viz_outcome_pie",     "type": "block", "position": {"x":   0, "y": 950, "w":  640, "h": 120}},
+
+      {"item": "viz_setup_label",     "type": "block", "position": {"x": 650, "y": 920, "w": 1260, "h":  30}},
+      {"item": "viz_setup",           "type": "block", "position": {"x": 650, "y": 950, "w": 1260, "h": 120}}
+    ]
+  }
+}
+  ]]></definition>
+</dashboard>

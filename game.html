@@ -3,10 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="no-referrer">
+  <!--
+    Content Security Policy (v2.4.0):
+      - default-src restricted to same-origin + data: (used by inline SVG noise)
+      - style-src/script-src allow 'unsafe-inline' for the legacy inline-heavy build (Q3 refactor will move to nonces)
+      - connect-src defaults to 'self' so the HEC POST goes through a same-origin reverse proxy
+        Operators direct-pointing at a HEC host should append the host to connect-src in their
+        deployment wrapper or load this page from an origin that already includes it.
+      - frame-ancestors 'none' blocks UI redress / clickjacking on the booth display
+      - object-src 'none' blocks legacy plugin attack surface
+      - base-uri 'self' prevents <base> hijacking
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'">
   <title>Nakatomi Plaza: Vault Heist</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <!--
+    OPTIONAL telemetry config block. NEVER inline a real HEC token here in committed source.
+    Operators inject this block server-side (behind SSO) before serving game.html, OR override
+    via window.NakatomiConfig in a same-origin <script>, OR via parent.postMessage({type:'nakatomi:config',...}).
+    The HEC token MUST come from one of those secure paths — never via a URL query parameter
+    (URL params land in browser history, Referer headers, and server access logs).
+
+    Example of what an operator might inject (NOT shipped — angle brackets escaped
+    so the example text below is inert and does not confuse HTML parsers):
+      &lt;script id="nakatomi-config" type="application/json"&gt;
+        { "hecUrl": "/proxy/hec/services/collector",
+          "hecToken": "...injected at request time...",
+          "boothId": "conf26-booth-3",
+          "scenario": "default" }
+      &lt;/script&gt;
+  -->
+  <script id="nakatomi-config" type="application/json">{}</script>
   <style>
     :root {
       --bg: #05050f;
@@ -378,6 +410,44 @@
     }
     .ms-diff-info b { color: var(--cyan); }
 
+    /* Demo + Iron Man buttons (v2.4 / v2.6): broken out from the main
+       3-tier difficulty row so booth visitors don't pick a special-mode
+       tier by accident. Both stay in the same row so the layout stays
+       compact on narrow phones. */
+    .ms-demo-row {
+      display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      position: relative; z-index: 2;
+    }
+    .ms-demo-btn,
+    .ms-ironman-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px; letter-spacing: 0.15em;
+      padding: 0.45rem 0.9rem; cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    .ms-demo-btn {
+      background: rgba(20,5,20,0.7); color: var(--hot-pink);
+      border: 1px solid rgba(255,0,128,0.35);
+    }
+    .ms-demo-btn:hover { color: var(--text); border-color: var(--hot-pink); box-shadow: 0 0 8px rgba(255,0,128,0.3); }
+    .ms-demo-btn.selected {
+      color: var(--hot-pink); border-color: var(--hot-pink);
+      box-shadow: 0 0 12px rgba(255,0,128,0.4), inset 0 0 8px rgba(255,0,128,0.1);
+    }
+    /* Iron Man uses red/danger styling so the "no hints" warning reads at
+       a glance and matches the "trap codes" visual language in diff-info. */
+    .ms-ironman-btn {
+      background: rgba(20,0,0,0.7); color: var(--red);
+      border: 1px solid rgba(255,68,68,0.4);
+    }
+    .ms-ironman-btn:hover { color: var(--text); border-color: var(--red); box-shadow: 0 0 8px rgba(255,68,68,0.4); }
+    .ms-ironman-btn.selected {
+      color: var(--red); border-color: var(--red);
+      box-shadow: 0 0 14px rgba(255,68,68,0.5), inset 0 0 10px rgba(255,68,68,0.15);
+    }
+
     /* ── RADIO INTERCEPT OVERLAY ──────────────────── */
     .radio-intercept {
       position: fixed; top: 0; left: 0; right: 0;
@@ -601,10 +671,14 @@
     .theme-picker {
       display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.4rem;
     }
+    /* `.theme-dot` is now a <button> (was a <div>). Reset button-default
+       padding/font/appearance so the dot stays a flat circle, but keep enough
+       hit area on touch devices via the `pointer: coarse` block lower down. */
     .theme-dot {
-      width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
-      border: 2px solid transparent; transition: all 0.2s;
+      width: 18px; height: 18px; padding: 0; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
       box-shadow: 0 0 6px rgba(255,255,255,0.1);
+      font: inherit; line-height: 0; -webkit-appearance: none; appearance: none;
     }
     .theme-dot:hover { transform: scale(1.2); }
     .theme-dot.active { border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.3); }
@@ -823,6 +897,224 @@
     .bonus-feedback {
       font-family: 'Share Tech Mono', monospace; font-size: 0.75rem;
       margin-top: 0.5rem; min-height: 1.2em; text-align: center;
+    }
+
+    .ms-team-row {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center;
+      margin: 0.6rem auto 0;
+      padding: 0.4rem 0.8rem;
+      max-width: 480px;
+      border: 1px dashed rgba(255,0,255,0.4);
+      border-radius: 4px;
+      background: rgba(5,5,20,0.5);
+      position: relative; z-index: 2;
+    }
+    .ms-team-label {
+      font-family: 'Press Start 2P', monospace; font-size: 0.55rem;
+      color: var(--cyan); letter-spacing: 0.1em;
+    }
+    .ms-team-input {
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: 1px solid var(--cyan);
+      padding: 0.4rem 0.6rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      width: 9rem;
+      min-height: 1.6rem;
+    }
+    .ms-team-input:focus { outline: 2px solid var(--hot-pink); outline-offset: 1px; }
+    .ms-team-btn {
+      background: rgba(0,0,0,0.6);
+      color: var(--cyan);
+      border: 1px solid var(--cyan);
+      padding: 0.3rem 0.6rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      cursor: pointer;
+      min-width: 2.4rem; min-height: 2.4rem;
+    }
+    .ms-team-btn:hover { background: rgba(0,255,255,0.15); }
+    .ms-team-help {
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      color: rgba(255,255,255,0.65);
+      width: 100%; text-align: center;
+    }
+    .ms-telemetry-status {
+      margin: 0.5rem auto 0;
+      padding: 0.25rem 0.7rem;
+      max-width: 480px;
+      font-family: 'Share Tech Mono', monospace; font-size: 0.65rem;
+      color: rgba(0,255,255,0.85);
+      text-align: center;
+      letter-spacing: 0.05em;
+      border: 1px solid rgba(0,255,255,0.25);
+      border-radius: 3px;
+      background: rgba(0,20,30,0.5);
+      position: relative; z-index: 2;
+    }
+    .ms-telemetry-status.warn { color: rgba(255,200,80,0.9); border-color: rgba(255,200,80,0.4); background: rgba(40,30,5,0.5); }
+    .ms-telemetry-status.error { color: rgba(255,100,100,0.9); border-color: rgba(255,100,100,0.4); background: rgba(40,5,5,0.5); }
+
+    /* ── Handoff modal: facilitator-friendly per-team URL + QR ──────────────── */
+    .handoff-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .handoff-overlay.show { display: flex; }
+    .handoff-modal {
+      background: #0a0a14;
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 24px rgba(0,255,255,0.4), inset 0 0 24px rgba(255,0,255,0.08);
+      max-width: 540px; width: 100%;
+      max-height: 92vh; overflow-y: auto;
+      padding: 1.5rem 1.5rem 1rem;
+      font-family: 'Share Tech Mono', monospace; color: #fff;
+      position: relative;
+    }
+    .handoff-modal h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin: 0 0 0.4rem;
+      text-shadow: 0 0 6px rgba(0,255,255,0.5);
+    }
+    .handoff-modal p.handoff-sub {
+      text-align: center;
+      color: rgba(255,255,255,0.65);
+      font-size: 0.72rem;
+      margin: 0 0 1rem;
+    }
+    .handoff-team {
+      text-align: center; margin: 0.4rem 0 1rem;
+    }
+    .handoff-team-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: var(--magenta);
+      display: block; margin-bottom: 0.3rem;
+    }
+    .handoff-team-code {
+      font-family: 'Orbitron', monospace; font-weight: 900;
+      font-size: 2.4rem;
+      color: var(--hot-pink);
+      letter-spacing: 0.4rem;
+      text-shadow: 0 0 12px rgba(255,0,255,0.6);
+    }
+    .handoff-qr-wrap {
+      background: #fff;
+      padding: 0.6rem;
+      margin: 0 auto 1rem;
+      width: fit-content;
+      box-shadow: 0 0 0 1px rgba(0,255,255,0.4);
+    }
+    .handoff-qr {
+      display: grid; gap: 0;
+      image-rendering: pixelated;
+    }
+    .handoff-qr-cell { width: 100%; height: 100%; }
+    .handoff-qr-cell.on  { background: #000; }
+    .handoff-qr-cell.off { background: #fff; }
+    .handoff-qr-fallback {
+      color: rgba(255,200,80,0.85);
+      font-size: 0.7rem;
+      text-align: center;
+      padding: 0.6rem;
+      border: 1px dashed rgba(255,200,80,0.4);
+      background: rgba(40,30,5,0.4);
+      margin: 0 auto 1rem;
+      max-width: 320px;
+    }
+    .handoff-url-row {
+      display: flex; gap: 0.4rem;
+      margin-bottom: 0.7rem;
+    }
+    .handoff-url-input {
+      flex: 1;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      border: 1px solid var(--cyan);
+      padding: 0.5rem 0.6rem;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      min-width: 0;
+    }
+    .handoff-url-input:focus { outline: 2px solid var(--hot-pink); outline-offset: 1px; }
+    .handoff-actions {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center;
+      margin-top: 0.4rem;
+    }
+    .handoff-btn {
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.5rem 0.9rem;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      min-height: 2.6rem;
+    }
+    .handoff-btn:hover, .handoff-btn:focus {
+      background: rgba(0,255,255,0.15);
+      outline: none;
+      box-shadow: 0 0 8px rgba(0,255,255,0.3);
+    }
+    .handoff-btn.primary { color: var(--hot-pink); border-color: var(--hot-pink); }
+    .handoff-btn.primary:hover { background: rgba(255,0,255,0.15); box-shadow: 0 0 8px rgba(255,0,255,0.3); }
+    .handoff-close {
+      position: absolute; top: 0.4rem; right: 0.6rem;
+      background: transparent; border: none; color: rgba(255,255,255,0.6);
+      font-size: 1.4rem; cursor: pointer;
+      padding: 0.2rem 0.5rem;
+      line-height: 1;
+    }
+    .handoff-close:hover { color: var(--hot-pink); }
+    .handoff-status {
+      text-align: center;
+      font-size: 0.7rem;
+      color: rgba(0,255,255,0.85);
+      min-height: 1.1em;
+      margin-top: 0.4rem;
+    }
+    .handoff-meta {
+      font-size: 0.7rem; color: rgba(255,255,255,0.5);
+      text-align: center; margin-top: 0.5rem;
+    }
+
+    /* Print stylesheet — clean handout when facilitator hits the print button */
+    @media print {
+      body * { visibility: hidden !important; }
+      .handoff-overlay, .handoff-overlay * { visibility: visible !important; }
+      .handoff-overlay {
+        position: absolute; inset: 0;
+        background: #fff !important;
+        display: block !important;
+        padding: 0 !important;
+      }
+      .handoff-modal {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important; box-shadow: none !important;
+        max-width: 100% !important;
+        margin: 0; padding: 1.5cm;
+      }
+      .handoff-modal h2,
+      .handoff-team-code,
+      .handoff-modal p.handoff-sub,
+      .handoff-team-label,
+      .handoff-meta { color: #000 !important; text-shadow: none !important; }
+      .handoff-actions, .handoff-close, .handoff-status, .handoff-url-row { display: none !important; }
+      .handoff-qr-wrap { box-shadow: none !important; border: 1px solid #000; }
     }
 
     .ms-cards { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; position: relative; z-index: 2; }
@@ -1196,6 +1488,16 @@
       color: #66ff66;
       text-shadow: 0 0 8px rgba(102,255,102,0.5);
     }
+    .gh-team-code {
+      margin-left: 0.6rem;
+      padding: 0.05rem 0.4rem;
+      border: 1px solid rgba(102,255,102,0.6);
+      border-radius: 2px;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: #aaffaa !important;
+      text-shadow: 0 0 4px rgba(102,255,102,0.4);
+    }
     .gh-stats { display: flex; gap: 1.5rem; align-items: center; }
     .gh-timer {
       font-family: 'Press Start 2P', monospace;
@@ -1213,6 +1515,59 @@
       font-size: 0.85rem; color: #33aa33; letter-spacing: 0.04em;
     }
     .gh-hints b { color: #ffaa33; text-shadow: 0 0 6px rgba(255,170,51,0.4); }
+    /* v2.6 hint-token chip. Uses the same colour family as the score so the
+       "you can spend it" association is immediate; goes red + boxed when
+       depleted to differentiate exhaustion from hints-already-revealed. */
+    .gh-tokens {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem; color: #33aa33; letter-spacing: 0.04em;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+    .gh-tokens b { color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.45); }
+    .gh-tokens.depleted b { color: #ff4444; text-shadow: 0 0 8px rgba(255,68,68,0.6); }
+    /* Iron-Man chip stays "0/0" the whole game — same red tone as depleted
+       (it's conceptually the same: no tokens to spend), but with a subtle
+       border-glow pulse so the player can tell at a glance this is the
+       no-hints mode rather than "I exhausted my tokens mid-game". */
+    .gh-tokens.iron-man {
+      color: #ff4444;
+      border: 1px solid rgba(255,68,68,0.5);
+      padding: 0.05rem 0.35rem; border-radius: 3px;
+      box-shadow: 0 0 6px rgba(255,68,68,0.3);
+    }
+    .gh-tokens.iron-man b { color: #ff8888; text-shadow: 0 0 8px rgba(255,68,68,0.7); }
+    .gh-tokens.flash-spent b {
+      animation: tokenFlashSpent 0.55s ease-out;
+    }
+    .gh-tokens.flash-exhausted {
+      animation: tokenFlashExhausted 0.55s ease-out;
+    }
+    @keyframes tokenFlashSpent {
+      0%   { transform: scale(1.3); color: #ffffff; text-shadow: 0 0 12px rgba(255,255,255,0.9); }
+      100% { transform: scale(1); }
+    }
+    @keyframes tokenFlashExhausted {
+      0%, 100% { transform: translateX(0); }
+      25%      { transform: translateX(-3px); }
+      75%      { transform: translateX(3px); }
+    }
+    /* Reduced-motion: fall back to a subtle border flash, no transform. */
+    @media (prefers-reduced-motion: reduce) {
+      .gh-tokens.flash-spent b,
+      .gh-tokens.flash-exhausted { animation: none; }
+      .gh-tokens.flash-spent b { color: #ffffff; }
+      .gh-tokens.flash-exhausted b { color: #ff4444; }
+    }
+    /* "No tokens left" hint button gets a distinct (and distinctly disabled)
+       look so it doesn't masquerade as the normal "next hint" call to action. */
+    .hint-btn.no-tokens {
+      opacity: 0.55;
+      cursor: not-allowed;
+      border-color: #aa3333;
+      color: #aa6666;
+      text-shadow: none;
+    }
+    .hint-btn.no-tokens:hover { background: none; }
     .gh-wrong {
       font-family: 'Share Tech Mono', monospace;
       font-size: 0.9rem; color: #33aa33; letter-spacing: 0.04em;
@@ -2199,24 +2554,485 @@
       .seg-digits { gap: 8px; }
       .seg-digit { font-size: 2rem; width: 32px; }
       #keypad { max-width: 300px; }
-      #keypad button { height: 42px; font-size: 0.95rem; }
+      /* WCAG 2.2 AA — interactive targets must be ≥24x24 CSS px (min) and 44x44 (best practice).
+         iOS HIG and Material recommend 48px. We use 48px on touch contexts and 44px elsewhere. */
+      #keypad button { height: 48px; font-size: 1rem; }
       .gh-timer { font-size: 0.8rem; }
       #progress-strip { border-radius: 0 0 6px 6px; padding: 0.4rem 0.5rem; }
       .pa-act-label { font-size: 0.5rem; min-width: 1.5em; }
       .pa-dot { width: 8px; height: 8px; }
       .pa-dots { gap: 3px; }
       #progress-current { font-size: 0.55rem; }
+
+      /* v2.4: bump every interactive control to a real touch target on phone-sized screens.
+         These rules are scoped to (max-width: 768px) so the desktop look is unchanged. */
+      .hint-btn { min-height: 44px; padding: 0.55rem 1rem; font-size: 0.85rem; }
+      #overlay-pause .pause-btn { min-height: 48px; padding: 0.7rem 1.5rem; font-size: 0.9rem; }
+      .pd-ctrl-btn { min-height: 44px; padding: 0.55rem 1rem; font-size: 0.8rem; }
+      .overlay-btn { min-height: 48px; padding: 0.75rem 1.75rem; font-size: 0.9rem; }
+      .handoff-btn { min-height: 48px; padding: 0.65rem 1rem; font-size: 0.85rem; }
+      .handoff-close { min-width: 44px; min-height: 44px; font-size: 1.6rem; }
+      .ms-team-input { min-height: 48px; font-size: 1.05rem; padding: 0.6rem 0.7rem; width: 10rem; }
+      .ms-team-btn { min-width: 48px; min-height: 48px; font-size: 1.1rem; padding: 0.5rem 0.8rem; }
+
+      /* HUD compaction: hide the static "v2.4" version chip on phones to free room for the
+         (more useful) team-code chip. The version is still visible in the boot sequence. */
+      .gh-title span:not(.gh-team-code) { display: none; }
+      .gh-team-code { font-size: 0.65rem; padding: 0.1rem 0.35rem; margin-left: 0.4rem; }
+    }
+
+    /* ── Small phones (≤480px): denser layout, single-column cards, stacked HUD bits. */
+    @media (max-width: 480px) {
+      .ms-cards { gap: 1rem; flex-direction: column; align-items: center; }
+      .ms-card { padding: 1.25rem 1rem; }
+      .ms-card .icon { font-size: 2.6rem; margin-bottom: 0.5rem; }
+      .ms-card h2 { font-size: 0.9rem; }
+      .ms-title { font-size: 1.4rem; }
+      .ms-subtitle { font-size: 0.8rem; }
+      .ms-team-row { padding: 0.4rem 0.6rem; }
+      .ms-team-input { width: 100%; max-width: 12rem; }
+      .handoff-modal { padding: 1rem 0.9rem 0.7rem; }
+      .handoff-team-code { font-size: 1.9rem; letter-spacing: 0.3rem; }
+      #game-header { padding: 0.4rem 0.6rem; flex-wrap: wrap; gap: 0.3rem; }
+      .gh-title { font-size: 0.78rem; }
+      .gh-stats { gap: 0.8rem; }
+      .gh-timer { font-size: 0.72rem; }
+      .gh-hints, .gh-wrong, .gh-tokens { font-size: 0.7rem; }
+      #keypad { gap: 4px; }
+      #keypad button { height: 52px; font-size: 1.1rem; } /* a touch larger on phones — easier to hit when running */
+      .seg-digit { font-size: 1.7rem; width: 28px; }
+    }
+
+    /* ── Coarse pointers (touchscreens at any width — iPad landscape, Surface, etc.).
+         Ensures the same touch-target floor on tablets that the 768px rule guarantees on phones,
+         WITHOUT making everything bulky on a desktop with a mouse. */
+    @media (pointer: coarse) {
+      .hint-btn { min-height: 44px; }
+      .pd-ctrl-btn { min-height: 44px; }
+      .overlay-btn { min-height: 44px; }
+      .handoff-btn { min-height: 44px; }
+      .ms-team-btn { min-width: 44px; min-height: 44px; }
+      .handoff-close { min-width: 44px; min-height: 44px; }
+      #keypad button { min-height: 48px; }
+      /* Theme dots are an unusual "small but critical" tap target on touch.
+         We grow them visually and add an invisible expanded hit-box via an
+         outset ::before pseudo-element to reach the WCAG 2.2 AA 44×44 floor
+         without breaking the visual design. */
+      .theme-dot { width: 28px; height: 28px; position: relative; }
+      .theme-dot::before {
+        content: ''; position: absolute; inset: -8px; /* extends touch zone to ~44×44 */
+      }
+      .theme-picker { gap: 0.75rem; }
+      /* Disable the 0.05s "press" transform on coarse devices — feels laggy on touch
+         because there's no hover to preview the affordance. */
+      #keypad button { transition: background 0.1s; }
+    }
+
+    /* ── Landscape phone prompt: the keypad column UI assumes portrait, and at <500px tall
+         in landscape it gets squeezed below usable. The orientation overlay (HTML below) is
+         only shown when this media query matches AND the user hasn't dismissed it for the
+         session. */
+    @media (orientation: landscape) and (max-height: 500px) and (max-width: 900px) {
+      #orientation-prompt.allow { display: flex; }
+    }
+
+    /* Orientation prompt visuals — kept here so the overlay works even before any JS runs. */
+    #orientation-prompt {
+      position: fixed; inset: 0; z-index: 1500;
+      display: none;
+      align-items: center; justify-content: center;
+      background: #05050f;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    #orientation-prompt.show { display: flex; }
+    #orientation-prompt .op-inner {
+      max-width: 420px;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    #orientation-prompt h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem; color: var(--cyan);
+      letter-spacing: 0.1em;
+      margin: 0 0 0.6rem;
+      text-shadow: 0 0 8px rgba(0,255,255,0.5);
+    }
+    #orientation-prompt p {
+      font-size: 0.85rem; line-height: 1.5;
+      color: rgba(255,255,255,0.78);
+      margin: 0 0 1.2rem;
+    }
+    #orientation-prompt .op-icon {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+      animation: opRotate 2.4s ease-in-out infinite;
+      display: inline-block;
+      transform-origin: 50% 50%;
+    }
+    @keyframes opRotate {
+      0%, 25%   { transform: rotate(-90deg); }
+      50%, 75%  { transform: rotate(0deg); }
+      100%      { transform: rotate(-90deg); }
+    }
+    #orientation-prompt .op-dismiss {
+      background: transparent; border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.8rem; padding: 0.7rem 1.4rem;
+      cursor: pointer; letter-spacing: 0.06em;
+      min-height: 44px;
+    }
+    #orientation-prompt .op-dismiss:hover { background: rgba(0,255,255,0.12); }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       A11Y (v2.4): the rules below add accessible focus, motion-safe defaults,
+       a high-contrast mono theme for color-blind players, and keyboard support
+       for the two custom-control patterns we use (`.theme-dot`, `.ms-card`).
+       ────────────────────────────────────────────────────────────────────── */
+
+    /* Visible, high-contrast focus ring for keyboard users.
+       :focus-visible only triggers on keyboard navigation (NOT mouse clicks),
+       so this doesn't add visual noise for pointer users while still giving
+       screen-reader / keyboard players a clear "you are here" indicator.
+       The 2px outline + 2px offset gives 3:1 contrast against any background. */
+    :focus { outline: none; }
+    :focus-visible {
+      outline: 2px solid #ffd700 !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.6), 0 0 12px rgba(255,215,0,0.6) !important;
+      border-radius: 2px;
+    }
+    /* Inputs that already have a visible focus border can suppress the global ring.
+       The selectors below override the global :focus-visible for these specific cases
+       where the input's existing border already provides ≥3:1 contrast. */
+    .ms-team-input:focus-visible,
+    .handoff-url-input:focus-visible,
+    .bonus-code-input:focus-visible,
+    .fac-pin-input:focus-visible {
+      outline-offset: 1px !important;
+    }
+    /* Theme dots are tiny circular controls — give them a focus halo that
+       respects their round shape. */
+    .theme-dot:focus-visible {
+      outline: 2px solid #fff !important;
+      outline-offset: 3px !important;
+      box-shadow: 0 0 0 5px rgba(0,0,0,0.7), 0 0 12px rgba(255,255,255,0.5) !important;
+    }
+
+    /* High-contrast monochrome phosphor — accessible for ALL CB types because
+       the only carrier of meaning is brightness/contrast, never hue. Pairs with
+       the WCAG-AA color recommendation: don't encode meaning in color alone. */
+    .theme-dot-mono {
+      background: linear-gradient(45deg, #ddd 0%, #fff 50%, #ddd 100%);
+    }
+
+    /* prefers-reduced-motion: kill all decorative motion across the entire page.
+       Keeps brief state transitions (≤10ms feels instant) but disables loops and
+       movement. The W3C-recommended approach (animation-duration: 0.01ms !important)
+       still fires animationend events so JS state machines that wait on them keep
+       working. We also explicitly stop a few keyframe loops that produce intense
+       flicker / strobe (crtFlicker, neonFlicker, grain, vhsTrack), which can be
+       worse than mere motion for vestibular and photosensitive players. */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      /* These specific decorative elements are entirely static-friendlier when
+         their animations are disabled outright, not just sped up. */
+      .noise,
+      .vhs-line,
+      #boot-screen .booting-cursor,
+      .crt-bezel.shaking,
+      .ms-card::before,
+      .achievement-toast,
+      #orientation-prompt .op-icon,
+      .vcr-rec {
+        animation: none !important;
+      }
+      /* Replace shake feedback with a brief solid color pulse — still gives
+         "wrong answer" feedback without rocking the screen. */
+      .seg-digits.wrong { background: rgba(255,40,40,0.18) !important; }
+      /* Disable the synthwave grid scroll — visually intense and entirely decorative. */
+      .grid-floor { animation: none !important; opacity: 0.5; }
+    }
+
+    /* Screen-reader-only utility (aria-live status regions, etc.) — keeps text in
+       the accessibility tree but invisible on screen. Standard pattern from W3C. */
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* ── ATTRACT LOOP (v2.4) ──────────────────────────────────────────────────
+       Booth idle screen overlay. Sits above mode-select, captures the booth
+       visitor's attention with cycling teaser panels, dismissed by any input.
+       The grid-floor backdrop reuses the existing animated grid for visual
+       continuity — when reduced-motion is active the grid animation is killed
+       by the global rule above, so attract-mode also stops cycling. */
+    #attract-overlay {
+      position: fixed; inset: 0; z-index: 1400;
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(20,5,35,0.96) 0%, #000 80%);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.6s ease;
+      overflow: hidden;
+    }
+    #attract-overlay.visible { opacity: 1; pointer-events: auto; }
+    #attract-overlay::before {
+      /* synthwave grid floor lines */
+      content: ''; position: absolute; inset: 0;
+      background:
+        repeating-linear-gradient(0deg,  transparent 0 39px, rgba(255,0,128,0.10) 39px 40px),
+        repeating-linear-gradient(90deg, transparent 0 39px, rgba(0,240,255,0.08) 39px 40px);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 100%);
+    }
+    #attract-panel {
+      position: relative; z-index: 1;
+      max-width: 720px; padding: 2rem 2.5rem; text-align: center;
+      color: #fff;
+      animation: atrFade 0.8s ease;
+    }
+    @keyframes atrFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .atr-tag {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem; letter-spacing: 0.3em; color: var(--cyan);
+      margin-bottom: 0.8rem; text-shadow: 0 0 8px rgba(0,240,255,0.5);
+    }
+    .atr-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.6rem; line-height: 1.4; margin: 0 0 1rem 0;
+      color: var(--hot-pink);
+      text-shadow: 0 0 16px rgba(255,0,128,0.6), 0 0 32px rgba(255,0,128,0.4);
+      letter-spacing: 0.05em;
+    }
+    .atr-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem; line-height: 1.6; color: #ddd;
+      margin: 0 0 1.5rem 0;
+    }
+    .atr-cta {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.7rem; letter-spacing: 0.25em;
+      color: var(--cyan); margin-top: 1.5rem;
+      animation: atrBlink 1.4s step-end infinite;
+    }
+    @keyframes atrBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .atr-lb {
+      width: 100%; max-width: 480px; margin: 0 auto;
+      border-collapse: collapse;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem; color: #eee;
+    }
+    .atr-lb th, .atr-lb td {
+      padding: 0.4rem 0.6rem; border-bottom: 1px solid rgba(0,240,255,0.2);
+    }
+    .atr-lb th {
+      color: var(--cyan); font-weight: normal; letter-spacing: 0.1em;
+      text-align: left; text-transform: uppercase; font-size: 0.7rem;
+    }
+    .atr-lb td:first-child { color: var(--hot-pink); width: 2em; }
+    .atr-empty { color: #888; font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; }
+
+    /* Smaller attract layout on narrow screens — keep the title legible. */
+    @media (max-width: 600px) {
+      .atr-title { font-size: 1.1rem; }
+      .atr-sub   { font-size: 0.85rem; }
+      .atr-cta   { font-size: 0.6rem; }
+      #attract-panel { padding: 1.2rem 1rem; }
+    }
+
+    /* ── SPECTATOR MODE (v2.4) ───────────────────────────────────────
+       A read-only "second screen" for booth play: the operator opens
+       game.html?spectator=1 on a public-facing monitor, and a separate
+       game tab on the player's machine writes its live state to
+       localStorage. Spectator mirrors progress without exposing controls
+       or answers. We hide the entire game body and replace it with a
+       big-text status panel optimized for distant viewing. */
+    body.spectator-mode {
+      background: #000;
+      overflow: hidden;
+    }
+    body.spectator-mode > *:not(#spectator-overlay) {
+      display: none !important;
+    }
+    #spectator-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, #0a1a0a 0%, #000 70%);
+      color: #00ff66;
+      font-family: 'Share Tech Mono', monospace;
+      z-index: 9999;
+      padding: 2rem;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    body.spectator-mode #spectator-overlay { display: flex; flex-direction: column; }
+
+    .spec-tag {
+      position: absolute; top: 1rem; left: 1rem;
+      font-size: 0.85rem; letter-spacing: 0.4em; color: #ff6633;
+      text-transform: uppercase;
+      border: 1px solid #ff6633; padding: 0.3rem 0.8rem;
+      background: rgba(255,102,51,0.1);
+    }
+    .spec-team {
+      position: absolute; top: 1rem; right: 1rem;
+      font-size: 0.85rem; color: #88ff88;
+      text-align: right; line-height: 1.4;
+    }
+    .spec-team b { color: #ffffaa; font-size: 1.05rem; letter-spacing: 0.2em; }
+
+    .spec-main {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 2.2rem; text-align: center;
+    }
+    .spec-timer {
+      font-size: clamp(4rem, 18vw, 14rem);
+      font-weight: bold; letter-spacing: 0.1em;
+      color: #ffd000;
+      text-shadow: 0 0 18px rgba(255,208,0,0.5), 0 0 40px rgba(255,208,0,0.3);
+      line-height: 1; font-variant-numeric: tabular-nums;
+    }
+    .spec-timer.urgent {
+      color: #ff3333;
+      text-shadow: 0 0 18px rgba(255,51,51,0.6), 0 0 40px rgba(255,51,51,0.3);
+      animation: spec-pulse 1s infinite;
+    }
+    @keyframes spec-pulse { 50% { opacity: 0.6; } }
+    @media (prefers-reduced-motion: reduce) {
+      .spec-timer.urgent { animation: none; }
+    }
+
+    .spec-task-block {
+      max-width: 80%;
+    }
+    .spec-act-name {
+      font-size: clamp(0.9rem, 2vw, 1.4rem);
+      color: #66ccff; letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .spec-task-name {
+      font-size: clamp(1.4rem, 4vw, 3.2rem);
+      color: #00ff99; line-height: 1.2;
+    }
+
+    .spec-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem 4rem;
+      font-size: clamp(1rem, 2vw, 1.6rem);
+      padding: 1rem 2rem;
+      border-top: 1px solid rgba(0,255,102,0.3);
+      border-bottom: 1px solid rgba(0,255,102,0.3);
+    }
+    .spec-stat { text-align: center; }
+    .spec-stat-label {
+      font-size: 0.75em; color: #66aa88;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .spec-stat-value {
+      font-size: 1.6em; color: #ffffaa;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .spec-progress {
+      width: 100%; max-width: 800px;
+      height: 14px; border: 1px solid #00ff66;
+      background: rgba(0,255,102,0.08);
+      position: relative; overflow: hidden;
+    }
+    .spec-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00cc66, #00ff99);
+      box-shadow: 0 0 12px rgba(0,255,153,0.6);
+      transition: width 0.5s ease;
+    }
+
+    .spec-status {
+      position: absolute; bottom: 1rem; left: 0; right: 0;
+      text-align: center; font-size: 0.9rem;
+      color: #66aa88; letter-spacing: 0.2em;
+    }
+    .spec-status.victory {
+      color: #ffd700; font-size: clamp(1.5rem, 4vw, 3rem);
+      text-transform: uppercase; letter-spacing: 0.4em;
+      bottom: 50%; transform: translateY(50%);
+      text-shadow: 0 0 20px rgba(255,215,0,0.6);
+    }
+    .spec-status.gameover {
+      color: #ff3333; font-size: clamp(1.5rem, 4vw, 3rem);
+      text-transform: uppercase; letter-spacing: 0.4em;
+      bottom: 50%; transform: translateY(50%);
+      text-shadow: 0 0 20px rgba(255,51,51,0.6);
+    }
+
+    /* When the spectator hasn't received any data yet (the player tab
+       isn't open or hasn't started a game), show a friendly waiting
+       state instead of empty fields. */
+    .spec-waiting {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; color: #66aa88;
+    }
+    .spec-waiting-title {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      color: #00ff66; letter-spacing: 0.3em;
+      margin-bottom: 1.5rem;
+    }
+    .spec-waiting-sub {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: #88ccaa; max-width: 600px; line-height: 1.6;
     }
   </style>
 </head>
 <body>
 
-  <!-- VHS / CRT effects -->
-  <div class="noise"></div>
-  <div class="vhs-line"></div>
-  <div class="vcr-play">PLAY &#9654;</div>
-  <div class="vcr-rec">&#9679; REC</div>
-  <div class="vcr-timestamp" id="vcr-ts">1988/12/24  22:00:00</div>
+  <!-- A11Y live regions (v2.4): hidden status areas that screen readers
+       announce when their text content changes. We split into "polite" (queued
+       behind whatever the user is currently hearing — used for task progress,
+       hint reveals, etc.) and "assertive" (interrupts immediately — used for
+       traps, time critical, victory, game over). The role attributes are
+       belt-and-suspenders for older screen readers that don't fully support
+       aria-live alone. -->
+  <div id="a11y-status" class="sr-only" aria-live="polite" aria-atomic="true" role="status"></div>
+  <div id="a11y-alerts" class="sr-only" aria-live="assertive" aria-atomic="true" role="alert"></div>
+
+  <!-- VHS / CRT effects (purely decorative — hidden from a11y tree so SR
+       users don't hear "PLAY" / "REC" announced repeatedly during gameplay). -->
+  <div class="noise" aria-hidden="true"></div>
+  <div class="vhs-line" aria-hidden="true"></div>
+  <div class="vcr-play" aria-hidden="true">PLAY &#9654;</div>
+  <div class="vcr-rec" aria-hidden="true">&#9679; REC</div>
+  <div class="vcr-timestamp" id="vcr-ts" aria-hidden="true">1988/12/24  22:00:00</div>
+
+  <!-- ORIENTATION PROMPT (v2.4): shown only on small landscape screens until dismissed.
+       The CSS media query auto-shows it via `.allow`; the user's "Continue anyway" choice
+       is remembered in sessionStorage so it doesn't nag through a single play session. -->
+  <div id="orientation-prompt" role="dialog" aria-modal="true" aria-labelledby="op-title" aria-describedby="op-desc">
+    <div class="op-inner">
+      <div class="op-icon" aria-hidden="true">&#x1F4F1;</div>
+      <h2 id="op-title">ROTATE YOUR DEVICE</h2>
+      <p id="op-desc">The vault terminal is designed for portrait orientation. Rotate your phone upright for the best experience &mdash; or continue here at your own risk.</p>
+      <button type="button" class="op-dismiss" onclick="dismissOrientationPrompt()">CONTINUE ANYWAY</button>
+    </div>
+  </div>
+
+  <!-- ATTRACT LOOP OVERLAY (v2.4): booth idle screen. Hidden by default; shown
+       by initAttractLoop() after ATTRACT_IDLE_MS of inactivity on mode-select.
+       The panel content is rebuilt by attractRenderPanel() each cycle. -->
+  <div id="attract-overlay" aria-hidden="true">
+    <div id="attract-panel"></div>
+  </div>
 
   <!-- BOOT SEQUENCE (shown on digital mode select) -->
   <div id="boot-screen" class="hidden"></div>
@@ -2257,34 +3073,107 @@
     <p class="ms-subtitle">"Now I have a SPL. Ho-ho-ho."</p>
     <div class="retro-line"></div>
     <div class="ms-insert" style="margin-bottom:0.3rem">DIFFICULTY</div>
-    <div class="ms-difficulty" id="diff-select">
-      <button class="ms-diff-btn" onclick="setDifficulty('rookie')" data-diff="rookie">ROOKIE</button>
-      <button class="ms-diff-btn selected" onclick="setDifficulty('operative')" data-diff="operative">OPERATIVE</button>
-      <button class="ms-diff-btn" onclick="setDifficulty('mastermind')" data-diff="mastermind">MASTERMIND</button>
+    <!-- Difficulty selector (v2.4 a11y): role=radiogroup pattern. aria-pressed
+         is updated by setDifficulty() to reflect which option is current.
+         The "Demo" option is broken out below the main 3 so it reads as a
+         distinct booth-mode shortcut, not a 4th difficulty tier.
+         "IRON MAN" (v2.6) is similarly broken out as a top-tier opt-in that
+         booth visitors can't pick by accident. -->
+    <div class="ms-difficulty" id="diff-select" role="radiogroup" aria-label="Difficulty">
+      <button class="ms-diff-btn" onclick="setDifficulty('rookie')" data-diff="rookie" role="radio" aria-checked="false">ROOKIE</button>
+      <button class="ms-diff-btn selected" onclick="setDifficulty('operative')" data-diff="operative" role="radio" aria-checked="true">OPERATIVE</button>
+      <button class="ms-diff-btn" onclick="setDifficulty('mastermind')" data-diff="mastermind" role="radio" aria-checked="false">MASTERMIND</button>
+    </div>
+    <div class="ms-demo-row">
+      <button class="ms-demo-btn" onclick="setDifficulty('demo')" data-diff="demo" role="radio" aria-checked="false" title="15 minute booth demo with 3 curated tasks">QUICK DEMO &middot; 15 MIN</button>
+      <button class="ms-ironman-btn" onclick="setDifficulty('iron_man')" data-diff="iron_man" role="radio" aria-checked="false" title="Zero hints. 50 minutes. 3 errors. For Splunk veterans only.">IRON MAN &middot; NO HINTS</button>
     </div>
     <div class="ms-diff-info" id="diff-info">
       <b>90 min</b> &middot; 7 errors &middot; all hints &middot; 1x score
     </div>
     <div class="ms-insert" style="margin-top:0.6rem">CRT PHOSPHOR</div>
-    <div class="theme-picker">
-      <div class="theme-dot theme-dot-green active" onclick="setCrtTheme('green')" title="Green"></div>
-      <div class="theme-dot theme-dot-amber" onclick="setCrtTheme('amber')" title="Amber"></div>
-      <div class="theme-dot theme-dot-blue" onclick="setCrtTheme('blue')" title="Blue"></div>
+    <!-- Theme picker (v2.4 a11y): buttons (not divs) so screen readers + keyboard
+         users can operate them. tabindex=0 + role=button is a fallback for any
+         legacy assistive tech that doesn't recognise <button>. The "mono" option
+         is high-contrast white for color-blind players (no hue carries meaning). -->
+    <div class="theme-picker" role="radiogroup" aria-label="CRT phosphor color">
+      <button type="button" class="theme-dot theme-dot-green active" onclick="setCrtTheme('green')" aria-label="Green phosphor" role="radio" aria-checked="true"></button>
+      <button type="button" class="theme-dot theme-dot-amber" onclick="setCrtTheme('amber')" aria-label="Amber phosphor" role="radio" aria-checked="false"></button>
+      <button type="button" class="theme-dot theme-dot-blue" onclick="setCrtTheme('blue')" aria-label="Blue phosphor" role="radio" aria-checked="false"></button>
+      <button type="button" class="theme-dot theme-dot-mono" onclick="setCrtTheme('mono')" aria-label="High-contrast monochrome (color-blind friendly)" role="radio" aria-checked="false"></button>
     </div>
     <div class="ms-insert" style="margin-top:0.6rem">SELECT YOUR MODE</div>
-    <div class="ms-cards">
-      <div class="ms-card" onclick="selectMode('physical')">
-        <span class="icon">&#x1F3DB;</span>
+    <!-- Mode cards (v2.4 a11y): made keyboard-operable. role=button + tabindex
+         + onkeydown gives Enter/Space activation parity with mouse click without
+         restructuring the visual layout (an actual <button> would inherit too
+         many platform defaults that fight the existing card style). -->
+    <div class="ms-cards" role="group" aria-label="Choose game mode">
+      <div class="ms-card" onclick="selectMode('physical')" role="button" tabindex="0" aria-label="Physical Vault mode" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMode('physical');}">
+        <span class="icon" aria-hidden="true">&#x1F3DB;</span>
         <h2>Physical Vault</h2>
         <p>Use the physical vault model. Enter codes on the hardware keypad. This screen serves as timer and seal status display.</p>
       </div>
-      <div class="ms-card" onclick="selectMode('digital')">
-        <span class="icon">&#x1F5A5;</span>
+      <div class="ms-card" onclick="selectMode('digital')" role="button" tabindex="0" aria-label="Digital Vault mode" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectMode('digital');}">
+        <span class="icon" aria-hidden="true">&#x1F5A5;</span>
         <h2>Digital Vault</h2>
         <p>Play entirely on screen. Enter codes on the digital keypad. Clue cards replace physical compartments.</p>
       </div>
     </div>
     <button class="overlay-btn" style="margin-top:1rem;font-size:0.65rem;padding:0.4rem 1rem;opacity:0.7" onclick="showLeaderboard()">Leaderboard</button>
+
+    <!-- Team code input (shown only when telemetry is configured for this deployment) -->
+    <div id="ms-team-row" class="ms-team-row" style="display:none">
+      <label for="ms-team-input" class="ms-team-label">TEAM CODE</label>
+      <input id="ms-team-input"
+             class="ms-team-input"
+             type="text"
+             maxlength="16"
+             autocomplete="off"
+             autocapitalize="characters"
+             spellcheck="false"
+             aria-describedby="ms-team-help">
+      <button id="ms-team-regen" class="ms-team-btn" type="button" onclick="NakaTelemetry.regenerateTeamCode()" title="Generate a new team code">&#x21BB;</button>
+      <button id="ms-team-handoff" class="ms-team-btn" type="button" onclick="showHandoffModal()" title="Show URL + QR code for booth handoff">QR</button>
+      <span id="ms-team-help" class="ms-team-help"></span>
+    </div>
+
+    <!-- Telemetry status pill (operator-facing; never shows tokens) -->
+    <div id="ms-telemetry-status" class="ms-telemetry-status" style="display:none" aria-live="polite"></div>
+  </div>
+
+  <!-- HANDOFF MODAL: per-team URL + QR code (facilitator booth tool) -->
+  <div id="handoff-overlay" class="handoff-overlay" role="dialog" aria-modal="true" aria-labelledby="handoff-title" aria-describedby="handoff-sub" onclick="if(event.target===this)hideHandoffModal()">
+    <div class="handoff-modal">
+      <button type="button" class="handoff-close" aria-label="Close" onclick="hideHandoffModal()">&times;</button>
+      <h2 id="handoff-title">TEAM HANDOFF</h2>
+      <p id="handoff-sub" class="handoff-sub">Hand this code to your team. They scan or open the URL on their device to join the same session.</p>
+
+      <div class="handoff-team">
+        <span class="handoff-team-label">TEAM CODE</span>
+        <span id="handoff-team-code" class="handoff-team-code">----</span>
+      </div>
+
+      <div id="handoff-qr-wrap" class="handoff-qr-wrap" aria-hidden="true">
+        <div id="handoff-qr" class="handoff-qr"></div>
+      </div>
+      <div id="handoff-qr-fallback" class="handoff-qr-fallback" style="display:none">
+        QR rendering unavailable in this browser &mdash; players can type the URL below or be sent the link by chat.
+      </div>
+
+      <div class="handoff-url-row">
+        <input id="handoff-url-input" class="handoff-url-input" type="text" readonly aria-label="Handoff URL">
+      </div>
+
+      <div class="handoff-actions">
+        <button type="button" class="handoff-btn primary" onclick="copyHandoffUrl()">COPY URL</button>
+        <button type="button" class="handoff-btn" onclick="window.print()">PRINT HANDOUT</button>
+        <button type="button" class="handoff-btn" onclick="openSpectatorTab()" title="Open a read-only second-screen view in another tab">SPECTATOR</button>
+        <button type="button" class="handoff-btn" onclick="NakaTelemetry.regenerateTeamCode(); refreshHandoffModal();">NEW CODE</button>
+      </div>
+
+      <div id="handoff-status" class="handoff-status" aria-live="polite"></div>
+      <div id="handoff-meta" class="handoff-meta"></div>
+    </div>
   </div>
 
   <!-- GAME SCREEN -->
@@ -2311,15 +3200,22 @@
           <div class="crt-screen">
             <div class="crt-glare"></div>
             <div class="crt-content">
-              <header id="game-header">
-                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.3</span></div>
-                <div class="gh-stats">
-                  <div class="gh-score">PTS: <b id="score-display">0</b></div>
-                  <div class="gh-hints" id="hint-counter">HINTS: <b>0</b></div>
-                  <div class="gh-timer mono" id="timer">90:00</div>
-                  <div class="gh-wrong">ERR: <b id="wrong-count">0</b>/7</div>
-                  <button class="gh-mute" id="mute-btn" onclick="toggleMute()" title="Toggle audio">SND</button>
-                  <button class="gh-mute" onclick="toggleShortcuts()" title="Keyboard shortcuts" style="font-size:0.65rem">?</button>
+              <header id="game-header" role="banner">
+                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.4</span> <span class="gh-team-code" id="hud-team-code" style="display:none"></span></div>
+                <!-- HUD stats (v2.4 a11y): aria-labels make the abbreviated
+                     "PTS:" / "ERR:" / etc. comprehensible to screen readers,
+                     which would otherwise read out the literal acronym. -->
+                <div class="gh-stats" role="region" aria-label="Game status">
+                  <div class="gh-score" aria-label="Score"><span aria-hidden="true">PTS:</span> <b id="score-display">0</b></div>
+                  <div class="gh-hints" id="hint-counter" aria-label="Hints used">HINTS: <b>0</b></div>
+                  <!-- v2.6 hint-token chip. aria-label is verbose (vs the
+                       short visible text) so screen-reader users get the
+                       semantics, not just "TOK 3/3". -->
+                  <div class="gh-tokens" id="hint-tokens" aria-label="Hint tokens remaining">TOK: <b id="hint-tokens-count">3</b>/<span id="hint-tokens-max">3</span></div>
+                  <div class="gh-timer mono" id="timer" aria-label="Time remaining" aria-atomic="true">90:00</div>
+                  <div class="gh-wrong" aria-label="Wrong attempts"><span aria-hidden="true">ERR:</span> <b id="wrong-count">0</b>/7</div>
+                  <button class="gh-mute" id="mute-btn" onclick="toggleMute()" title="Toggle audio" aria-label="Toggle audio">SND</button>
+                  <button class="gh-mute" onclick="toggleShortcuts()" title="Keyboard shortcuts" aria-label="Show keyboard shortcuts" style="font-size:0.65rem">?</button>
                 </div>
               </header>
 
@@ -2358,7 +3254,7 @@
                   <span class="gf-power-led" id="power-led" onclick="handlePowerClick()" title=""></span>
                   <span id="power-label">ONLINE</span>
                 </div>
-                <div class="gf-version">NAKATOMI-OS 2.3 &middot; 24-DEC-88</div>
+                <div class="gf-version">NAKATOMI-OS 2.4 &middot; 24-DEC-88</div>
               </footer>
               <!-- Clue overlay (inside CRT) -->
               <div id="clue-overlay" class="hidden">
@@ -2425,19 +3321,23 @@
             <div class="kb-led-item"><div class="kb-led-dot"></div><div class="kb-led-label">CAPS</div></div>
             <div class="kb-led-item"><div class="kb-led-dot"></div><div class="kb-led-label">SCR</div></div>
           </div>
-          <div id="keypad">
-            <button onclick="enterDigit('1')">1</button>
-            <button onclick="enterDigit('2')">2</button>
-            <button onclick="enterDigit('3')">3</button>
-            <button onclick="enterDigit('4')">4</button>
-            <button onclick="enterDigit('5')">5</button>
-            <button onclick="enterDigit('6')">6</button>
-            <button onclick="enterDigit('7')">7</button>
-            <button onclick="enterDigit('8')">8</button>
-            <button onclick="enterDigit('9')">9</button>
-            <button class="key-fn" onclick="clearCode()">CLR</button>
-            <button onclick="enterDigit('0')">0</button>
-            <button class="key-fn key-enter" onclick="submitCode()">ENT</button>
+          <!-- Keypad (v2.4 a11y): role=group + aria-label tells SR users this
+               cluster of buttons is a single "vault keypad" unit. CLR / ENT have
+               explicit aria-labels because "CLR" / "ENT" are abbreviations SR
+               will pronounce literally otherwise. -->
+          <div id="keypad" role="group" aria-label="Vault keypad">
+            <button onclick="enterDigit('1')" aria-label="1">1</button>
+            <button onclick="enterDigit('2')" aria-label="2">2</button>
+            <button onclick="enterDigit('3')" aria-label="3">3</button>
+            <button onclick="enterDigit('4')" aria-label="4">4</button>
+            <button onclick="enterDigit('5')" aria-label="5">5</button>
+            <button onclick="enterDigit('6')" aria-label="6">6</button>
+            <button onclick="enterDigit('7')" aria-label="7">7</button>
+            <button onclick="enterDigit('8')" aria-label="8">8</button>
+            <button onclick="enterDigit('9')" aria-label="9">9</button>
+            <button class="key-fn" onclick="clearCode()" aria-label="Clear input">CLR</button>
+            <button onclick="enterDigit('0')" aria-label="0">0</button>
+            <button class="key-fn key-enter" onclick="submitCode()" aria-label="Enter code">ENT</button>
           </div>
         </div>
       </div><!-- keyboard-housing -->
@@ -2552,7 +3452,1382 @@
     </div>
   </div>
 
+  <!-- Spectator overlay (v2.4): a giant read-only "second screen" for booth
+       play. Activated with ?spectator=1 — hides the entire game and shows
+       a big-text mirror of the player's progress polled from localStorage. -->
+  <div id="spectator-overlay" aria-live="polite">
+    <div class="spec-tag">SPECTATOR</div>
+    <div class="spec-team" id="spec-team-info">
+      Waiting for game…
+    </div>
+    <div id="spec-content" class="spec-waiting">
+      <div class="spec-waiting-title">SPECTATOR MODE</div>
+      <div class="spec-waiting-sub">
+        Waiting for the player tab on this machine.<br>
+        Open <span style="color:#ffd700;">game.html</span> in another tab,
+        choose a difficulty, and the live timer + progress will appear here.
+      </div>
+    </div>
+    <div class="spec-status" id="spec-status-bar">
+      Same-machine mirror &middot; localStorage live updates &middot; press F5 to reset
+    </div>
+  </div>
+
 <script>
+/* ──────────────────────────────────────────────────────────────────────────
+   NakaTelemetry (v2.4.0)
+   ──────────────────────────────────────────────────────────────────────────
+   Opt-in HEC posting + offline queue + KV-Store progress writes for the
+   live facilitator board. Designed to be SAFE TO SHIP UNCONFIGURED — the
+   default is fully offline, no network requests, nothing in localStorage
+   beyond what the existing game already uses.
+
+   SECURITY MODEL (read this before changing anything):
+
+     1. The HEC token is NEVER read from URL parameters.
+        URL params land in browser history, server access logs, and
+        Referer headers. The only accepted sources are:
+          a) `window.NakatomiConfig` (set by an inline <script> injected
+             server-side behind SSO before sending game.html to the browser),
+          b) a JSON config block at #nakatomi-config (also injected server-side),
+          c) a `postMessage({ type: 'nakatomi:config', ... })` from a
+             same-origin parent frame (kiosk wrapper).
+        Anything else is rejected with a console warning.
+
+     2. The token is held in a closure inside this module. It is never
+        copied to a global, never logged, never put in the DOM, and never
+        included in queue payloads (queue stores only event JSON; the token
+        is re-attached at POST time).
+
+     3. The recommended deployment is a same-origin reverse proxy:
+        the page POSTs to /proxy/hec/services/collector and the proxy
+        injects the Authorization header before forwarding to the real HEC.
+        That way the token never even reaches the browser. See docs/DEPLOY.md.
+
+     4. All payload strings (team_name, team_code, booth_id, scenario,
+        any task_id) are sanitized through `safeId()` which restricts to
+        [A-Za-z0-9 _-] and trims to a max length. Free-form display
+        strings (e.g., the optional team_label) are HTML-escaped on render
+        and length-capped before posting.
+
+     5. event_type values come from a fixed allowlist (see EVENT_TYPES).
+        Unknown event types are dropped with a warning rather than silently
+        forwarded to the indexer.
+   ────────────────────────────────────────────────────────────────────── */
+var NakaTelemetry = (function() {
+  'use strict';
+
+  /* Fixed allowlist of event types we ever post to HEC. Drives what the
+     facilitator dashboard expects to find. Adding new types here also
+     requires updating nakatomi_heist/default/props.conf field extractions
+     if the new payload introduces new top-level keys. */
+  var EVENT_TYPES = {
+    'session_start':           1,
+    'session_end':             1,
+    'session_resume':          1,
+    'act_start':               1,
+    'task_start':              1,
+    'task_complete':           1,
+    'task_fail':               1,
+    'trap_hit':                1,
+    'hint_used':               1,
+    'hint_token_spent':        1, /* v2.6 — token-economy emission */
+    'pacifist_run_completed':  1, /* v2.6 — finished without spending a token */
+    'pause':                   1,
+    'resume':                  1,
+    'achievement':             1,
+    'heartbeat':               1,
+    'feedback':                1
+  };
+
+  /* ── private state (closure-scoped; never exposed) ───────────────── */
+  var hecUrl = '';
+  var hecToken = '';        // never logged, never serialized into queue
+  var kvUrl = '';           // optional KV-Store collection write endpoint
+  var enabled = false;      // becomes true only when configured AND the player has not opted out
+  var sessionId = '';
+  var teamCode = '';
+  var teamName = '';
+  var boothId = '';
+  var scenarioId = 'default';
+  var optedOut = false;
+  var heartbeatTimer = null;
+  var drainTimer = null;
+  var inFlight = false;
+  var lastDrainAt = 0;
+  var consecutiveFailures = 0;
+  var statusListeners = [];
+
+  /* Offline queue — capped, oldest-first eviction. Stored under a single
+     localStorage key so the existing nakatomi_* keys are not polluted. */
+  var QUEUE_KEY = 'nakatomi_telemetry_queue_v1';
+  var QUEUE_MAX = 500;            // ~500 events ≈ a few hundred KB max
+  var QUEUE_DRAIN_BATCH = 25;     // POST in modest batches so a transient flake doesn't lose a whole session
+  var DRAIN_INTERVAL_MS = 8000;
+  var HEARTBEAT_MS = 30000;
+  var POST_TIMEOUT_MS = 6000;
+  var MAX_PAYLOAD_BYTES = 16384;  // matches props.conf TRUNCATE
+  var MAX_BACKOFF_MS = 60000;
+
+  /* ── helpers ──────────────────────────────────────────────────────── */
+
+  function nowIso() { return new Date().toISOString(); }
+
+  /* Strict allowlist for any value that becomes a Splunk field —
+     prevents log injection (newlines/CRLF), HTML-injection in dashboards,
+     and quote-escape pivots into the JSON event. */
+  function safeId(s, maxLen) {
+    if (s === null || s === undefined) return '';
+    var str = String(s);
+    var keep = str.replace(/[^A-Za-z0-9 _\-\.:]/g, '').replace(/\s+/g, ' ').trim();
+    var cap = Math.max(1, Math.min(maxLen || 64, 128));
+    return keep.slice(0, cap);
+  }
+
+  /* Free-form text fields (e.g. feedback). Strip control chars and cap
+     length, but allow more punctuation than safeId(). Still rejects CR/LF
+     to prevent multi-line log-injection. */
+  function safeText(s, maxLen) {
+    if (s === null || s === undefined) return '';
+    var str = String(s).replace(/[\r\n\t\u0000-\u001F\u007F]/g, ' ');
+    var cap = Math.max(1, Math.min(maxLen || 256, 1000));
+    return str.trim().slice(0, cap);
+  }
+
+  /* CSPRNG-backed (where available) random hex string for sessionId/teamCode. */
+  function randomHex(byteCount) {
+    var n = Math.max(1, byteCount || 8);
+    var out = '';
+    if (window.crypto && window.crypto.getRandomValues) {
+      var arr = new Uint8Array(n);
+      window.crypto.getRandomValues(arr);
+      for (var i = 0; i < n; i++) {
+        var h = arr[i].toString(16);
+        out += h.length === 1 ? '0' + h : h;
+      }
+    } else {
+      // Fallback for ancient browsers (booth kiosks shouldn't hit this path).
+      for (var j = 0; j < n; j++) {
+        out += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+      }
+    }
+    return out;
+  }
+
+  /* Human-friendly team code: 4 alpha chars (no I/O/0/1 confusion). */
+  function genTeamCode() {
+    var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var bytes = (window.crypto && window.crypto.getRandomValues)
+      ? window.crypto.getRandomValues(new Uint8Array(4)) : null;
+    var out = '';
+    for (var i = 0; i < 4; i++) {
+      var idx = bytes ? (bytes[i] % alphabet.length) : Math.floor(Math.random() * alphabet.length);
+      out += alphabet.charAt(idx);
+    }
+    return out;
+  }
+
+  function loadQueue() {
+    try {
+      var raw = localStorage.getItem(QUEUE_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function saveQueue(arr) {
+    try {
+      // Cap before writing to avoid quota exceptions in long-running booth sessions.
+      if (arr.length > QUEUE_MAX) arr = arr.slice(arr.length - QUEUE_MAX);
+      localStorage.setItem(QUEUE_KEY, JSON.stringify(arr));
+    } catch (e) {
+      // Quota exceeded — drop the oldest half and try once more, then give up.
+      try {
+        var trimmed = arr.slice(Math.floor(arr.length / 2));
+        localStorage.setItem(QUEUE_KEY, JSON.stringify(trimmed));
+      } catch (e2) { /* swallow; better to lose telemetry than crash the game */ }
+    }
+  }
+
+  function setStatus(text, level) {
+    var el = document.getElementById('ms-telemetry-status');
+    if (!el) return;
+    if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
+    el.style.display = '';
+    el.textContent = text;
+    el.classList.remove('warn', 'error');
+    if (level === 'warn') el.classList.add('warn');
+    if (level === 'error') el.classList.add('error');
+    for (var i = 0; i < statusListeners.length; i++) {
+      try { statusListeners[i]({ text: text, level: level || 'info' }); } catch (e) {}
+    }
+  }
+
+  /* ── config loading (security-critical) ───────────────────────────── */
+
+  function readConfigBlock() {
+    var el = document.getElementById('nakatomi-config');
+    if (!el || !el.textContent || el.textContent.trim() === '' || el.textContent.trim() === '{}') return {};
+    try {
+      var parsed = JSON.parse(el.textContent);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+      console.warn('[nakatomi] inline config block is not valid JSON; ignoring.');
+      return {};
+    }
+  }
+
+  function applyConfig(cfg) {
+    if (!cfg || typeof cfg !== 'object') return;
+
+    /* Token + endpoint are the only secret-bearing fields.
+       Hard requirement: token must NOT have come from a URL param. */
+    if (typeof cfg.hecUrl === 'string' && cfg.hecUrl) {
+      // Allow same-origin paths and absolute URLs, but reject anything that
+      // looks like javascript:/data:/vbscript: schemes (XSS via redirect target).
+      var url = String(cfg.hecUrl).trim();
+      if (/^(javascript|data|vbscript|file):/i.test(url)) {
+        console.warn('[nakatomi] hecUrl uses an unsafe scheme; ignoring.');
+      } else {
+        hecUrl = url;
+      }
+    }
+    if (typeof cfg.hecToken === 'string' && cfg.hecToken) {
+      // Token must look like a HEC token (UUID-shape or 32+ hex/base64).
+      // Reject obviously-bogus values to fail loudly rather than silently
+      // posting unauthenticated.
+      var tok = String(cfg.hecToken).trim();
+      if (tok.length < 16 || /[\s"\\]/.test(tok)) {
+        console.warn('[nakatomi] hecToken has unexpected shape; ignoring.');
+      } else {
+        hecToken = tok;
+      }
+    }
+    if (typeof cfg.kvUrl === 'string' && cfg.kvUrl) {
+      var k = String(cfg.kvUrl).trim();
+      if (!/^(javascript|data|vbscript|file):/i.test(k)) kvUrl = k;
+    }
+    if (typeof cfg.boothId === 'string') boothId = safeId(cfg.boothId, 64);
+    if (typeof cfg.scenario === 'string') scenarioId = safeId(cfg.scenario, 32) || 'default';
+    if (typeof cfg.teamCode === 'string') teamCode = safeId(cfg.teamCode, 16);
+    if (typeof cfg.teamName === 'string') teamName = safeText(cfg.teamName, 64);
+  }
+
+  function readUrlNonSecrets() {
+    /* URL params are explicitly allowed for NON-SECRET fields only:
+         ?team=XXXX            (team code, e.g. printed on a booth handout)
+         ?booth=conf26-3       (booth identifier for facilitator filtering)
+         ?scenario=xmas        (scenario pack id)
+       Tokens and endpoints are deliberately NOT honored from URL params. */
+    var out = {};
+    try {
+      var p = new URLSearchParams(window.location.search);
+      var t = p.get('team');     if (t) out.teamCode = safeId(t, 16);
+      var b = p.get('booth');    if (b) out.boothId = safeId(b, 64);
+      var s = p.get('scenario'); if (s) out.scenario = safeId(s, 32);
+      // Loud rejection if a deployer accidentally puts a token in the URL.
+      if (p.has('hecToken') || p.has('token')) {
+        console.warn('[nakatomi] HEC token MUST NOT be passed via URL params. Use a same-origin proxy or window.NakatomiConfig instead.');
+      }
+    } catch (e) { /* no-op */ }
+    return out;
+  }
+
+  function loadOptOut() {
+    try { return localStorage.getItem('nakatomi_telemetry_optout') === '1'; }
+    catch (e) { return false; }
+  }
+
+  function saveOptOut(v) {
+    try { localStorage.setItem('nakatomi_telemetry_optout', v ? '1' : '0'); } catch (e) {}
+    optedOut = !!v;
+  }
+
+  function loadOrCreateSessionId() {
+    try {
+      var existing = sessionStorage.getItem('nakatomi_session_id');
+      if (existing && /^[a-f0-9]{16,64}$/.test(existing)) return existing;
+    } catch (e) {}
+    var sid = randomHex(16);
+    try { sessionStorage.setItem('nakatomi_session_id', sid); } catch (e) {}
+    return sid;
+  }
+
+  function loadOrCreateTeamCode() {
+    /* Order: server-injected config > URL param > previous session > new */
+    if (teamCode) return teamCode;
+    try {
+      var stored = localStorage.getItem('nakatomi_team_code');
+      if (stored && /^[A-Z0-9]{4,16}$/.test(stored)) return stored;
+    } catch (e) {}
+    var fresh = genTeamCode();
+    try { localStorage.setItem('nakatomi_team_code', fresh); } catch (e) {}
+    return fresh;
+  }
+
+  /* ── HEC POSTing ──────────────────────────────────────────────────── */
+
+  function buildHecBatch(events) {
+    /* HEC accepts newline-delimited JSON for the /event endpoint. Each
+       event is wrapped with sourcetype and index so a single token can
+       feed multiple sourcetypes. */
+    var out = '';
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      var wrapper = {
+        time: ev._time || (Date.now() / 1000),
+        host: 'nakatomi-game',
+        source: 'nakatomi:game.html',
+        sourcetype: 'nakatomi:session:event',
+        index: 'nakatomi_sessions',
+        event: ev
+      };
+      out += JSON.stringify(wrapper) + '\n';
+      // Hard cap on batch size; if the next event would push past
+      // MAX_PAYLOAD_BYTES, return the partial batch and we'll flush again.
+      if (out.length > MAX_PAYLOAD_BYTES) return { body: out, used: i + 1 };
+    }
+    return { body: out, used: events.length };
+  }
+
+  function postBatch(body) {
+    /* Returns a Promise<boolean> — true on 2xx, false otherwise. */
+    return new Promise(function(resolve) {
+      if (!hecUrl) { resolve(false); return; }
+      var aborted = false;
+      var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = setTimeout(function() {
+        aborted = true;
+        if (controller) controller.abort();
+        resolve(false);
+      }, POST_TIMEOUT_MS);
+
+      var headers = { 'Content-Type': 'application/json' };
+      // If a token is present we attach it. If the deployment is a
+      // same-origin proxy, hecToken can be left blank and the proxy
+      // injects the Authorization header server-side.
+      if (hecToken) headers['Authorization'] = 'Splunk ' + hecToken;
+
+      var opts = {
+        method: 'POST',
+        headers: headers,
+        body: body,
+        credentials: 'same-origin',     // no third-party cookies attached
+        cache: 'no-store',
+        mode: 'cors'
+      };
+      if (controller) opts.signal = controller.signal;
+
+      fetch(hecUrl, opts).then(function(resp) {
+        clearTimeout(timer);
+        if (aborted) return;
+        resolve(resp.ok);
+      }).catch(function() {
+        clearTimeout(timer);
+        if (aborted) return;
+        resolve(false);
+      });
+    });
+  }
+
+  function backoffDelay() {
+    var base = Math.min(MAX_BACKOFF_MS, 1000 * Math.pow(2, consecutiveFailures));
+    var jitter = Math.floor(Math.random() * 500);
+    return base + jitter;
+  }
+
+  function drain() {
+    if (!enabled || !hecUrl || optedOut || inFlight) return;
+    var queue = loadQueue();
+    if (queue.length === 0) return;
+    if (Date.now() - lastDrainAt < backoffDelay()) return;
+
+    var batch = buildHecBatch(queue.slice(0, QUEUE_DRAIN_BATCH));
+    if (!batch.body || batch.used === 0) return;
+    inFlight = true;
+    lastDrainAt = Date.now();
+    postBatch(batch.body).then(function(ok) {
+      inFlight = false;
+      if (ok) {
+        consecutiveFailures = 0;
+        var remaining = queue.slice(batch.used);
+        saveQueue(remaining);
+        if (remaining.length > 0) drain(); // immediately try the next batch
+      } else {
+        consecutiveFailures++;
+        if (consecutiveFailures === 3) {
+          setStatus('Telemetry queued (' + queue.length + ') — HEC unreachable, retrying.', 'warn');
+        }
+      }
+    });
+  }
+
+  /* Best-effort flush on unload. Uses sendBeacon when available because
+     fetch() with keepalive is throttled in some browsers. */
+  function flushOnUnload() {
+    if (!enabled || !hecUrl || optedOut) return;
+    var queue = loadQueue();
+    if (queue.length === 0) return;
+    var batch = buildHecBatch(queue.slice(0, QUEUE_DRAIN_BATCH));
+    if (!batch.body) return;
+    try {
+      if (navigator.sendBeacon) {
+        // sendBeacon doesn't let us set the Authorization header — so we
+        // ONLY use it when running through a same-origin proxy that
+        // injects the token server-side (i.e., hecToken is empty).
+        if (!hecToken) {
+          var blob = new Blob([batch.body], { type: 'application/json' });
+          navigator.sendBeacon(hecUrl, blob);
+          // Optimistically drop those events; if the beacon fails we lose them.
+          saveQueue(queue.slice(batch.used));
+        }
+      }
+    } catch (e) { /* no-op */ }
+  }
+
+  /* ── KV-Store progress writer ────────────────────────────────────── */
+
+  function writeProgress(payload) {
+    if (!enabled || !kvUrl || optedOut) return;
+    if (!payload || typeof payload !== 'object') return;
+    var record = {
+      session_id: sessionId,
+      team_code: teamCode,
+      team_name: teamName,
+      booth_id: boothId,
+      scenario: scenarioId,
+      ts: nowIso()
+    };
+    for (var k in payload) {
+      if (Object.prototype.hasOwnProperty.call(payload, k)) record[k] = payload[k];
+    }
+    try {
+      var headers = { 'Content-Type': 'application/json' };
+      if (hecToken) headers['Authorization'] = 'Splunk ' + hecToken;
+      fetch(kvUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(record),
+        credentials: 'same-origin',
+        cache: 'no-store',
+        mode: 'cors'
+      }).catch(function() { /* swallow; KV write is best-effort */ });
+    } catch (e) {}
+  }
+
+  /* ── public emit ─────────────────────────────────────────────────── */
+
+  function emit(eventType, payload) {
+    if (!enabled || optedOut) return;
+    if (!EVENT_TYPES[eventType]) {
+      console.warn('[nakatomi] dropped unknown event_type:', eventType);
+      return;
+    }
+    var ev = {
+      _time: Date.now() / 1000,
+      ts: nowIso(),
+      session_id: sessionId,
+      team_code: teamCode,
+      team_name: teamName,
+      booth_id: boothId,
+      scenario: scenarioId,
+      event_type: eventType
+    };
+    if (payload && typeof payload === 'object') {
+      for (var k in payload) {
+        if (!Object.prototype.hasOwnProperty.call(payload, k)) continue;
+        var v = payload[k];
+        if (v === null || v === undefined) continue;
+        // Sanitize obvious string fields. Numbers / booleans pass through.
+        if (typeof v === 'string') {
+          if (k === 'feedback' || k === 'note' || k === 'message') {
+            ev[k] = safeText(v, 500);
+          } else {
+            ev[k] = safeId(v, 128);
+          }
+        } else if (typeof v === 'number' || typeof v === 'boolean') {
+          ev[k] = v;
+        } else if (Array.isArray(v) || typeof v === 'object') {
+          // Allow nested object/array but cap serialized size.
+          try {
+            var s = JSON.stringify(v);
+            if (s.length <= 4096) ev[k] = v;
+          } catch (e) {}
+        }
+      }
+    }
+    var queue = loadQueue();
+    queue.push(ev);
+    saveQueue(queue);
+    // Try to drain immediately (no-op if not configured / offline / already in-flight).
+    drain();
+  }
+
+  /* ── lifecycle ───────────────────────────────────────────────────── */
+
+  function init() {
+    /* Read config from injected sources only. */
+    applyConfig(window.NakatomiConfig || {});
+    applyConfig(readConfigBlock());
+    /* URL non-secrets are merged after — they can override booth/team but never tokens. */
+    var urlBits = readUrlNonSecrets();
+    if (urlBits.teamCode) teamCode = urlBits.teamCode;
+    if (urlBits.boothId)  boothId = urlBits.boothId;
+    if (urlBits.scenario) scenarioId = urlBits.scenario;
+
+    /* Same-origin postMessage handshake (kiosk wrappers). Origin is
+       checked strictly: only messages from this exact origin are honored. */
+    window.addEventListener('message', function(ev) {
+      if (!ev || !ev.data) return;
+      if (ev.origin !== window.location.origin) return;
+      if (ev.data && ev.data.type === 'nakatomi:config') {
+        applyConfig(ev.data.config || {});
+        finishInit();
+      }
+    }, false);
+
+    finishInit();
+
+    /* Drain on window focus + unload. */
+    window.addEventListener('online', drain, false);
+    window.addEventListener('focus', drain, false);
+    window.addEventListener('pagehide', flushOnUnload, false);
+    window.addEventListener('beforeunload', flushOnUnload, false);
+  }
+
+  function finishInit() {
+    sessionId = sessionId || loadOrCreateSessionId();
+    teamCode = teamCode || loadOrCreateTeamCode();
+    optedOut = loadOptOut();
+
+    /* Telemetry only becomes "enabled" when a HEC URL is configured.
+       Without it, we still maintain the team code + session ID locally
+       (so the HUD shows them) but post nothing. */
+    enabled = !!hecUrl;
+
+    renderModeSelectFields();
+    renderHudTeamCode();
+
+    if (!enabled) {
+      setStatus(''); // hidden
+      return;
+    }
+    if (optedOut) {
+      setStatus('Telemetry: opted out for this browser. ', 'warn');
+    } else {
+      setStatus('Telemetry: ' + (hecToken ? 'direct HEC' : 'same-origin proxy') + ' \u2192 booth=' + (boothId || 'unset'));
+    }
+
+    if (drainTimer) clearInterval(drainTimer);
+    drainTimer = setInterval(drain, DRAIN_INTERVAL_MS);
+    if (heartbeatTimer) clearInterval(heartbeatTimer);
+    heartbeatTimer = setInterval(function() {
+      if (typeof state !== 'undefined' && state && state.gameState === 'playing') {
+        emit('heartbeat', {
+          act: state.actIdx + 1,
+          task_id: state.actIdx >= 0 && state.taskIdx >= 0 ? (currentTask() ? currentTask().id : '') : '',
+          completed: typeof completedCount === 'function' ? completedCount() : 0,
+          score: state.score || 0,
+          wrong_count: state.wrongCount || 0,
+          elapsed_seconds: state.startTime ? Math.floor((Date.now() - state.startTime - (state.totalPauseTime || 0)) / 1000) : 0
+        });
+      }
+    }, HEARTBEAT_MS);
+  }
+
+  function renderModeSelectFields() {
+    var row = document.getElementById('ms-team-row');
+    var input = document.getElementById('ms-team-input');
+    var help = document.getElementById('ms-team-help');
+    if (!row || !input) return;
+
+    /* The row is shown when ANY of these are configured. That covers
+       solo-play (no row), facilitator-driven booth (full row), or pure
+       team-code mode without telemetry (just for leaderboard labelling). */
+    if (enabled || boothId || teamCode) {
+      row.style.display = '';
+      input.value = teamCode;
+      if (help) {
+        help.textContent = enabled
+          ? (boothId ? 'Booth ' + boothId + ' — code shown on the facilitator board.' : 'Code shown on the facilitator board.')
+          : 'Local code only (telemetry not configured).';
+      }
+      // Sanitize on every keystroke to prevent injection.
+      input.oninput = function() {
+        var clean = safeId(input.value, 16).toUpperCase();
+        if (clean !== input.value) input.value = clean;
+        teamCode = clean || genTeamCode();
+        try { localStorage.setItem('nakatomi_team_code', teamCode); } catch (e) {}
+        renderHudTeamCode();
+      };
+    } else {
+      row.style.display = 'none';
+    }
+  }
+
+  function renderHudTeamCode() {
+    var hud = document.getElementById('hud-team-code');
+    if (!hud) return;
+    if ((enabled || boothId) && teamCode) {
+      hud.style.display = '';
+      hud.textContent = '\u2316 ' + teamCode + (boothId ? ' \u00B7 ' + boothId : '');
+    } else {
+      hud.style.display = 'none';
+    }
+  }
+
+  function regenerateTeamCode() {
+    teamCode = genTeamCode();
+    try { localStorage.setItem('nakatomi_team_code', teamCode); } catch (e) {}
+    var input = document.getElementById('ms-team-input');
+    if (input) input.value = teamCode;
+    renderHudTeamCode();
+  }
+
+  /* Build a per-team handoff URL.
+     Always uses the same origin + path the page is loaded from — never
+     mixes hosts (which would also leak in browser history if cross-origin).
+     Only NON-SECRET params are included: team, booth, scenario.
+     The HEC token is NEVER part of this URL (see security model header). */
+  function getHandoffUrl() {
+    var origin = window.location.origin || '';
+    var path = window.location.pathname || '';
+    var params = [];
+    if (teamCode)   params.push('team=' + encodeURIComponent(teamCode));
+    if (boothId)    params.push('booth=' + encodeURIComponent(boothId));
+    if (scenarioId && scenarioId !== 'default') {
+      params.push('scenario=' + encodeURIComponent(scenarioId));
+    }
+    var qs = params.length ? '?' + params.join('&') : '';
+    return origin + path + qs;
+  }
+
+  function setOptOut(v) { saveOptOut(v); finishInit(); }
+
+  function debugInfo() {
+    /* Returns metadata WITHOUT the token. Used by the operator status
+       pill and by automated tests. */
+    return {
+      enabled: enabled,
+      sessionId: sessionId,
+      teamCode: teamCode,
+      boothId: boothId,
+      scenario: scenarioId,
+      optedOut: optedOut,
+      queueLength: loadQueue().length,
+      hasHecUrl: !!hecUrl,
+      hasHecToken: !!hecToken,
+      hasKvUrl: !!kvUrl
+    };
+  }
+
+  /* Initialize once the DOM is ready (the script tag is at the end of
+     <body> in this file, so the DOM is already parsed — but guard anyway). */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+
+  return {
+    emit: emit,
+    writeProgress: writeProgress,
+    regenerateTeamCode: regenerateTeamCode,
+    setOptOut: setOptOut,
+    isEnabled: function() { return enabled && !optedOut; },
+    getTeamCode: function() { return teamCode; },
+    getSessionId: function() { return sessionId; },
+    getBoothId: function() { return boothId; },
+    getScenarioId: function() { return scenarioId; },
+    getHandoffUrl: getHandoffUrl,
+    debugInfo: debugInfo,
+    safeId: safeId,
+    safeText: safeText
+  };
+})();
+
+/* ──────────────────────────────────────────────────────────────────────────
+   NakaQR (v2.4.0) — Minimal inline QR Code encoder
+   ──────────────────────────────────────────────────────────────────────────
+   Hand-authored QR Code v1-v5 byte-mode encoder with EC level L.
+   Vendored inline because we cannot pull a third-party CDN script (CSP) and
+   we don't want to add an npm dep + build step for one feature. Algorithm
+   follows ISO/IEC 18004:2015 (QR Code 2005).
+
+   Scope (deliberately minimal):
+     - Versions 1..5 (21x21 to 37x37 modules) — single Reed-Solomon block,
+       so no interleaving complexity. v5 holds up to ~106 bytes of byte-mode
+       data, which is plenty for a typical handoff URL like
+       "https://example.com/game.html?team=ABCD&booth=conf26-3".
+     - Byte mode only (UTF-8 encoded). Numeric/alphanumeric modes would be
+       slightly more efficient but not worth the extra code paths here.
+     - EC level L (low). Maximizes data capacity. 7% damage tolerance is
+       fine for a fresh on-screen render.
+     - Full 8-mask penalty evaluation per the spec, so output is conformant.
+
+   Out of scope: ECI, structured append, version info (only needed for v7+),
+   versions 6+. If a URL exceeds v5 capacity, encode() returns null and the
+   caller must show a text-only fallback.
+
+   No external dependencies. No network. No DOM access during encoding.
+   ────────────────────────────────────────────────────────────────────── */
+var NakaQR = (function() {
+  'use strict';
+
+  /* (data codewords, EC codewords) per version for EC-L. v1..v5 are
+     single-block, so encoding is data || rsEncode(data). */
+  var VERSION_META = {
+    1: { data: 19,  ec: 7  },
+    2: { data: 34,  ec: 10 },
+    3: { data: 55,  ec: 15 },
+    4: { data: 80,  ec: 20 },
+    5: { data: 108, ec: 26 }
+  };
+
+  /* Alignment pattern centers per version. v1 has none.
+     v2..v5 each have a single alignment pattern at the position below. */
+  var ALIGN_CENTERS = { 1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30] };
+
+  /* Galois Field GF(256) with primitive polynomial 0x11D (x^8+x^4+x^3+x^2+1). */
+  var GF_EXP = new Array(256);
+  var GF_LOG = new Array(256);
+  (function() {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      GF_EXP[i] = x;
+      GF_LOG[x] = i;
+      x = x << 1;
+      if (x & 0x100) x ^= 0x11D;
+    }
+    GF_EXP[255] = GF_EXP[0];
+  })();
+
+  function gfMul(a, b) {
+    if (a === 0 || b === 0) return 0;
+    return GF_EXP[(GF_LOG[a] + GF_LOG[b]) % 255];
+  }
+
+  /* Build the Reed-Solomon generator polynomial of degree n. */
+  function genPoly(n) {
+    var g = [1];
+    for (var i = 0; i < n; i++) {
+      var next = new Array(g.length + 1);
+      for (var k = 0; k < next.length; k++) next[k] = 0;
+      for (var j = 0; j < g.length; j++) {
+        next[j]     ^= g[j];
+        next[j + 1] ^= gfMul(g[j], GF_EXP[i]);
+      }
+      g = next;
+    }
+    return g;
+  }
+
+  /* Standard RS encoder: returns ecLen check codewords for `data`. */
+  function rsEncode(data, ecLen) {
+    var gen = genPoly(ecLen);
+    var ecc = new Array(ecLen);
+    for (var i = 0; i < ecLen; i++) ecc[i] = 0;
+    for (var i = 0; i < data.length; i++) {
+      var factor = data[i] ^ ecc[0];
+      for (var j = 0; j < ecLen - 1; j++) ecc[j] = ecc[j + 1];
+      ecc[ecLen - 1] = 0;
+      if (factor !== 0) {
+        for (var j = 0; j < ecLen; j++) {
+          ecc[j] ^= gfMul(gen[j + 1], factor);
+        }
+      }
+    }
+    return ecc;
+  }
+
+  /* BCH(15,5) encode — used for the 15-bit format info word. */
+  function bchFormat(format) {
+    var d = format << 10;
+    for (var i = 4; i >= 0; i--) {
+      if ((d >> (i + 10)) & 1) d ^= 0x537 << i;
+    }
+    return ((format << 10) | d) ^ 0x5412;  /* XOR with the spec's mask */
+  }
+
+  /* UTF-8 encode a string into a byte array. */
+  function utf8(s) {
+    var out = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) {
+        out.push(c);
+      } else if (c < 0x800) {
+        out.push(0xC0 | (c >> 6), 0x80 | (c & 0x3F));
+      } else if (c >= 0xD800 && c <= 0xDBFF && i + 1 < s.length) {
+        var c2 = s.charCodeAt(i + 1);
+        var cp = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
+        out.push(0xF0 | (cp >> 18),
+                 0x80 | ((cp >> 12) & 0x3F),
+                 0x80 | ((cp >> 6)  & 0x3F),
+                 0x80 | (cp & 0x3F));
+        i++;
+      } else {
+        out.push(0xE0 | (c >> 12),
+                 0x80 | ((c >> 6) & 0x3F),
+                 0x80 | (c & 0x3F));
+      }
+    }
+    return out;
+  }
+
+  function pickVersion(byteLen) {
+    /* Bits needed = mode (4) + length-indicator (8 for v1-v9) + data (8*N) + terminator (4). */
+    var needed = 4 + 8 + byteLen * 8 + 4;
+    for (var v = 1; v <= 5; v++) {
+      if (needed <= VERSION_META[v].data * 8) return v;
+    }
+    return -1;
+  }
+
+  function encode(text) {
+    if (typeof text !== 'string' || text.length === 0) return null;
+    var bytes = utf8(text);
+    var version = pickVersion(bytes.length);
+    if (version < 0) return null;
+    var meta = VERSION_META[version];
+
+    /* ── Build bit stream ── */
+    var bits = [];
+    function pushBits(val, n) {
+      for (var i = n - 1; i >= 0; i--) bits.push((val >> i) & 1);
+    }
+    pushBits(0x4, 4);              /* mode = 0100 (byte) */
+    pushBits(bytes.length, 8);     /* length indicator (v1-v9, byte mode) */
+    for (var i = 0; i < bytes.length; i++) pushBits(bytes[i], 8);
+
+    /* Terminator (up to 4 zero bits, capped at remaining capacity) */
+    var capacityBits = meta.data * 8;
+    var termLen = Math.min(4, capacityBits - bits.length);
+    for (var i = 0; i < termLen; i++) bits.push(0);
+
+    /* Pad to byte boundary */
+    while (bits.length % 8 !== 0) bits.push(0);
+
+    /* Pack to bytes */
+    var data = [];
+    for (var i = 0; i < bits.length; i += 8) {
+      var b = 0;
+      for (var j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+      data.push(b);
+    }
+
+    /* Pad to data capacity with alternating 0xEC, 0x11 */
+    var pads = [0xEC, 0x11], padIdx = 0;
+    while (data.length < meta.data) {
+      data.push(pads[padIdx]);
+      padIdx ^= 1;
+    }
+
+    /* Reed-Solomon (single block for v1-v5 EC-L) */
+    var ecc = rsEncode(data, meta.ec);
+    var codewords = data.concat(ecc);
+
+    /* ── Build matrix ── */
+    var size = 17 + version * 4;
+    var m = new Array(size), reserved = new Array(size);
+    for (var i = 0; i < size; i++) {
+      m[i] = new Array(size); reserved[i] = new Array(size);
+      for (var j = 0; j < size; j++) { m[i][j] = 0; reserved[i][j] = 0; }
+    }
+
+    function set(r, c, v) { m[r][c] = v; reserved[r][c] = 1; }
+
+    /* Three 7x7 finder patterns (with 1-px white separator outside).
+       For an offset (dr, dc) within the finder bounding box (-1..7),
+       the module is dark iff max(|dr-3|, |dc-3|) is 0, 1, or 3. */
+    function placeFinder(rOrigin, cOrigin) {
+      for (var dr = -1; dr <= 7; dr++) {
+        for (var dc = -1; dc <= 7; dc++) {
+          var rr = rOrigin + dr, cc = cOrigin + dc;
+          if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+          if (dr === -1 || dr === 7 || dc === -1 || dc === 7) {
+            set(rr, cc, 0);  /* separator (white) */
+          } else {
+            var d = Math.max(Math.abs(dr - 3), Math.abs(dc - 3));
+            set(rr, cc, (d === 0 || d === 1 || d === 3) ? 1 : 0);
+          }
+        }
+      }
+    }
+    placeFinder(0, 0);
+    placeFinder(0, size - 7);
+    placeFinder(size - 7, 0);
+
+    /* Timing patterns on row 6 / column 6 (between finder corners). */
+    for (var i = 8; i < size - 8; i++) {
+      set(6, i, (i & 1) === 0 ? 1 : 0);
+      set(i, 6, (i & 1) === 0 ? 1 : 0);
+    }
+
+    /* Alignment patterns. For v1 this loop is a no-op. */
+    var centers = ALIGN_CENTERS[version];
+    for (var ai = 0; ai < centers.length; ai++) {
+      for (var aj = 0; aj < centers.length; aj++) {
+        var ar = centers[ai], ac = centers[aj];
+        if (reserved[ar][ac]) continue;  /* skip if it would overlap a finder */
+        for (var dr = -2; dr <= 2; dr++) {
+          for (var dc = -2; dc <= 2; dc++) {
+            var d = Math.max(Math.abs(dr), Math.abs(dc));
+            set(ar + dr, ac + dc, (d === 0 || d === 2) ? 1 : 0);
+          }
+        }
+      }
+    }
+
+    /* Reserve format-info modules (filled in after mask selection). */
+    for (var i = 0; i <= 8; i++) { reserved[8][i] = 1; reserved[i][8] = 1; }
+    for (var i = 0; i < 8; i++)  { reserved[size - 1 - i][8] = 1; reserved[8][size - 1 - i] = 1; }
+    /* Always-dark module beneath top-left format strip */
+    set(size - 8, 8, 1);
+
+    /* ── Place data codewords (right-to-left, zigzag) ── */
+    var bitIdx = 0;
+    var totalDataBits = codewords.length * 8;
+    var rightCol = size - 1;
+    var goingUp = true;
+    while (rightCol > 0) {
+      if (rightCol === 6) rightCol--;  /* skip vertical timing column */
+      for (var rowStep = 0; rowStep < size; rowStep++) {
+        var row = goingUp ? (size - 1 - rowStep) : rowStep;
+        for (var k = 0; k < 2; k++) {
+          var col = rightCol - k;
+          if (reserved[row][col]) continue;
+          var bit = 0;
+          if (bitIdx < totalDataBits) {
+            bit = (codewords[bitIdx >> 3] >> (7 - (bitIdx & 7))) & 1;
+          }
+          m[row][col] = bit;
+          bitIdx++;
+        }
+      }
+      rightCol -= 2;
+      goingUp = !goingUp;
+    }
+
+    /* ── Mask selection ── */
+    function maskFn(mask, r, c) {
+      switch (mask) {
+        case 0: return ((r + c) % 2) === 0;
+        case 1: return (r % 2) === 0;
+        case 2: return (c % 3) === 0;
+        case 3: return ((r + c) % 3) === 0;
+        case 4: return ((Math.floor(r / 2) + Math.floor(c / 3)) % 2) === 0;
+        case 5: return (((r * c) % 2) + ((r * c) % 3)) === 0;
+        case 6: return ((((r * c) % 2) + ((r * c) % 3)) % 2) === 0;
+        case 7: return ((((r + c) % 2) + ((r * c) % 3)) % 2) === 0;
+      }
+      return false;
+    }
+
+    function applyMaskAndFormat(srcMatrix, mask) {
+      /* Returns a copy with the mask applied to non-reserved modules and
+         the format-info bits for (EC-L, mask) written into both copies. */
+      var copy = new Array(size);
+      for (var i = 0; i < size; i++) {
+        copy[i] = srcMatrix[i].slice();
+        for (var j = 0; j < size; j++) {
+          if (!reserved[i][j] && maskFn(mask, i, j)) copy[i][j] ^= 1;
+        }
+      }
+      /* EC-L = 0b01 in spec encoding. Format word is (ecBits<<3 | mask). */
+      var format = (1 << 3) | mask;
+      var bch = bchFormat(format);
+      var fb = new Array(15);
+      for (var i = 0; i < 15; i++) fb[i] = (bch >> i) & 1;
+      /* fb[0] = LSB. Standard placement uses bit 0 first at lowest module. */
+      /* Top-left copy */
+      for (var i = 0; i < 6; i++) copy[i][8] = fb[14 - i];
+      copy[7][8]    = fb[14 - 6];
+      copy[8][8]    = fb[14 - 7];
+      copy[8][7]    = fb[14 - 8];
+      for (var i = 9; i < 15; i++) copy[8][14 - i] = fb[14 - i];
+      /* Bottom-left + top-right copy */
+      for (var i = 0; i < 7; i++) copy[size - 1 - i][8] = fb[i];
+      for (var i = 0; i < 8; i++) copy[8][size - 8 + i] = fb[7 + i];
+      return copy;
+    }
+
+    /* Penalty rules from ISO 18004 §8.8.2 — sum across rule 1..4. */
+    function penalty(mat) {
+      var p = 0;
+      /* Rule 1: runs of 5+ same-color modules in a row/column */
+      for (var i = 0; i < size; i++) {
+        var rRun = 1, cRun = 1;
+        for (var j = 1; j < size; j++) {
+          if (mat[i][j] === mat[i][j - 1]) {
+            rRun++;
+          } else {
+            if (rRun >= 5) p += 3 + (rRun - 5);
+            rRun = 1;
+          }
+          if (mat[j][i] === mat[j - 1][i]) {
+            cRun++;
+          } else {
+            if (cRun >= 5) p += 3 + (cRun - 5);
+            cRun = 1;
+          }
+        }
+        if (rRun >= 5) p += 3 + (rRun - 5);
+        if (cRun >= 5) p += 3 + (cRun - 5);
+      }
+      /* Rule 2: 2x2 same-color blocks */
+      for (var i = 0; i < size - 1; i++) {
+        for (var j = 0; j < size - 1; j++) {
+          var v = mat[i][j];
+          if (v === mat[i][j + 1] && v === mat[i + 1][j] && v === mat[i + 1][j + 1]) {
+            p += 3;
+          }
+        }
+      }
+      /* Rule 3: 1011101 with 4-wide white border on either side */
+      var P1 = [1,0,1,1,1,0,1,0,0,0,0];
+      var P2 = [0,0,0,0,1,0,1,1,1,0,1];
+      for (var i = 0; i < size; i++) {
+        for (var j = 0; j <= size - 11; j++) {
+          var h1 = true, h2 = true, v1 = true, v2 = true;
+          for (var k = 0; k < 11; k++) {
+            if (mat[i][j + k] !== P1[k]) h1 = false;
+            if (mat[i][j + k] !== P2[k]) h2 = false;
+            if (mat[j + k][i] !== P1[k]) v1 = false;
+            if (mat[j + k][i] !== P2[k]) v2 = false;
+          }
+          if (h1) p += 40;
+          if (h2) p += 40;
+          if (v1) p += 40;
+          if (v2) p += 40;
+        }
+      }
+      /* Rule 4: dark module proportion deviation from 50% */
+      var dark = 0;
+      for (var i = 0; i < size; i++) for (var j = 0; j < size; j++) if (mat[i][j]) dark++;
+      var pct = (dark * 100) / (size * size);
+      var dev = Math.abs(pct - 50);
+      p += Math.floor(dev / 5) * 10;
+      return p;
+    }
+
+    var bestMatrix = null, bestPenalty = Infinity, bestMask = 0;
+    for (var mask = 0; mask < 8; mask++) {
+      var candidate = applyMaskAndFormat(m, mask);
+      var pen = penalty(candidate);
+      if (pen < bestPenalty) {
+        bestPenalty = pen;
+        bestMatrix  = candidate;
+        bestMask    = mask;
+      }
+    }
+
+    return { matrix: bestMatrix, size: size, version: version, mask: bestMask };
+  }
+
+  /* Render a QR matrix into `container` as a CSS-grid of div cells.
+     `cellPx` is the pixel size of each module. */
+  function render(container, qr, cellPx) {
+    if (!container || !qr) return false;
+    container.style.gridTemplateColumns = 'repeat(' + qr.size + ', ' + cellPx + 'px)';
+    container.style.gridTemplateRows    = 'repeat(' + qr.size + ', ' + cellPx + 'px)';
+    container.style.width  = (qr.size * cellPx) + 'px';
+    container.style.height = (qr.size * cellPx) + 'px';
+    container.innerHTML = '';
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < qr.size; i++) {
+      for (var j = 0; j < qr.size; j++) {
+        var cell = document.createElement('div');
+        cell.className = 'handoff-qr-cell ' + (qr.matrix[i][j] ? 'on' : 'off');
+        frag.appendChild(cell);
+      }
+    }
+    container.appendChild(frag);
+    return true;
+  }
+
+  return { encode: encode, render: render };
+})();
+
+/* ── Handoff modal helpers ──────────────────────────────────────────────── */
+function showHandoffModal() {
+  refreshHandoffModal();
+  var overlay = document.getElementById('handoff-overlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  document.addEventListener('keydown', handoffEscHandler);
+  /* Defer focus so the open animation completes first. */
+  setTimeout(function() {
+    var btn = overlay.querySelector('.handoff-btn.primary');
+    if (btn) btn.focus();
+  }, 50);
+}
+
+function hideHandoffModal() {
+  var overlay = document.getElementById('handoff-overlay');
+  if (overlay) overlay.classList.remove('show');
+  document.removeEventListener('keydown', handoffEscHandler);
+}
+
+function handoffEscHandler(e) {
+  if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) hideHandoffModal();
+}
+
+function refreshHandoffModal() {
+  if (typeof NakaTelemetry === 'undefined') return;
+  var url = NakaTelemetry.getHandoffUrl();
+  var teamCode = NakaTelemetry.getTeamCode();
+  var boothId = NakaTelemetry.getBoothId();
+
+  var teamEl = document.getElementById('handoff-team-code');
+  var urlEl = document.getElementById('handoff-url-input');
+  var metaEl = document.getElementById('handoff-meta');
+  if (teamEl) teamEl.textContent = teamCode || '----';
+  if (urlEl)  urlEl.value = url;
+  if (metaEl) {
+    var bits = ['Origin: ' + (window.location.origin || 'file://')];
+    if (boothId) bits.push('Booth: ' + boothId);
+    metaEl.textContent = bits.join(' \u00B7 ');
+  }
+
+  var container = document.getElementById('handoff-qr');
+  var fallback  = document.getElementById('handoff-qr-fallback');
+  var wrap      = document.getElementById('handoff-qr-wrap');
+  if (!container || !wrap) return;
+
+  try {
+    var qr = NakaQR.encode(url);
+    if (qr) {
+      var cellPx = Math.max(3, Math.floor(280 / qr.size));
+      NakaQR.render(container, qr, cellPx);
+      wrap.style.display = '';
+      if (fallback) fallback.style.display = 'none';
+    } else {
+      wrap.style.display = 'none';
+      if (fallback) {
+        fallback.style.display = '';
+        fallback.textContent = 'URL is too long for an inline QR — please share the URL by chat or have players type it.';
+      }
+    }
+  } catch (err) {
+    wrap.style.display = 'none';
+    if (fallback) {
+      fallback.style.display = '';
+      fallback.textContent = 'QR rendering failed — please share the URL below instead.';
+    }
+  }
+  setHandoffStatus('');
+}
+
+function copyHandoffUrl() {
+  var input = document.getElementById('handoff-url-input');
+  if (!input) return;
+  var done = function(ok) {
+    setHandoffStatus(ok ? 'Copied to clipboard.' : 'Copy failed — please copy manually.');
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(input.value).then(
+      function() { done(true); },
+      function() { handoffFallbackCopy(input, done); }
+    );
+  } else {
+    handoffFallbackCopy(input, done);
+  }
+}
+
+/* Open a spectator tab (read-only second-screen mirror) for the current
+   game URL. Strips telemetry/sensitive params and adds spectator=1; tab
+   listens to localStorage updates from the player tab on the same machine. */
+function openSpectatorTab() {
+  try {
+    var url = new URL(window.location.href);
+    /* Keep team/booth/scenario for branding; drop everything else and add
+       spectator=1 to flip the view. */
+    var keep = new URLSearchParams();
+    var team = url.searchParams.get('team'); if (team) keep.set('team', team);
+    var booth = url.searchParams.get('booth'); if (booth) keep.set('booth', booth);
+    var scen = url.searchParams.get('scenario'); if (scen) keep.set('scenario', scen);
+    keep.set('spectator', '1');
+    url.search = '?' + keep.toString();
+    window.open(url.toString(), '_blank', 'noopener');
+    setHandoffStatus('Spectator tab opened.');
+  } catch (e) {
+    setHandoffStatus('Could not open spectator tab.');
+  }
+}
+
+function handoffFallbackCopy(input, done) {
+  try {
+    input.focus();
+    input.select();
+    if (input.setSelectionRange) input.setSelectionRange(0, input.value.length);
+    var ok = document.execCommand && document.execCommand('copy');
+    done(!!ok);
+  } catch (e) {
+    done(false);
+  }
+}
+
+function setHandoffStatus(text) {
+  var el = document.getElementById('handoff-status');
+  if (el) el.textContent = text || '';
+}
+
+/* ── Orientation prompt (v2.4) ─────────────────────────────────────────────────
+   The CSS auto-shows #orientation-prompt only when:
+     1. The CSS media query (landscape + tiny viewport) matches, AND
+     2. The element has class "allow" (set here based on sessionStorage).
+   This means a desktop / tablet user never sees this UI even if they resize
+   the window, because the media query doesn't match.
+
+   Why sessionStorage and not localStorage:
+     - "Continue anyway" should be remembered for the current play session, but
+       a player coming back next week probably wants to see the prompt again.
+     - sessionStorage is cleared automatically when the tab closes.
+   ────────────────────────────────────────────────────────────────────────── */
+function initOrientationPrompt() {
+  var dismissed = false;
+  try { dismissed = sessionStorage.getItem('nakatomi_orient_dismissed') === '1'; } catch (e) {}
+  var el = document.getElementById('orientation-prompt');
+  if (!el) return;
+  if (!dismissed) el.classList.add('allow');
+}
+
+function dismissOrientationPrompt() {
+  var el = document.getElementById('orientation-prompt');
+  if (el) el.classList.remove('allow');
+  try { sessionStorage.setItem('nakatomi_orient_dismissed', '1'); } catch (e) {}
+}
+
+/* ── ATTRACT LOOP (v2.4) ─────────────────────────────────────────────────────
+   Booth idle screen. After ATTRACT_IDLE_MS of no input on the mode-select
+   screen, an overlay slides in cycling between "teaser" / "leaderboard" /
+   "press to play" panels. Any pointer/key/touch event dismisses immediately.
+
+   Activation rules (intentionally conservative — we don't want this firing
+   for someone playing at home and stepping away to grab coffee):
+   - Only when telemetry is configured (suggests a managed deployment) OR
+     `?attract=1` URL param is set.
+   - Only on the mode-select screen (paused while a game is in progress).
+   - Disabled entirely if `prefers-reduced-motion: reduce` matches and the
+     panel cycling animation would be intrusive (we still show the static first
+     panel, no auto-cycling).
+   ────────────────────────────────────────────────────────────────────────── */
+var ATTRACT_IDLE_MS = 60000;     /* fire after 60s of no input */
+var ATTRACT_CYCLE_MS = 6000;     /* swap panel every 6s */
+var attractTimer = null;
+var attractCycleTimer = null;
+var attractPanelIdx = 0;
+var attractActive = false;
+
+function attractEnabled() {
+  /* Re-evaluate every check — telemetry config may load asynchronously, and the
+     `?attract=1` override should always work even without telemetry. */
+  try {
+    var p = new URLSearchParams(window.location.search);
+    if (p.get('attract') === '1') return true;
+    if (p.get('attract') === '0') return false; /* explicit opt-out */
+  } catch (e) {}
+  return !!(typeof NakaTelemetry !== 'undefined' && NakaTelemetry.debugInfo && NakaTelemetry.debugInfo().enabled);
+}
+
+function attractReset() {
+  if (attractTimer) { clearTimeout(attractTimer); attractTimer = null; }
+  /* Don't schedule if the mode-select screen isn't visible (mid-game). */
+  var ms = document.getElementById('mode-select');
+  if (!ms || ms.classList.contains('hidden')) return;
+  if (!attractEnabled()) return;
+  attractTimer = setTimeout(attractShow, ATTRACT_IDLE_MS);
+}
+
+function attractShow() {
+  var ms = document.getElementById('mode-select');
+  if (!ms || ms.classList.contains('hidden')) return;
+  var overlay = document.getElementById('attract-overlay');
+  if (!overlay) return;
+  attractActive = true;
+  attractPanelIdx = 0;
+  attractRenderPanel();
+  overlay.classList.add('visible');
+  /* Cycle panels unless reduced-motion is requested. */
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  attractCycleTimer = setInterval(function() {
+    attractPanelIdx = (attractPanelIdx + 1) % 3;
+    attractRenderPanel();
+  }, ATTRACT_CYCLE_MS);
+}
+
+function attractHide() {
+  if (!attractActive) return;
+  attractActive = false;
+  if (attractCycleTimer) { clearInterval(attractCycleTimer); attractCycleTimer = null; }
+  var overlay = document.getElementById('attract-overlay');
+  if (overlay) overlay.classList.remove('visible');
+  attractReset();
+}
+
+function attractRenderPanel() {
+  var p = document.getElementById('attract-panel');
+  if (!p) return;
+  /* All HTML built here is from string literals — no user input is interpolated,
+     so XSS is structurally impossible. Leaderboard names are pulled from
+     localStorage and pass through escHTML before going into the DOM. */
+  if (attractPanelIdx === 0) {
+    p.innerHTML =
+      '<div class="atr-tag">NAKATOMI CORP. &middot; LOS ANGELES &middot; 1988</div>' +
+      '<h1 class="atr-title">VAULT HEIST</h1>' +
+      '<p class="atr-sub">A Splunk escape room. 25 tasks. 90 minutes. Real SPL.</p>' +
+      '<div class="atr-cta">PRESS ANY KEY TO BEGIN</div>';
+  } else if (attractPanelIdx === 1) {
+    var lb = '';
+    try {
+      var raw = localStorage.getItem('nakatomi_leaderboard') || '[]';
+      var entries = JSON.parse(raw);
+      if (Array.isArray(entries) && entries.length) {
+        entries = entries.slice(0, 5);
+        lb = '<table class="atr-lb"><thead><tr><th>#</th><th>Team</th><th>Time</th><th>Score</th></tr></thead><tbody>';
+        for (var i = 0; i < entries.length; i++) {
+          var e = entries[i] || {};
+          var nm = escHTML(String(e.name || '???')).slice(0, 12);
+          var tm = String(e.timeStr || '--:--').slice(0, 8);
+          var sc = String(e.score == null ? '--' : e.score).slice(0, 8);
+          lb += '<tr><td>' + (i+1) + '</td><td>' + nm + '</td><td>' + tm + '</td><td>' + sc + '</td></tr>';
+        }
+        lb += '</tbody></table>';
+      } else {
+        lb = '<p class="atr-empty">No high scores yet. Be the first.</p>';
+      }
+    } catch (e) {
+      lb = '<p class="atr-empty">Leaderboard unavailable.</p>';
+    }
+    p.innerHTML =
+      '<div class="atr-tag">TODAY\'S TOP HEISTS</div>' +
+      '<h1 class="atr-title">LEADERBOARD</h1>' +
+      lb +
+      '<div class="atr-cta">PRESS ANY KEY TO PLAY</div>';
+  } else {
+    p.innerHTML =
+      '<div class="atr-tag">CHRISTMAS EVE 1988 &middot; 22:00</div>' +
+      '<h1 class="atr-title">"NOW I HAVE A SPL.<br>HO HO HO."</h1>' +
+      '<p class="atr-sub">Hans Gruber needs $640 million in bearer bonds.<br>You need 90 minutes and a Splunk query.</p>' +
+      '<div class="atr-cta">PRESS ANY KEY TO BEGIN</div>';
+  }
+}
+
+function initAttractLoop() {
+  if (!attractEnabled()) return;
+  /* Any pointer/key/touch event resets the idle timer (or dismisses the
+     overlay if it's already up). Passive listeners — we don't preventDefault. */
+  ['mousemove', 'mousedown', 'keydown', 'touchstart', 'pointerdown'].forEach(function(ev) {
+    document.addEventListener(ev, function() {
+      if (attractActive) attractHide();
+      else attractReset();
+    }, { passive: true });
+  });
+  attractReset();
+}
+
 /* ── BOOT SEQUENCE ──────────────────────────── */
 function runBoot(onComplete) {
   var bootEl = document.getElementById('boot-screen');
@@ -2561,7 +4836,7 @@ function runBoot(onComplete) {
   bootEl.classList.remove('hidden');
   document.getElementById('mode-select').classList.add('hidden');
   var lines = [
-    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.3',
+    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.4',
     'COPYRIGHT (C) 1988 NAKATOMI TRADING CORPORATION',
     '', 'BIOS VERSION 2.0.88 — 24 DEC 1988', '',
     'MEMORY TEST.......... 640K OK',
@@ -2572,7 +4847,7 @@ function runBoot(onComplete) {
     '  RF RECEIVER........ OK', '  RADIO INTERCEPT.... OK',
     '  CAMERA FEEDS....... OK', '  PHONE TAP.......... OK', '',
     'LOADING VAULT OS...', '__BAR__', '',
-    'VAULT STATUS: 26 TASKS / 5 ACTS / v2.3',
+    'VAULT STATUS: 26 TASKS / 5 ACTS / v2.4',
     'DIFFICULTY: ' + (DIFFICULTY_PRESETS[selectedDifficulty] ? DIFFICULTY_PRESETS[selectedDifficulty].label.toUpperCase() : 'OPERATIVE'),
     gameSeed ? 'SEED: ' + gameSeed + ' (randomized codes)' : 'CODES: STANDARD',
     'AUTHORIZATION: GRUBER, HANS', '',
@@ -2616,26 +4891,111 @@ function runBoot(onComplete) {
 })();
 
 /* ── DIFFICULTY PRESETS ─────────────────────── */
+/* `demo` (v2.4) is the booth-friendly preset: 15 minutes, 3 curated tasks
+   from the full campaign, full hints, no trap-code gotchas, no score multiplier
+   (still tracked). The 3-task subset is synthesized into a single act in
+   `applyDemoMode()` below, so all the existing act-progression code keeps
+   working unchanged. */
+/* hintTokens (v2.6): a finite, scenario-wide pool replacing the old
+   "unlimited per-task hints, just take the score penalty" model. The score
+   penalty stays — tokens stack on top so a careless team still has to use
+   them deliberately. Per-difficulty starting count, per the v2.6 plan:
+     rookie: 5 (forgiving, room to learn)
+     operative: 3 (default — encourages thinking before asking)
+     mastermind: 1 (matches the existing 1-hint-level cap; spend it well)
+     iron_man: 0 (no hints at all — Pacifist Run is the only outcome)
+     demo: 5 (booth visitors should never feel locked out)
+   Tokens are decremented when a hint level is revealed, NOT when the hint
+   button is clicked but the player aborts the confirmation. A "Pacifist Run"
+   achievement is unlocked by completing the campaign without spending any.
+
+   Iron-Man (v2.6) is the new top-tier preset: 50-minute timer, 3 errors max,
+   no hints whatsoever, all trap codes armed, 3x score multiplier. It's
+   intentionally exposed as a separate button so booth visitors don't pick
+   it by accident; the styling and copy ("only for Splunk veterans") make
+   the warning explicit. */
 var DIFFICULTY_PRESETS = {
-  rookie:     { timer: 7200, maxWrong: 10, hintLevels: 4, trapCodes: false, scoreMultiplier: 0.5, splHelp: 'always',  label: 'Rookie' },
-  operative:  { timer: 5400, maxWrong: 7,  hintLevels: 3, trapCodes: true,  scoreMultiplier: 1,   splHelp: 'act2',    label: 'Operative' },
-  mastermind: { timer: 3600, maxWrong: 4,  hintLevels: 1, trapCodes: true,  scoreMultiplier: 2,   splHelp: 'never',   label: 'Mastermind' }
+  demo:       { timer:  900, maxWrong: 5,  hintLevels: 4, hintTokens: 5, trapCodes: false, scoreMultiplier: 0.5, splHelp: 'always',  label: 'Demo',       isDemo: true },
+  rookie:     { timer: 7200, maxWrong: 10, hintLevels: 4, hintTokens: 5, trapCodes: false, scoreMultiplier: 0.5, splHelp: 'always',  label: 'Rookie' },
+  operative:  { timer: 5400, maxWrong: 7,  hintLevels: 3, hintTokens: 3, trapCodes: true,  scoreMultiplier: 1,   splHelp: 'act2',    label: 'Operative' },
+  mastermind: { timer: 3600, maxWrong: 4,  hintLevels: 1, hintTokens: 1, trapCodes: true,  scoreMultiplier: 2,   splHelp: 'never',   label: 'Mastermind' },
+  iron_man:   { timer: 3000, maxWrong: 3,  hintLevels: 0, hintTokens: 0, trapCodes: true,  scoreMultiplier: 3,   splHelp: 'never',   label: 'Iron Man' }
 };
 var selectedDifficulty = 'operative';
 
+/* Tasks chosen for the booth demo (v2.4). The set is hand-picked, NOT random:
+   - 1.1 Guest List teaches `stats dc()` (the most universally useful SPL idiom)
+     and gives the player an immediate "I solved a real query" moment.
+   - 2.1 Cut Communications introduces lookups + a join-style pattern, showing
+     SPL beyond simple counts.
+   - 5.4 Final Extraction is the campaign finale and produces a strong cinematic
+     win, so a 15-minute play still feels like a complete heist arc.
+   When demo difficulty is selected, ACTS is replaced (and restored on resetGame)
+   with a synthesized 1-act adventure containing only these 3 tasks. */
+var DEMO_TASK_IDS = ['1.1', '2.1', '5.4'];
+var ORIGINAL_ACTS = null; /* populated lazily on first demo activation */
+
 function setDifficulty(diff) {
   selectedDifficulty = diff;
-  document.querySelectorAll('.ms-diff-btn').forEach(function(b) {
-    b.classList.toggle('selected', b.getAttribute('data-diff') === diff);
+  /* Selector covers all difficulty buttons (3 main tier + demo + iron-man)
+     so they stay visually in sync. */
+  document.querySelectorAll('.ms-diff-btn, .ms-demo-btn, .ms-ironman-btn').forEach(function(b) {
+    var sel = b.getAttribute('data-diff') === diff;
+    b.classList.toggle('selected', sel);
+    /* Keep ARIA in sync — SR users rely on aria-checked to know which radio
+       option is currently active. */
+    if (b.hasAttribute('role')) b.setAttribute('aria-checked', sel ? 'true' : 'false');
   });
   var p = DIFFICULTY_PRESETS[diff];
   var info = '<b>' + (p.timer / 60) + ' min</b> &middot; ' + p.maxWrong + ' errors &middot; ';
-  if (p.hintLevels === 4) info += 'all hints';
-  else if (p.hintLevels === 3) info += '3 hints (no answer)';
-  else info += '1 hint only';
+  /* Hint description now communicates BOTH the per-task ceiling (which
+     levels are reachable) and the scenario-wide token pool (how many you
+     get to spend total). Special-cases 0 tokens (Iron Man) and 1 token
+     for grammatical singular/plural agreement. */
+  var tokenLabel;
+  if (p.hintTokens === 0) tokenLabel = '<span style="color:var(--red)">no hints</span>';
+  else if (p.hintTokens === 1) tokenLabel = '1 hint token total';
+  else tokenLabel = p.hintTokens + ' hint tokens total';
+  if (p.hintLevels === 0) info += tokenLabel;
+  else if (p.hintLevels === 4) info += 'all hints &middot; ' + tokenLabel;
+  else if (p.hintLevels === 3) info += '3 hints/task &middot; ' + tokenLabel;
+  else info += '1 hint/task &middot; ' + tokenLabel;
   info += ' &middot; ' + p.scoreMultiplier + 'x score';
   if (p.trapCodes) info += ' &middot; <span style="color:var(--red)">trap codes</span>';
+  if (p.isDemo) info += ' &middot; <span style="color:var(--hot-pink)">3-task booth demo</span>';
   document.getElementById('diff-info').innerHTML = info;
+}
+
+/* Build the demo ACTS package by pulling out specific tasks from the canonical
+   campaign, then bolting them onto a single fake "act" so the existing
+   act-loop / progress / completion code can run unchanged.
+   Idempotent: stores the original ACTS the first time it's called and reuses
+   that snapshot for all subsequent invocations. */
+function applyDemoMode() {
+  if (!ORIGINAL_ACTS) ORIGINAL_ACTS = ACTS;
+  var picks = [];
+  for (var a = 0; a < ORIGINAL_ACTS.length; a++) {
+    var tasks = ORIGINAL_ACTS[a].tasks;
+    for (var t = 0; t < tasks.length; t++) {
+      if (DEMO_TASK_IDS.indexOf(tasks[t].id) !== -1) picks.push(tasks[t]);
+    }
+  }
+  /* If a task got renamed/removed in a future scenario edit, fall back to the
+     first 3 tasks so demo mode never crashes. */
+  if (picks.length < DEMO_TASK_IDS.length) {
+    picks = (ORIGINAL_ACTS[0] && ORIGINAL_ACTS[0].tasks) ? ORIGINAL_ACTS[0].tasks.slice(0, 3) : [];
+  }
+  ACTS = [{
+    name: 'Quick Heist',
+    quote: '"Welcome to the party, pal."',
+    tasks: picks
+  }];
+}
+
+/* Reverts the demo-mode ACTS swap so the next non-demo session sees the full
+   campaign. Always safe to call (no-op if demo was never activated). */
+function restoreOriginalActs() {
+  if (ORIGINAL_ACTS) ACTS = ORIGINAL_ACTS;
 }
 
 /* ── GAME CONSTANTS (set from difficulty) ──── */
@@ -2644,6 +5004,7 @@ var SCORING_ENABLED = true;
 var MAX_WRONG = 7;
 var TIMER_SECONDS = 5400;
 var MAX_HINT_LEVELS = 4;
+var HINT_TOKENS_INITIAL = 3;
 var TRAP_CODES_ENABLED = false;
 var SCORE_MULTIPLIER = 1;
 var SPL_HELP_MODE = 'always';
@@ -2653,9 +5014,23 @@ function applyDifficulty() {
   TIMER_SECONDS = p.timer;
   MAX_WRONG = p.maxWrong;
   MAX_HINT_LEVELS = p.hintLevels;
+  /* Default to 3 if a preset somehow forgot to declare tokens — keeps the
+     game playable even if a future preset is added without updating this
+     section. Never assume undefined === unlimited; that would silently
+     reintroduce v2.5 behaviour. */
+  HINT_TOKENS_INITIAL = (typeof p.hintTokens === 'number' && p.hintTokens >= 0) ? p.hintTokens : 3;
   TRAP_CODES_ENABLED = p.trapCodes;
   SCORE_MULTIPLIER = p.scoreMultiplier;
   SPL_HELP_MODE = p.splHelp;
+  /* Re-sync the live state's token pool to the (possibly just-updated)
+     starting count. We only reset if no game is in progress, otherwise a
+     mid-game `applyDifficulty()` re-call (e.g. dev tools) would silently
+     restore tokens already spent. */
+  if (state && (state.gameState === 'select' || state.gameState === 'briefing')) {
+    state.hintTokensInitial = HINT_TOKENS_INITIAL;
+    state.hintTokensRemaining = HINT_TOKENS_INITIAL;
+    state.hintTokensSpent = 0;
+  }
   var wrongParent = document.querySelector('.gh-wrong');
   if (wrongParent) {
     wrongParent.innerHTML = 'ERR: <b id="wrong-count">0</b>/' + MAX_WRONG;
@@ -2700,10 +5075,10 @@ var ACTS = [
       { id:'1.1', name:'Guest List', type:'code', code:'0047',
         trapCodes:['0048','0046','0050'],
         speaker:'HANS',
-        objective:'\u201cCount how many unique employees badged into the building tonight. That\'s our headcount. Note: the caterer logs show 52 entries, but some are repeated swipes \u2014 we need unique badge IDs only.\u201d',
-        spl:'index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)',
-        hints:['The badge system logs every swipe. Start there.','Search nakatomi_access for badge events with action=swipe and count unique IDs.','Try: index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe | stats dc(badge_id)','The answer is 0047.'],
-        storyBeat:'47 employees on-site. Good \u2014 we know our headcount. Now find the CEO.' },
+        objective:'\u201cCount how many unique party guests badged in tonight \u2014 those are our hostages. The caterer\'s door log shows ~190 entries, but most are duplicate swipes as guests moved between floors. We need *unique* badge IDs of attendees only \u2014 filter to the party events.\u201d',
+        spl:'index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe detail="*party*" | stats dc(badge_id)',
+        hints:['Tonight\'s Christmas party events have \u201cparty\u201d in the detail field.','Filter badge swipes where the detail mentions the party, then count unique badge IDs.','Try: index=nakatomi_access sourcetype="nakatomi:access:badge" action=swipe detail="*party*" | stats dc(badge_id)','The answer is 0047.'],
+        storyBeat:'47 guests at the party. Good \u2014 we know our headcount. Now find the CEO.' },
       { id:'1.2', name:'Find Takagi', type:'code', code:'0030',
         trapCodes:['0031','0029'],
         speaker:'HANS',
@@ -3014,6 +5389,27 @@ function getGameSeedFromUrl() {
 var urlSeed = getGameSeedFromUrl();
 if (urlSeed) randomizeCodesWithSeed(urlSeed);
 
+/* URL-driven defaults (v2.4): booth operators can pre-select demo via
+   `?demo=1` or any difficulty via `?difficulty=rookie` so a printed handout /
+   QR code lands the visitor on the right preset without manual clicks.
+   Difficulty values are validated against DIFFICULTY_PRESETS to prevent
+   anyone from stuffing arbitrary text and breaking the picker. */
+(function() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var d = params.get('difficulty');
+    if (params.get('demo') === '1') d = 'demo';
+    if (d && DIFFICULTY_PRESETS[d]) {
+      /* setDifficulty needs the DOM to exist — defer until first paint. */
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function(){ setDifficulty(d); });
+      } else {
+        setDifficulty(d);
+      }
+    }
+  } catch(e) { /* URL parsing failures must never crash the game */ }
+})();
+
 function filterTrapCodeCollisions() {
   var allCodes = {};
   for (var a = 0; a < ACTS.length; a++)
@@ -3050,6 +5446,13 @@ function initState() {
     dossierVisible: false,
     dossier: [],
     hintsUsed: {},
+    /* v2.6 hint-token economy. tokensRemaining decrements per hint reveal;
+       tokensInitial captures the starting pool so the achievement check + UI
+       can show "n/m" without re-reading the difficulty preset (which can
+       drift if the player switches mid-session via the dev tools). */
+    hintTokensRemaining: HINT_TOKENS_INITIAL,
+    hintTokensInitial: HINT_TOKENS_INITIAL,
+    hintTokensSpent: 0,
     taskWrongs: {},
     taskScores: {},
     score: 0,
@@ -3196,9 +5599,74 @@ function startHeartbeat() {
   }, 1000);
 }
 
+/* ── SPECTATOR BROADCAST (v2.4) ──────────────
+   Writes a small JSON snapshot of the live game state to localStorage every
+   second, keyed by the team code (or 'default'). Same-machine spectator tabs
+   listen for the `storage` event and re-render. This is intentionally
+   minimal — it carries only public, non-sensitive game progress (no SPL
+   queries, no answers, no codes) so a malicious second tab can't cheat.
+   Storage event semantics: only fires in OTHER tabs, never the writing one,
+   which is exactly what we want. */
+var SPECTATOR_KEY = 'nakatomi_spectator_state';
+
+function broadcastSpectatorState() {
+  if (state.gameState !== 'playing' && state.gameState !== 'victory' && state.gameState !== 'gameover') return;
+  try {
+    var t = currentTask();
+    var snap = {
+      ts: Date.now(),
+      team: (typeof NakaTelemetry !== 'undefined' && NakaTelemetry.getTeamCode) ? NakaTelemetry.getTeamCode() : '',
+      state: state.gameState,
+      timerRemaining: state.timerRemaining || 0,
+      score: state.score || 0,
+      wrongCount: state.wrongCount || 0,
+      maxWrong: MAX_WRONG,
+      actIdx: state.actIdx || 0,
+      taskIdx: state.taskIdx || 0,
+      totalActs: ACTS.length,
+      totalTasks: totalTasks(),
+      completedTasks: completedCount(),
+      currentTaskName: t ? String(t.name || '').slice(0, 60) : '',
+      currentActName: ACTS[state.actIdx] ? String(ACTS[state.actIdx].name || '').slice(0, 40) : '',
+      difficulty: state.difficulty || ''
+    };
+    /* Truncate everything to safe sizes — defense in depth against a future
+       refactor that accidentally puts user input into a task name. */
+    localStorage.setItem(SPECTATOR_KEY, JSON.stringify(snap));
+  } catch (e) { /* localStorage may be full or disabled — drop the update */ }
+}
+
+/* ── A11Y LIVE-REGION ANNOUNCER (v2.4) ───────
+   Pushes text into the hidden #a11y-status / #a11y-alerts regions so screen
+   readers announce game state changes. Important nuances:
+   - Re-using the same string would NOT fire change events on some screen
+     readers, so we append a zero-width-space to force re-announcement when
+     the same message repeats (e.g. "Hint used" 3 times).
+   - "polite" queues behind ongoing speech; "assertive" interrupts. We reserve
+     assertive for genuinely time-critical events (trap, victory, time low,
+     game over) so we don't desensitize users into ignoring them.
+   - All text is plain — no markup is announced. */
+function a11yAnnounce(text, urgent) {
+  var elId = urgent ? 'a11y-alerts' : 'a11y-status';
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var msg = String(text == null ? '' : text);
+  /* Toggle a trailing zero-width space so identical-message repeats are still
+     detected as a content change by AT. */
+  if (el.textContent === msg) msg = msg + '\u200B';
+  el.textContent = msg;
+}
+
 /* ── GAME FLOW ──────────────────────────────── */
 function selectMode(mode) {
   ensureAudio();
+  /* Cancel any pending attract-loop activation — we're starting a real game. */
+  if (typeof attractHide === 'function') attractHide();
+  if (typeof attractTimer !== 'undefined' && attractTimer) { clearTimeout(attractTimer); attractTimer = null; }
+  /* Demo mode swaps ACTS BEFORE applyDifficulty/runBoot so the boot text /
+     mission briefing reflect the 1-act demo layout, not the full campaign. */
+  if (selectedDifficulty === 'demo') applyDemoMode();
+  else restoreOriginalActs();
   applyDifficulty();
   runBoot(function() { showMissionBriefing(mode); });
 }
@@ -3276,6 +5744,38 @@ function enterGame(mode) {
   }
   startAmbient();
   buildTaskPanel();
+  NakaTelemetry.emit('session_start', {
+    mode: mode,
+    difficulty: state.difficulty,
+    seed: gameSeed || 0,
+    total_tasks: totalTasks(),
+    timer_seconds: TIMER_SECONDS,
+    max_wrong: MAX_WRONG
+  });
+  NakaTelemetry.writeProgress({
+    status: 'in_progress',
+    mode: mode,
+    difficulty: state.difficulty,
+    act: 1,
+    completed_tasks: 0,
+    total_tasks: totalTasks(),
+    score: 0,
+    started_at: new Date(state.startTime).toISOString()
+  });
+  NakaTelemetry.emit('act_start', {
+    act: 1,
+    act_name: ACTS[0] ? ACTS[0].name : '',
+    elapsed_seconds: 0
+  });
+  var firstTask = currentTask();
+  if (firstTask) {
+    NakaTelemetry.emit('task_start', {
+      act: 1,
+      task_id: firstTask.id,
+      task_name: firstTask.name,
+      task_type: firstTask.type || 'code'
+    });
+  }
   showActTransition(0);
   startTimer();
   render();
@@ -3300,6 +5800,18 @@ function tickTimer() {
   checkNudge();
   updateAmbient();
   renderTimer();
+  /* a11y time-remaining milestones (v2.4): announce only at meaningful
+     thresholds so SR users get the same "oh no, time's running out" beat as
+     sighted players see in the urgent timer color, WITHOUT flooding their
+     speech queue with per-second updates. */
+  if (state.timerRemaining === 600) a11yAnnounce('Ten minutes remaining.');
+  else if (state.timerRemaining === 300) a11yAnnounce('Five minutes remaining.', true);
+  else if (state.timerRemaining === 60)  a11yAnnounce('One minute remaining.', true);
+  else if (state.timerRemaining === 30)  a11yAnnounce('Thirty seconds.', true);
+  /* Push state to localStorage so a same-machine spectator tab can mirror
+     the live game on a second monitor. Throttled to once per 2s in the
+     spectator-handler itself; here we just push every tick (1s). */
+  broadcastSpectatorState();
 }
 function renderTimer() {
   var m = Math.floor(state.timerRemaining / 60), s = state.timerRemaining % 60;
@@ -3381,6 +5893,13 @@ function submitCode() {
       sd.classList.add('wrong'); playWrong(); shakeScreen();
       setTimeout(function() { sd.classList.remove('wrong'); }, 500);
       document.getElementById('wrong-count').textContent = state.wrongCount;
+      NakaTelemetry.emit('task_fail', {
+        act: state.actIdx + 1,
+        task_id: task.id,
+        wrong_count: state.wrongCount,
+        task_wrongs: state.taskWrongs[task.id],
+        multi_step: stepIdx + 1
+      });
       if (state.wrongCount >= MAX_WRONG) { setTimeout(function() { triggerGameOver('mcclane'); }, 800); }
       state.codeInput = '';
       setTimeout(renderCodeDisplay, 600);
@@ -3396,6 +5915,10 @@ function submitCode() {
   if (inputMatch) {
     sd.classList.add('correct');
     playSealOpen();
+    /* Polite: success is non-urgent — let the SR finish whatever it was reading
+       before announcing seal opens. The detail (act + task name) is conveyed
+       in completeCurrentTask() so SR users don't get a vague "correct" only. */
+    a11yAnnounce('Code accepted. Seal opening.');
     setTimeout(function() {
       sd.classList.remove('correct');
       completeCurrentTask();
@@ -3416,6 +5939,12 @@ function submitCode() {
     shakeScreen();
     setTimeout(function() { sd.classList.remove('wrong'); }, 500);
     document.getElementById('wrong-count').textContent = state.wrongCount;
+    NakaTelemetry.emit('task_fail', {
+      act: state.actIdx + 1,
+      task_id: task.id,
+      wrong_count: state.wrongCount,
+      task_wrongs: state.taskWrongs[task.id]
+    });
     render();
     if (state.wrongCount >= MAX_WRONG) {
       setTimeout(function() { triggerGameOver('mcclane'); }, 800);
@@ -3428,6 +5957,17 @@ function submitCode() {
 
 function handleTrapCode(sd) {
   var preset = DIFFICULTY_PRESETS[state.difficulty];
+  var trappedTask = currentTask();
+  var trapCode = state.codeInput;
+  NakaTelemetry.emit('trap_hit', {
+    act: state.actIdx + 1,
+    task_id: trappedTask.id,
+    trap_code: trapCode,
+    difficulty: state.difficulty
+  });
+  /* Assertive announcement: trap hits should interrupt anything currently being
+     read so SR users immediately understand the negative consequence. */
+  a11yAnnounce('Decoy code triggered. Security alert.', true);
   if (state.difficulty === 'mastermind') {
     sd.classList.add('wrong');
     playTrapCode();
@@ -3435,7 +5975,7 @@ function handleTrapCode(sd) {
     setTimeout(function() { sd.classList.remove('wrong'); triggerGameOver('trap'); }, 1200);
   } else {
     state.wrongCount += 2;
-    state.taskWrongs[currentTask().id] = (state.taskWrongs[currentTask().id] || 0) + 2;
+    state.taskWrongs[trappedTask.id] = (state.taskWrongs[trappedTask.id] || 0) + 2;
     if (SCORING_ENABLED) {
       var penalty = SCORING.WRONG_PENALTY * 3;
       state.score = Math.max(0, state.score - penalty);
@@ -3466,6 +6006,10 @@ function showTrapWarning() {
 function completeCurrentTask() {
   var task = currentTask();
   state.completed[task.id] = true;
+  /* Polite SR announcement: include the task name so the user knows what they
+     just solved, which matters when traveling between tasks blindly. */
+  a11yAnnounce('Task complete: ' + (task && task.name ? task.name : 'objective'));
+  broadcastSpectatorState();
 
   var taskElapsed = (Date.now() - state.taskStartTime) / 1000;
   state.taskTimes[task.id] = Math.round(taskElapsed);
@@ -3504,6 +6048,29 @@ function completeCurrentTask() {
 
   state.dossier.push({ id: task.id, name: task.name, text: task.storyBeat, speaker: task.speaker || null, score: state.taskScores[task.id] || null });
 
+  NakaTelemetry.emit('task_complete', {
+    act: state.actIdx + 1,
+    task_id: task.id,
+    task_name: task.name,
+    elapsed_seconds: Math.round(taskElapsed),
+    points: SCORING_ENABLED ? taskPts : 0,
+    time_bonus: SCORING_ENABLED ? timeBonus : 0,
+    hints_used: state.hintsUsed[task.id] || 0,
+    answer_revealed: !!answerRevealed,
+    wrongs_on_task: state.taskWrongs[task.id] || 0,
+    score_total: state.score
+  });
+  NakaTelemetry.writeProgress({
+    status: 'in_progress',
+    mode: state.mode,
+    difficulty: state.difficulty,
+    act: state.actIdx + 1,
+    completed_tasks: completedCount(),
+    total_tasks: totalTasks(),
+    score: state.score,
+    last_task_id: task.id
+  });
+
   if (state.mode === 'digital') {
     showStoryBeat(task);
   }
@@ -3527,12 +6094,28 @@ function advanceTask() {
     var prevAct = state.actIdx;
     state.actIdx++;
     state.taskIdx = 0;
+    NakaTelemetry.emit('act_start', {
+      act: state.actIdx + 1,
+      act_name: ACTS[state.actIdx].name,
+      elapsed_seconds: Math.floor((Date.now() - state.startTime - state.totalPauseTime) / 1000)
+    });
     showActTransition(state.actIdx);
   }
   state.taskStartTime = Date.now();
   state.hintConfirmPending = false;
   var hcb = document.getElementById('hint-confirm-box');
   if (hcb) hcb.remove();
+  if (state.gameState === 'playing') {
+    var nextTask = currentTask();
+    if (nextTask) {
+      NakaTelemetry.emit('task_start', {
+        act: state.actIdx + 1,
+        task_id: nextTask.id,
+        task_name: nextTask.name,
+        task_type: nextTask.type || 'code'
+      });
+    }
+  }
 }
 
 var ACT_ASCII_ART = [
@@ -3681,6 +6264,43 @@ function triggerGameOver(reason) {
   if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}
   stopAmbient();
   playGameOver();
+  /* Assertive: game over is THE moment players need to know about, regardless
+     of what the SR was reading. Reason is included so blind players know
+     whether they ran out of time, hit a trap, or were caught. */
+  a11yAnnounce('Game over. ' + (reason === 'timeout' ? 'Time expired.' : reason === 'trap' ? 'Caught by security.' : 'McClane intervened.'), true);
+  broadcastSpectatorState();
+  var elapsedLoss = state.startTime
+    ? Math.floor((Date.now() - state.startTime - (state.totalPauseTime || 0)) / 1000)
+    : 0;
+  var totalHintsLoss = 0;
+  for (var hkl in state.hintsUsed) totalHintsLoss += state.hintsUsed[hkl];
+  NakaTelemetry.emit('session_end', {
+    outcome: 'loss',
+    reason: reason || 'mcclane',
+    elapsed_seconds: elapsedLoss,
+    score: state.score || 0,
+    score_scaled: SCORING_ENABLED ? Math.round((state.score || 0) * SCORE_MULTIPLIER) : 0,
+    completed_tasks: completedCount(),
+    total_tasks: totalTasks(),
+    wrong_count: state.wrongCount,
+    hints_used: totalHintsLoss,
+    difficulty: state.difficulty,
+    mode: state.mode,
+    failed_at_act: state.actIdx + 1,
+    failed_at_task: currentTask() ? currentTask().id : ''
+  });
+  NakaTelemetry.writeProgress({
+    status: 'failed',
+    reason: reason || 'mcclane',
+    mode: state.mode,
+    difficulty: state.difficulty,
+    act: state.actIdx + 1,
+    completed_tasks: completedCount(),
+    total_tasks: totalTasks(),
+    score: state.score || 0,
+    finished_at: new Date().toISOString(),
+    elapsed_seconds: elapsedLoss
+  });
   var reasons = {
     mcclane: { text: 'McClane got the drop on you.', quote: '"Just another American who saw too many movies."' },
     timer: { text: 'Time\'s up. The FBI moved in.', quote: '"No more table. Where are my detonators?"' },
@@ -3707,10 +6327,22 @@ function triggerGameOver(reason) {
 /* ── ACHIEVEMENTS ──────────────────────────── */
 var ACHIEVEMENTS = [
   { id: 'no_hints',    icon: '\u{1F910}', name: 'No Hints',      test: function() { for (var k in state.hintsUsed) { if (state.hintsUsed[k] > 0) return false; } return true; } },
+  /* v2.6 Pacifist Run — finished the campaign without spending a single hint
+     token. Functionally identical to no_hints today (since every revealed
+     hint costs a token), but distinct conceptually: we plan branching
+     storylines (v2.10+) where some lore reveals are free of charge but still
+     count as "hint shown". Track the achievement separately now so we don't
+     have to migrate save data later. */
+  { id: 'pacifist',    icon: '\u{1F54A}',  name: 'Pacifist Run',  test: function() { return (state.hintTokensSpent || 0) === 0; } },
   { id: 'speed_demon', icon: '\u26A1',     name: 'Speed Demon',   test: function() { return (Date.now() - state.startTime) < 2700000; } },
   { id: 'perfect',     icon: '\u2B50',     name: 'Perfect Score', test: function() { var max = totalTasks() * (SCORING.BASE + SCORING.TIME_BONUS_MAX); return state.score >= max; } },
   { id: 'glass_walk',  icon: '\u{1F463}',  name: 'Glass Walker',  test: function() { return state.wrongCount === 0; } },
-  { id: 'yippee',      icon: '\u{1F525}',  name: 'Yippee-ki-yay', test: function() { return state.difficulty === 'mastermind'; } },
+  { id: 'yippee',      icon: '\u{1F525}',  name: 'Yippee-ki-yay', test: function() { return state.difficulty === 'mastermind' || state.difficulty === 'iron_man'; } },
+  /* Iron Man completion is its own achievement — Pacifist Run is implicit
+     (tokens=0 spent), but iron-man clears deserve their own marker on the
+     leaderboard so a player can tell "they survived the no-hint, 50-min,
+     3-error gauntlet" at a glance. */
+  { id: 'iron_man',    icon: '\u{1F9CD}',  name: 'Iron Man',      test: function() { return state.difficulty === 'iron_man'; } },
   { id: 'bonus_hunter',icon: '\u{1F3AF}',  name: 'Bonus Hunter',  test: function() { var b = loadBonusState(); return BONUS_TASKS.every(function(t) { return !!b[t.id]; }); } }
 ];
 
@@ -3733,6 +6365,14 @@ function evaluateAchievements() {
     }
   }
   saveAchievements(stored);
+  for (var n = 0; n < newlyEarned.length; n++) {
+    NakaTelemetry.emit('achievement', {
+      achievement_id: newlyEarned[n],
+      difficulty: state.difficulty,
+      mode: state.mode,
+      score: state.score || 0
+    });
+  }
   return { stored: stored, newlyEarned: newlyEarned };
 }
 
@@ -3882,9 +6522,56 @@ function triggerVictory() {
   stopAmbient();
   playVictory();
   launchConfetti();
+  /* Assertive: victory is the celebratory payoff — interrupt to announce. The
+     full breakdown is read out by the polite region a moment later as the
+     overlay populates. */
+  a11yAnnounce('Vault open. Heist complete.', true);
+  broadcastSpectatorState();
   var elapsed = Math.floor((Date.now() - state.startTime - state.totalPauseTime) / 1000);
   var em = Math.floor(elapsed / 60), es = elapsed % 60;
   var diffLabel = DIFFICULTY_PRESETS[state.difficulty] ? DIFFICULTY_PRESETS[state.difficulty].label : 'Operative';
+  var totalHintsUsed = 0;
+  for (var hk in state.hintsUsed) totalHintsUsed += state.hintsUsed[hk];
+  NakaTelemetry.emit('session_end', {
+    outcome: 'victory',
+    elapsed_seconds: elapsed,
+    score: state.score,
+    score_scaled: SCORING_ENABLED ? Math.round(state.score * SCORE_MULTIPLIER) : 0,
+    completed_tasks: completedCount(),
+    total_tasks: totalTasks(),
+    wrong_count: state.wrongCount,
+    hints_used: totalHintsUsed,
+    /* v2.6: token-economy roll-up so the facilitator board can plot
+       "spent / starting" alongside hints + errors without a separate query. */
+    hint_tokens_initial: state.hintTokensInitial || 0,
+    hint_tokens_spent: state.hintTokensSpent || 0,
+    hint_tokens_remaining: state.hintTokensRemaining || 0,
+    difficulty: state.difficulty,
+    mode: state.mode
+  });
+  /* Pacifist Run dedicated event — separate from session_end so it's easy to
+     count distinct players who completed without spending a single token,
+     without having to filter session_end by hint_tokens_spent=0. The
+     achievement record itself is emitted by evaluateAchievements() below. */
+  if ((state.hintTokensSpent || 0) === 0) {
+    NakaTelemetry.emit('pacifist_run_completed', {
+      difficulty: state.difficulty,
+      mode: state.mode,
+      score: state.score,
+      elapsed_seconds: elapsed
+    });
+  }
+  NakaTelemetry.writeProgress({
+    status: 'completed',
+    mode: state.mode,
+    difficulty: state.difficulty,
+    act: state.actIdx + 1,
+    completed_tasks: completedCount(),
+    total_tasks: totalTasks(),
+    score: state.score,
+    finished_at: new Date().toISOString(),
+    elapsed_seconds: elapsed
+  });
   document.getElementById('victory-time').textContent =
     'Completed in ' + em + 'm ' + String(es).padStart(2,'0') + 's \u2014 ' +
     state.wrongCount + ' wrong code' + (state.wrongCount !== 1 ? 's' : '') +
@@ -3907,11 +6594,20 @@ function triggerVictory() {
     totalWrongs = state.wrongCount;
     var bd = document.getElementById('victory-breakdown');
     bd.className = 'victory-breakdown';
+    /* v2.6: surface the token economy in the post-game breakdown so the
+       player understands the trade-off (used 2/3 → still has 1 in the bank,
+       which feeds Pacifist Run logic). Tokens don't directly affect the
+       score (the score penalty is a separate axis), so we render the row in
+       neutral text rather than penalty red. */
+    var tokSpent = state.hintTokensSpent || 0;
+    var tokInit = state.hintTokensInitial || 0;
+    var tokRemain = state.hintTokensRemaining || 0;
     bd.innerHTML =
       '<div class="vb-row"><span class="vb-label">Base points (' + totalTasks() + ' tasks)</span><span class="vb-value">+' + totalBase + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Speed bonuses</span><span class="vb-value">+' + totalTimeBonus + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Hint penalties (' + totalHints + ' used)</span><span class="vb-value penalty">-' + totalHintPen + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Error penalties (' + totalWrongs + ' wrong)</span><span class="vb-value penalty">-' + totalWrongPen + '</span></div>' +
+      '<div class="vb-row"><span class="vb-label">Hint tokens spent</span><span class="vb-value">' + tokSpent + ' / ' + tokInit + (tokRemain > 0 ? ' (' + tokRemain + ' unused)' : '') + (tokSpent === 0 && tokInit > 0 ? ' \u2014 <b>Pacifist Run</b>' : '') + '</span></div>' +
       (SCORE_MULTIPLIER !== 1 ? '<div class="vb-row"><span class="vb-label">Difficulty multiplier</span><span class="vb-value">\u00d7' + SCORE_MULTIPLIER + '</span></div>' : '') +
       '<div class="vb-row vb-total"><span class="vb-label">TOTAL</span><span class="vb-value">' + finalScore + '</span></div>' +
       '<button class="stats-toggle" onclick="toggleStatsTable()">Detailed Stats \u25BC</button>' +
@@ -3930,6 +6626,9 @@ function resetGame() {
   clearInterval(state.timerInterval);
   if(heartbeatInterval){clearInterval(heartbeatInterval);heartbeatInterval=null;}
   stopAmbient();
+  /* If we were in demo mode, restore the canonical campaign so the next
+     non-demo selection (or attract loop preview) sees the right ACTS. */
+  restoreOriginalActs();
   initState();
   document.getElementById('overlay-gameover').classList.add('hidden');
   document.getElementById('overlay-victory').classList.add('hidden');
@@ -3951,6 +6650,15 @@ function resetGame() {
   document.getElementById('wrong-count').textContent = '0';
   document.getElementById('score-display').textContent = '0';
   document.getElementById('hint-counter').innerHTML = 'HINTS: <b>0</b>';
+  /* Token chip reset — values get re-bound by render() once a new game
+     starts, but blank them here so a leftover "0/3" doesn't flash on the
+     mode-select screen between games. */
+  var tokElReset = document.getElementById('hint-tokens');
+  if (tokElReset) {
+    document.getElementById('hint-tokens-count').textContent = HINT_TOKENS_INITIAL;
+    document.getElementById('hint-tokens-max').textContent = HINT_TOKENS_INITIAL;
+    tokElReset.classList.remove('depleted', 'flash-spent', 'flash-exhausted');
+  }
   document.getElementById('victory-breakdown').innerHTML = '';
   document.getElementById('gameover-score').textContent = '';
   var sd = document.getElementById('seg-digits');
@@ -3969,6 +6677,9 @@ function resetGame() {
     filterTrapCodeCollisions();
   }
   renderTimer();
+  /* Mode-select is back on screen — restart the attract-loop idle timer so
+     the booth display will go into demo cycling again after a quiet period. */
+  if (typeof attractReset === 'function') attractReset();
 }
 
 /* ── HINTS ──────────────────────────────────── */
@@ -3979,6 +6690,16 @@ function requestHint() {
   var used = state.hintsUsed[task.id] || 0;
   var maxAvail = Math.min(task.hints.length, MAX_HINT_LEVELS);
   if (used >= maxAvail) return;
+  /* v2.6: gate every reveal on the scenario-wide token pool. We refuse
+     before showing the score-penalty confirm dialog so the player never sees
+     "Reveal hint? (-50)" for a hint they can't actually buy. Out-of-tokens
+     messaging is announced + flashed in the HUD so it's not silent. */
+  if ((state.hintTokensRemaining || 0) <= 0) {
+    state.hintConfirmPending = false;
+    flashHintTokenChip('exhausted');
+    a11yAnnounce('No hint tokens remaining.', true);
+    return;
+  }
   var penalty = hintPenaltyFor(used);
   if (SCORING_ENABLED && penalty > 0 && !state.hintConfirmPending) {
     state.hintConfirmPending = true;
@@ -3987,13 +6708,57 @@ function requestHint() {
   }
   state.hintConfirmPending = false;
   state.hintsUsed[task.id] = used + 1;
+  /* Spend the token AFTER the score penalty + confirm flow but BEFORE the
+     telemetry emit so the emitted `tokens_remaining` reflects the post-spend
+     balance the player now sees in the HUD. */
+  state.hintTokensRemaining = Math.max(0, (state.hintTokensRemaining || 0) - 1);
+  state.hintTokensSpent = (state.hintTokensSpent || 0) + 1;
   if (SCORING_ENABLED && penalty > 0) {
     state.score = Math.max(0, state.score - penalty);
     showScoreDelta(-penalty);
   }
+  NakaTelemetry.emit('hint_used', {
+    act: state.actIdx + 1,
+    task_id: task.id,
+    hint_level: used + 1,
+    hint_max: maxAvail,
+    penalty: penalty,
+    answer_revealed: (used + 1) >= 4
+  });
+  /* Dedicated event so the facilitator board can plot token economy
+     separately from score-penalty hint usage (they used to be the same
+     signal pre-v2.6). */
+  NakaTelemetry.emit('hint_token_spent', {
+    act: state.actIdx + 1,
+    task_id: task.id,
+    hint_level: used + 1,
+    tokens_remaining: state.hintTokensRemaining,
+    tokens_initial: state.hintTokensInitial
+  });
   ensureAudio(); playHintReveal();
+  /* Polite SR announcement: include the new hint count + remaining token
+     pool so blind players get the same running tally sighted players see. */
+  a11yAnnounce('Hint ' + (used + 1) + ' of ' + maxAvail + ' revealed. ' +
+    state.hintTokensRemaining + ' tokens remaining.');
+  flashHintTokenChip(state.hintTokensRemaining === 0 ? 'exhausted' : 'spent');
   renderHints();
   render();
+}
+
+/* Pulse the HUD token chip on spend / refusal so the player has visual
+   confirmation of the cost. Animation is CSS-driven; if reduced-motion is
+   set the class adds a brief border colour change instead of a transform.
+   Safe to call when the chip element doesn't exist (early game / mode swap). */
+function flashHintTokenChip(kind) {
+  var el = document.getElementById('hint-tokens');
+  if (!el) return;
+  el.classList.remove('flash-spent', 'flash-exhausted');
+  /* Force layout so the re-added class re-triggers the animation. */
+  void el.offsetWidth;
+  el.classList.add(kind === 'exhausted' ? 'flash-exhausted' : 'flash-spent');
+  setTimeout(function() {
+    el.classList.remove('flash-spent', 'flash-exhausted');
+  }, 600);
 }
 function renderHints() {
   var task = currentTask();
@@ -4004,15 +6769,26 @@ function renderHints() {
     btn.style.display = 'none';
     return;
   }
+  /* v2.6: Iron Man (hintLevels=0, hintTokens=0) hides the hint UI entirely.
+     The HUD token chip already communicates "0/0" which the player saw on the
+     mode-select screen, so re-asserting "NO TOKENS LEFT" here on every task
+     would just be noise. */
+  if (MAX_HINT_LEVELS === 0 && (state.hintTokensInitial || 0) === 0) {
+    hd.classList.add('hidden');
+    btn.style.display = 'none';
+    return;
+  }
   var maxAvail = Math.min(task.hints.length, MAX_HINT_LEVELS);
   var used = state.hintsUsed[task.id] || 0;
+  /* v2.6: outOfTokens is the new reason a hint button might be disabled.
+     `exhausted` keeps its old meaning ("all hints for THIS task already
+     shown") so the existing CSS for that state still applies; out-of-tokens
+     gets a distinct treatment so the player can tell the two apart. */
+  var outOfTokens = (state.hintTokensRemaining || 0) <= 0;
   btn.style.display = '';
   var levelClasses = ['hint-free', 'hint-lv2', 'hint-lv3', 'hint-answer'];
   if (used === 0) {
     hd.classList.add('hidden');
-    var nextPen = hintPenaltyFor(0);
-    btn.textContent = 'HINT 1/' + maxAvail + (nextPen === 0 ? ' (free)' : ' (-' + nextPen + ')') + ' (H)';
-    btn.classList.remove('exhausted');
   } else {
     var html = '';
     for (var i = 0; i < used; i++) {
@@ -4021,17 +6797,35 @@ function renderHints() {
     }
     hd.innerHTML = html;
     hd.classList.remove('hidden');
-    if (used >= maxAvail) {
-      btn.textContent = 'ALL HINTS REVEALED';
-      btn.classList.add('exhausted');
-    } else {
-      var nextPen = hintPenaltyFor(used);
-      var isNextAnswer = (used + 1 === 4);
-      var costLabel = nextPen === 0 ? ' (free)' : ' (-' + nextPen + ' pts)';
-      if (isNextAnswer) costLabel = ' (0 pts for task)';
-      btn.textContent = (isNextAnswer ? 'ANSWER' : 'HINT ' + (used+1)) + '/' + maxAvail + costLabel + ' (H)';
-      btn.classList.remove('exhausted');
-    }
+  }
+  /* Three terminal states for the button label:
+     1) all hints for this task already revealed → "ALL HINTS REVEALED"
+     2) tokens exhausted globally → "NO TOKENS LEFT"
+     3) more available + tokens available → normal prompt */
+  if (used >= maxAvail) {
+    btn.textContent = 'ALL HINTS REVEALED';
+    btn.classList.add('exhausted');
+    btn.classList.remove('no-tokens');
+    btn.disabled = true;
+  } else if (outOfTokens) {
+    btn.textContent = 'NO TOKENS LEFT';
+    btn.classList.add('no-tokens');
+    btn.classList.remove('exhausted');
+    btn.disabled = true;
+  } else {
+    var nextPen = hintPenaltyFor(used);
+    var isNextAnswer = (used + 1 === 4);
+    var costLabel;
+    if (nextPen === 0 && !isNextAnswer) costLabel = ' (free pts)';
+    else if (isNextAnswer) costLabel = ' (0 pts for task)';
+    else costLabel = ' (-' + nextPen + ' pts)';
+    /* Always include "1 token" in the cost so the economy is visible at
+     the point of decision, not buried in the HUD chip. */
+    var label = (isNextAnswer ? 'ANSWER' : 'HINT ' + (used + 1)) + '/' + maxAvail +
+      costLabel + ' \u00b7 1 TOKEN (H)';
+    btn.textContent = label;
+    btn.classList.remove('exhausted', 'no-tokens');
+    btn.disabled = false;
   }
 }
 function showHintConfirm(hintNum, hintTotal, penalty) {
@@ -4470,8 +7264,29 @@ function render() {
     document.getElementById('hint-counter').innerHTML =
       'HINTS: <b>' + totalHintsUsed() + '</b>/' + totalHintsAvailable();
     document.getElementById('hint-counter').style.display = '';
+    /* v2.6 token chip update — kept in lock-step with the hints counter so a
+       glance at the HUD shows both spent + remaining budget. Iron Man (init=0)
+       gets a special "0/0" treatment: the chip stays visible (so the player
+       can see they're in no-hints mode) but uses the same depleted styling. */
+    var tokEl = document.getElementById('hint-tokens');
+    if (tokEl) {
+      var rem = state.hintTokensRemaining || 0;
+      var init = state.hintTokensInitial || 0;
+      document.getElementById('hint-tokens-count').textContent = rem;
+      document.getElementById('hint-tokens-max').textContent = init;
+      tokEl.classList.toggle('depleted', rem === 0);
+      tokEl.classList.toggle('iron-man', init === 0);
+      /* aria-label changes per state so a screen reader announces the right
+         meaning (depleted vs no-hints-mode) when the player tabs to it. */
+      if (init === 0) tokEl.setAttribute('aria-label', 'No hints available — Iron Man mode');
+      else if (rem === 0) tokEl.setAttribute('aria-label', 'No hint tokens remaining');
+      else tokEl.setAttribute('aria-label', rem + ' of ' + init + ' hint tokens remaining');
+      tokEl.style.display = '';
+    }
   } else {
     document.getElementById('hint-counter').style.display = 'none';
+    var tokElOff = document.getElementById('hint-tokens');
+    if (tokElOff) tokElOff.style.display = 'none';
   }
   if (state.mode === 'digital') {
     var task = currentTask();
@@ -4564,11 +7379,20 @@ function togglePause() {
     state.taskStartTime += pauseDuration;
     state.gameState = 'playing';
     document.getElementById('overlay-pause').classList.add('hidden');
+    NakaTelemetry.emit('resume', {
+      pause_duration_seconds: Math.round(pauseDuration / 1000),
+      act: state.actIdx + 1,
+      task_id: currentTask() ? currentTask().id : ''
+    });
   } else {
     state.paused = true;
     state.pauseStart = Date.now();
     state.gameState = 'paused';
     document.getElementById('overlay-pause').classList.remove('hidden');
+    NakaTelemetry.emit('pause', {
+      act: state.actIdx + 1,
+      task_id: currentTask() ? currentTask().id : ''
+    });
   }
 }
 
@@ -4578,11 +7402,16 @@ function toggleShortcuts() {
   el.classList.toggle('hidden');
 }
 
-/* ── CRT THEME ─────────────────────────────── */
+/* ── CRT THEME ───────────────────────────────
+   `mono` is a high-contrast white phosphor theme intended for color-blind players
+   (it conveys all state via brightness rather than hue, which works for protan,
+   deutan, and tritan deficiencies alike). All four themes hit ≥4.5:1 contrast
+   against the CRT background per WCAG 2.2 AA. */
 var CRT_THEMES = {
-  green: { primary: '#33ff33', glow: 'rgba(51,255,51,0.5)', dim: '#33aa33', bg: 'rgba(0,5,0,0.97)' },
-  amber: { primary: '#ffb000', glow: 'rgba(255,176,0,0.5)', dim: '#aa7700', bg: 'rgba(5,3,0,0.97)' },
-  blue:  { primary: '#00b4ff', glow: 'rgba(0,180,255,0.5)', dim: '#0077aa', bg: 'rgba(0,2,5,0.97)' }
+  green: { primary: '#33ff33', glow: 'rgba(51,255,51,0.5)',  dim: '#33aa33', bg: 'rgba(0,5,0,0.97)'  },
+  amber: { primary: '#ffb000', glow: 'rgba(255,176,0,0.5)',  dim: '#aa7700', bg: 'rgba(5,3,0,0.97)'  },
+  blue:  { primary: '#00b4ff', glow: 'rgba(0,180,255,0.5)',  dim: '#0077aa', bg: 'rgba(0,2,5,0.97)'  },
+  mono:  { primary: '#f0f0f0', glow: 'rgba(255,255,255,0.55)', dim: '#999999', bg: 'rgba(2,2,2,0.97)' }
 };
 var currentCrtTheme = 'green';
 try { currentCrtTheme = localStorage.getItem('nakatomi_crt_theme') || 'green'; } catch(e) {}
@@ -4596,7 +7425,11 @@ function setCrtTheme(theme) {
   document.documentElement.style.setProperty('--crt-dim', t.dim);
   document.documentElement.style.setProperty('--crt-bg', t.bg);
   document.querySelectorAll('.theme-dot').forEach(function(d) {
-    d.classList.toggle('active', d.classList.contains('theme-dot-' + theme));
+    var isActive = d.classList.contains('theme-dot-' + theme);
+    d.classList.toggle('active', isActive);
+    /* Keep the radio-group ARIA state in sync — screen readers depend on this
+       to announce "selected" when the user lands on the active dot. */
+    if (d.hasAttribute('role')) d.setAttribute('aria-checked', isActive ? 'true' : 'false');
   });
 }
 setCrtTheme(currentCrtTheme);
@@ -4959,6 +7792,127 @@ document.addEventListener('keydown', function(e) {
   else if (e.key === 'Backspace' || e.key === 'Delete') clearCode();
   else if (e.key === 'Enter') submitCode();
 });
+
+/* ── SPECTATOR MODE (v2.4) ───────────────────────
+   Activated via ?spectator=1 (or ?spectate=1 alias). Hides the whole game
+   and shows a big read-only mirror of another tab's live state, polled
+   from localStorage on `storage` events + a 2s safety poll. */
+function initSpectatorMode() {
+  var sp = new URLSearchParams(window.location.search);
+  if (sp.get('spectator') !== '1' && sp.get('spectate') !== '1') return;
+
+  document.body.classList.add('spectator-mode');
+  /* Stop the timer/audio/etc. from running on this tab — we're a viewer only. */
+  if (state && state.timerInterval) clearInterval(state.timerInterval);
+
+  var lastSnap = null;
+  var lastUpdateMs = 0;
+
+  function fmtTime(secs) {
+    secs = Math.max(0, Math.floor(secs || 0));
+    var m = Math.floor(secs / 60), s = secs % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function escapeHtml(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){
+      return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':c==='"'?'&quot;':'&#39;';
+    });
+  }
+
+  function render(snap) {
+    var teamInfo = document.getElementById('spec-team-info');
+    var content = document.getElementById('spec-content');
+    var status = document.getElementById('spec-status-bar');
+    if (!content) return;
+
+    if (!snap) {
+      content.className = 'spec-waiting';
+      content.innerHTML =
+        '<div class="spec-waiting-title">SPECTATOR MODE</div>' +
+        '<div class="spec-waiting-sub">' +
+          'Waiting for the player tab on this machine.<br>' +
+          'Open <span style="color:#ffd700;">game.html</span> in another tab, ' +
+          'choose a difficulty, and the live timer + progress will appear here.' +
+        '</div>';
+      teamInfo.innerHTML = 'Waiting for game…';
+      status.className = 'spec-status';
+      status.textContent = 'Same-machine mirror · localStorage live updates · press F5 to reset';
+      return;
+    }
+
+    /* Reject snapshots older than 60s — likely a stale leftover from a
+       previous game that ended unceremoniously. */
+    var age = Date.now() - (snap.ts || 0);
+    if (age > 60000) {
+      teamInfo.innerHTML = 'Last update: <b>' + Math.round(age/1000) + 's ago</b><br>(Game tab may be closed.)';
+    } else {
+      teamInfo.innerHTML = 'Team: <b>' + escapeHtml(snap.team || '----') + '</b><br>' +
+        'Difficulty: ' + escapeHtml(snap.difficulty || 'unknown');
+    }
+
+    if (snap.state === 'victory') {
+      content.className = '';
+      content.innerHTML = '';
+      status.className = 'spec-status victory';
+      status.textContent = '★ VAULT CRACKED ★';
+      return;
+    }
+    if (snap.state === 'gameover') {
+      content.className = '';
+      content.innerHTML = '';
+      status.className = 'spec-status gameover';
+      status.textContent = '✗ MISSION FAILED ✗';
+      return;
+    }
+
+    var pct = snap.totalTasks > 0 ? Math.round(100 * snap.completedTasks / snap.totalTasks) : 0;
+    var urgent = snap.timerRemaining < 300;
+
+    content.className = 'spec-main';
+    content.innerHTML =
+      '<div class="spec-timer' + (urgent ? ' urgent' : '') + '">' + fmtTime(snap.timerRemaining) + '</div>' +
+      '<div class="spec-task-block">' +
+        '<div class="spec-act-name">' + escapeHtml(snap.currentActName || 'Mission') + '</div>' +
+        '<div class="spec-task-name">' + escapeHtml(snap.currentTaskName || 'Loading…') + '</div>' +
+      '</div>' +
+      '<div class="spec-stats">' +
+        '<div class="spec-stat"><div class="spec-stat-label">Progress</div><div class="spec-stat-value">' + snap.completedTasks + ' / ' + snap.totalTasks + '</div></div>' +
+        '<div class="spec-stat"><div class="spec-stat-label">Score</div><div class="spec-stat-value">' + (snap.score || 0).toLocaleString() + '</div></div>' +
+        '<div class="spec-stat"><div class="spec-stat-label">Mistakes</div><div class="spec-stat-value">' + snap.wrongCount + ' / ' + snap.maxWrong + '</div></div>' +
+      '</div>' +
+      '<div class="spec-progress"><div class="spec-progress-fill" style="width:' + pct + '%"></div></div>';
+
+    status.className = 'spec-status';
+    status.textContent = 'Updated ' + Math.max(1, Math.round(age/1000)) + 's ago · same-machine mirror';
+  }
+
+  function tryRead() {
+    try {
+      var raw = localStorage.getItem(SPECTATOR_KEY);
+      if (!raw) { render(lastSnap); return; }
+      var snap = JSON.parse(raw);
+      lastSnap = snap;
+      lastUpdateMs = Date.now();
+      render(snap);
+    } catch (e) {
+      render(lastSnap);
+    }
+  }
+
+  /* Listen for cross-tab writes (fires only in OTHER tabs — exactly right). */
+  window.addEventListener('storage', function(e) {
+    if (e.key === SPECTATOR_KEY) tryRead();
+  }, false);
+
+  /* Initial paint + 2s safety poll for the "stale data" age clock. */
+  tryRead();
+  setInterval(tryRead, 2000);
+}
+
+/* ── PAGE INIT (runs once on script load — script is at end of <body> so DOM is ready). */
+initOrientationPrompt();
+initAttractLoop();
+initSpectatorMode();
 </script>
 </body>
 </html>

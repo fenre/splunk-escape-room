@@ -152,6 +152,108 @@ characters:
       department: Catering
       clearance: LEVEL-1
 
+# ── NPC Population (v2.9 / Phase 6) ──────────────────────────────
+# 60 named NPCs split across 5 realistic Nakatomi work patterns.
+# The generator emits ~48 hours of pre-heist baseline traffic from
+# this roster (~50k events) so SPL queries see a real corporate
+# rhythm instead of an empty stage. Booth mode (`--booth-mode`)
+# disables NPC generation entirely so conference demos stay quick
+# and puzzle-only.
+#
+# Pattern groups:
+#   day_shift        — 9am–6pm office workers (32 people)
+#   late_engineers   — 6pm–10pm staying late (10 people)
+#   cleaning_crew    — 10pm–2am floor-by-floor cleaning (6 people)
+#   security_rotation — 24/7 in 8h shifts (8 people)
+#   vendors          — sporadic loading-dock visits (4 people)
+#
+# Each entry needs: badge_id, name, department, clearance,
+# home_floors (list — workdays distribute time across these), and
+# pattern-specific fields (shift, route, etc.) consumed by the
+# pattern emitters in generate.py. Names are clearly fictional
+# Nakatomi staff — no real Die Hard characters reused here.
+npcs:
+  day_shift:
+    # Finance — floor 20
+    - { badge_id: NP-2001, name: "Akira Watanabe",   department: Finance,        clearance: LEVEL-2, home_floors: [20],     start_hour: 8,  end_hour: 18 }
+    - { badge_id: NP-2002, name: "Brenda Hollings",  department: Finance,        clearance: LEVEL-2, home_floors: [20],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-2003, name: "Chen-Wei Liu",     department: Finance,        clearance: LEVEL-3, home_floors: [20, 28], start_hour: 7,  end_hour: 18 }
+    - { badge_id: NP-2004, name: "Deepa Iyer",       department: Finance,        clearance: LEVEL-2, home_floors: [20],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-2005, name: "Erin Bouchard",    department: Finance,        clearance: LEVEL-3, home_floors: [20, 28], start_hour: 8,  end_hour: 18 }
+    # International Trade — floor 15 (Holly's department)
+    - { badge_id: NP-1501, name: "Felipe Ortiz",     department: "Intl Trade",   clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-1502, name: "Greta Sandberg",   department: "Intl Trade",   clearance: LEVEL-3, home_floors: [15],     start_hour: 8,  end_hour: 17 }
+    - { badge_id: NP-1503, name: "Hiroshi Mori",     department: "Intl Trade",   clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-1504, name: "Indira Sharma",    department: "Intl Trade",   clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 17 }
+    # Legal — floor 5
+    - { badge_id: NP-0501, name: "Jared Mahoney",    department: Legal,          clearance: LEVEL-2, home_floors: [5],      start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-0502, name: "Kira Robinson",    department: Legal,          clearance: LEVEL-3, home_floors: [5],      start_hour: 8,  end_hour: 17 }
+    - { badge_id: NP-0503, name: "Linus Petrov",     department: Legal,          clearance: LEVEL-2, home_floors: [5],      start_hour: 9,  end_hour: 18 }
+    # HR — floor 10
+    - { badge_id: NP-1001, name: "Mia Calloway",     department: HR,             clearance: LEVEL-2, home_floors: [10],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-1002, name: "Noah Bristowe",    department: HR,             clearance: LEVEL-2, home_floors: [10],     start_hour: 8,  end_hour: 17 }
+    - { badge_id: NP-1003, name: "Olivia Park-Hammond", department: HR,         clearance: LEVEL-3, home_floors: [10],     start_hour: 9,  end_hour: 18 }
+    # Sales / Marketing — distributed
+    - { badge_id: NP-1505, name: "Pedro Almeida",    department: Sales,          clearance: LEVEL-1, home_floors: [15, 20], start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-1506, name: "Qiang Yu",         department: Sales,          clearance: LEVEL-2, home_floors: [15],     start_hour: 8,  end_hour: 18 }
+    - { badge_id: NP-1507, name: "Rae Coleman",      department: Marketing,      clearance: LEVEL-1, home_floors: [10, 15], start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-1508, name: "Sven Andersen",    department: Marketing,      clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 18 }
+    # Admin / Exec Support — floor 28
+    - { badge_id: NP-2801, name: "Tamiko Yoshida",   department: Admin,          clearance: LEVEL-3, home_floors: [28, 30], start_hour: 8,  end_hour: 18 }
+    - { badge_id: NP-2802, name: "Ulysses Bekele",   department: Admin,          clearance: LEVEL-2, home_floors: [28],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-2803, name: "Vera Nystrom",     department: Admin,          clearance: LEVEL-3, home_floors: [28, 30], start_hour: 8,  end_hour: 18 }
+    - { badge_id: NP-2804, name: "Walid Hassan",     department: Admin,          clearance: LEVEL-2, home_floors: [28],     start_hour: 9,  end_hour: 17 }
+    # Sundry day-shift staffers (additional generic office workers)
+    - { badge_id: NP-1004, name: "Xanthe Forsberg",  department: HR,             clearance: LEVEL-1, home_floors: [10],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-2006, name: "Yusuf Keita",      department: Finance,        clearance: LEVEL-2, home_floors: [20],     start_hour: 8,  end_hour: 17 }
+    - { badge_id: NP-1509, name: "Zoe Aleman",       department: Sales,          clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-2007, name: "Alma Ferrante",    department: Finance,        clearance: LEVEL-3, home_floors: [20, 28], start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-2805, name: "Boris Kuznetsov",  department: Admin,          clearance: LEVEL-2, home_floors: [28],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-1005, name: "Camille Dubois",   department: HR,             clearance: LEVEL-2, home_floors: [10],     start_hour: 8,  end_hour: 17 }
+    - { badge_id: NP-0504, name: "Dmitri Volkov",    department: Legal,          clearance: LEVEL-3, home_floors: [5],      start_hour: 9,  end_hour: 18 }
+    - { badge_id: NP-1510, name: "Elena Ricci",      department: "Intl Trade",   clearance: LEVEL-2, home_floors: [15],     start_hour: 9,  end_hour: 17 }
+    - { badge_id: NP-2008, name: "Fatima al-Sayed",  department: Finance,        clearance: LEVEL-2, home_floors: [20],     start_hour: 8,  end_hour: 17 }
+
+  late_engineers:
+    # R&D / IT engineers staying late on the Y2K migration project (referenced by Phase 6 lore)
+    - { badge_id: ENG-2501, name: "Gus Aoki",         department: "R&D",           clearance: LEVEL-3, home_floors: [25],     start_hour: 11, end_hour: 22 }
+    - { badge_id: ENG-2502, name: "Hannah Liebowitz", department: "R&D",           clearance: LEVEL-3, home_floors: [25],     start_hour: 12, end_hour: 23 }
+    - { badge_id: ENG-2503, name: "Ivan Krylov",      department: "IT Operations", clearance: LEVEL-3, home_floors: [25],     start_hour: 13, end_hour: 23 }
+    - { badge_id: ENG-2504, name: "Junko Hanada",     department: "R&D",           clearance: LEVEL-4, home_floors: [25],     start_hour: 11, end_hour: 22 }
+    - { badge_id: ENG-2505, name: "Kwame Achebe",     department: "IT Operations", clearance: LEVEL-3, home_floors: [25],     start_hour: 12, end_hour: 22 }
+    - { badge_id: ENG-2506, name: "Liana Mitsotakis", department: "R&D",           clearance: LEVEL-3, home_floors: [25],     start_hour: 11, end_hour: 23 }
+    - { badge_id: ENG-2507, name: "Mads Sorensen",    department: "IT Operations", clearance: LEVEL-4, home_floors: [25],     start_hour: 13, end_hour: 23 }
+    - { badge_id: ENG-2508, name: "Nadia Solomon",    department: "R&D",           clearance: LEVEL-3, home_floors: [25],     start_hour: 12, end_hour: 22 }
+    - { badge_id: ENG-2509, name: "Oscar Pendragon",  department: "R&D",           clearance: LEVEL-4, home_floors: [25],     start_hour: 11, end_hour: 23 }
+    - { badge_id: ENG-2510, name: "Petra Janovic",    department: "IT Operations", clearance: LEVEL-3, home_floors: [25],     start_hour: 12, end_hour: 22 }
+
+  cleaning_crew:
+    - { badge_id: CLN-001, name: "Quentin Marquez",  department: Janitorial, clearance: LEVEL-1, route: [1, 2, 5, 10, 15, 20, 28], shift_start_hour: 22, shift_end_hour: 26 }
+    - { badge_id: CLN-002, name: "Rosalia Sanchez",  department: Janitorial, clearance: LEVEL-1, route: [10, 15, 20, 28],          shift_start_hour: 22, shift_end_hour: 26 }
+    - { badge_id: CLN-003, name: "Simon Devereaux",  department: Janitorial, clearance: LEVEL-1, route: [1, 2, 3, 5, 10],          shift_start_hour: 22, shift_end_hour: 26 }
+    - { badge_id: CLN-004, name: "Tamar Goldman",    department: Janitorial, clearance: LEVEL-1, route: [15, 20, 28, 30],          shift_start_hour: 22, shift_end_hour: 26 }
+    - { badge_id: CLN-005, name: "Umberto Rizzo",    department: Janitorial, clearance: LEVEL-2, route: [25, 28, 30, 35],          shift_start_hour: 22, shift_end_hour: 26 }
+    - { badge_id: CLN-006, name: "Valentina Korolyova", department: Janitorial, clearance: LEVEL-1, route: [1, 2, 3, 5],            shift_start_hour: 22, shift_end_hour: 26 }
+
+  security_rotation:
+    # 8 guards in 3 rotating shifts; the schedule rotates day-by-day. James (SE-0012) and Lisa (SE-0015)
+    # already exist in `supporting` and serve as senior shift leads — these 8 are the rank-and-file.
+    - { badge_id: SE-0020, name: "Wesley Aldridge",  department: Security, clearance: LEVEL-2, shift: morning,    shift_start_hour: 6,  shift_end_hour: 14 }
+    - { badge_id: SE-0021, name: "Xiomara Pereira",  department: Security, clearance: LEVEL-2, shift: morning,    shift_start_hour: 6,  shift_end_hour: 14 }
+    - { badge_id: SE-0022, name: "Yannis Papadakis", department: Security, clearance: LEVEL-2, shift: afternoon,  shift_start_hour: 14, shift_end_hour: 22 }
+    - { badge_id: SE-0023, name: "Zarela Estevez",   department: Security, clearance: LEVEL-2, shift: afternoon,  shift_start_hour: 14, shift_end_hour: 22 }
+    - { badge_id: SE-0024, name: "Aaron Blackwell",  department: Security, clearance: LEVEL-2, shift: night,      shift_start_hour: 22, shift_end_hour: 30 }
+    - { badge_id: SE-0025, name: "Bonnie Kalla",     department: Security, clearance: LEVEL-2, shift: night,      shift_start_hour: 22, shift_end_hour: 30 }
+    - { badge_id: SE-0026, name: "Cyrus Mahmoudi",   department: Security, clearance: LEVEL-3, shift: floating,   shift_start_hour: 10, shift_end_hour: 18 }
+    - { badge_id: SE-0027, name: "Dasha Petrenko",   department: Security, clearance: LEVEL-3, shift: floating,   shift_start_hour: 18, shift_end_hour: 26 }
+
+  vendors:
+    # Sporadic loading-dock and IT-vendor visits scattered across the baseline window
+    - { badge_id: VND-001, name: "Eddie Pulaski",     department: "Vendor (Catering)",  clearance: LEVEL-1, vendor_kind: catering,   typical_floors: [1, 2, 30] }
+    - { badge_id: VND-002, name: "Faye Solano",       department: "Vendor (Pkg Delivery)", clearance: LEVEL-1, vendor_kind: delivery, typical_floors: [1, 2] }
+    - { badge_id: VND-003, name: "Greg Tannenbaum",   department: "Vendor (IT Service)", clearance: LEVEL-2, vendor_kind: it_service, typical_floors: [25, 28] }
+    - { badge_id: VND-004, name: "Halima Senghor",    department: "Vendor (HVAC Repair)", clearance: LEVEL-2, vendor_kind: hvac_repair, typical_floors: [3, "roof"] }
+
 # ── Building ─────────────────────────────────────────────────────
 building:
   name: Nakatomi Plaza
@@ -182,6 +284,46 @@ volume:
   security_events_per_hour_normal: 8
   security_events_per_hour_fbi: 25
 
+  # ── Party guest crowd (Phase 6a / v2.9) ────────────────────────
+  # Seal 2 ("Hostage Floor") expects floor 30 to be the busiest
+  # floor (by `dc(badge_id)`) during the 20:00–22:00 party window.
+  # The legacy generator only emitted ~50 random badge events split
+  # across [1, 15, 20, 30] which made that ranking unreliable as
+  # soon as the v2.9 NPC baseline gave other floors comparable
+  # distinct-badge volume.
+  #
+  # Solution: a dedicated party-guest roster of synthetic attendees
+  # who badge in (lobby → 30) at party start, swipe across floor 30
+  # rooms during the party, and leave. Booth mode also runs this so
+  # the puzzle is solvable in the curated 5-min subset.
+  party_guest_count: 47            # distinct attendees at the Christmas party
+                                   # (47 also matches Hans's "47 employees on-site"
+                                   # narrative beat for Discovery 1.1)
+  party_guest_swipes_per_attendee: 4   # lobby in + 2 floor-30 moves + lobby out (avg)
+  party_overflow_floor_15_pct: 12  # ≈ % of guests who detour through Trading Floor
+  party_overflow_floor_20_pct: 8   # ≈ % of guests who detour through Finance suite
+
+  # ── NPC baseline (Phase 6 / v2.9) ──────────────────────────────
+  # Defines the pre-heist activity window so SPL queries see a real
+  # corporate rhythm. Total event budget targets ~50k by emitting:
+  #   - per-NPC daily badge swipes (entry, internal moves, lunch, exit)
+  #   - cleaning-crew floor-by-floor sweeps each weeknight
+  #   - 24/7 security patrol checkpoints
+  #   - sporadic vendor loading-dock visits
+  # Booth mode (`--booth-mode`) skips this entire block.
+  npc_baseline_window_hours: 168    # Dec 17 18:00 → Dec 24 18:00 (a full work week before the heist)
+  npc_workdays_only: false          # if true, day-shift only emits Mon–Fri (we leave Sat/Sun in for richer dataset)
+  npc_target_events_total: 50000    # advisory ceiling; actual count depends on roster + window
+  npc_per_person_daily_swipes: 26   # entry + ~16 internal + lunch + ~7 misc + exit (averaged)
+  npc_security_checkpoints_per_hour: 28   # roughly one patrol checkpoint every 2 minutes per active guard
+  npc_cleaning_swipes_per_floor: 6
+  npc_vendor_visits_per_day: 14
+  # When true (default), every NPC badge swipe also emits a paired
+  # door event to the same room — doubles the access event volume
+  # without adding new "people" to the dataset. Booth mode skips
+  # this whole subsystem either way.
+  npc_emit_paired_door_event: true
+
 # ── Red Herrings ─────────────────────────────────────────────────
 red_herrings:
   seal_1:
@@ -210,7 +352,7 @@ red_herrings:
       detail: "Late executive work session — quarterly report review"
     - floor: 30
       room: Conference Room A
-      detail: "Christmas party catering delivery confirmed"
+      detail: "catering delivery confirmed for Conference Room A"
     - floor: 25
       detail: "vault HVAC inspection — nominal"
 

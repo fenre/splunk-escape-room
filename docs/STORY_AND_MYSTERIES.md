@@ -485,3 +485,85 @@ This confirms: the seventh lock opens when power is lost. The player must physic
 **Thematic consistency**: Every code, clue, and event ties back to the Die Hard narrative. The codes aren't arbitrary numbers — they connect to Christmas, vault procedures, Takagi's resistance, building systems, FBI operations, and employee clearances.
 
 **Time budget**: Seals 1–2 should take ~3–5 minutes each (players are learning). Seals 3–5 take ~5–7 minutes. Seal 6 takes ~5 minutes. Seal 7 takes ~2–5 minutes (it's a moment of realization, not computation). Total puzzle time: ~28–39 minutes, leaving room for the phase 1–3 overhead within the 45–60 minute window.
+
+---
+
+## Part 3 — Branching Storylines *(planned: v2.10 + v2.11)*
+
+The seven-seal core remains the canonical play, but two upcoming releases introduce branching paths that re-shape how a session is remembered (Tier 1) and how a session unfolds (Tier 2). The branch tree below is the design target for those releases.
+
+### Branching policy (locked)
+
+- **Branches never invalidate the seven-seal core** — every branch ends in the same vault and the same bearer-bonds payoff.
+- **Branches are decided by behaviour, not by overt menu choices** — Tier 1 reads cumulative telemetry; Tier 2 surfaces a single decision point at a Die Hard story beat.
+- **All branches ship as scenario JSON v2** — the schema gains `branch_point`, `leads_to`, and `available_when` keys; v1 scenarios continue to play without modification.
+- **Per-branch achievements** — each ending and fork unlocks a distinct achievement so completionists have a reason to replay.
+
+### Tier 1 — Ending branches (v2.10.0, `p7-branching-tier1`)
+
+Driven by cumulative performance signals already tracked by `NakaTelemetry`:
+
+```
+Seal 1 ─ Seal 2 ─ Seal 3 ─ Seal 4 ─ Seal 5 ─ Seal 6 ─ Seal 7 ─┐
+                                                              │
+                                              ┌───────────────┤
+                                              │ Ending branch │
+                                              └───┬───────────┘
+                                                  │
+                  ┌───────────────────────────────┼───────────────────────────────┐
+                  │                               │                               │
+              Analyst                         Cowboy                         Speedrunner
+        (≥80% no-hint solves,           (≥3 trap codes hit,             (sub-30 min on Operative,
+         ≥6 first-try entries)           still won)                       ≤2 hints)
+                  │                               │                               │
+       Holly's calm exfiltration       McClane's wisecrack              FBI helicopters arrive
+       monologue + bond-room            radio swap + getaway             5 seconds late + skyline
+       handoff with Powell              with the limo                    sting on the roof
+                  │                               │                               │
+                  └───────────────────────────────┼───────────────────────────────┘
+                                                  │
+                                            Default ending
+                                  ("Yippee-ki-yay" + standard victory)
+```
+
+Each ending swaps the Act 5 narrative beat, plays a unique audio sting, and unlocks a per-branch achievement. Telemetry emits `branch_chosen { branch_id, signals }` so the facilitator board's "Endings tonight" panel can show the spread.
+
+### Tier 2 — Mid-game fork (v2.11.0, `p7-branching-tier2`, gated on Tier 1 telemetry)
+
+Surfaces at the close of Seal 3 (Takagi's Refusal):
+
+```
+Seal 1 ─ Seal 2 ─ Seal 3 ─┐
+                          │
+                          │  Decision: Takagi is dead. What now?
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+       "Call the FBI"           "Handle it ourselves"
+              │                       │
+              ▼                       ▼
+   Seal 3a — Powell on the     Seal 3b — Holly's hostage
+   line (new task: tail an      negotiation log (new task:
+   FBI courier through          identify the henchman who
+   building access logs)        moved Holly between floors)
+              │                       │
+              ▼                       ▼
+   Seal 3c — Code drop in       Seal 3c' — Code drop in
+   the FBI advance team's       Karl's encrypted radio
+   shared lookup                intercept
+              │                       │
+              └───────────┬───────────┘
+                          │
+              Branches converge at Seal 4 (C4 on the Roof);
+              branch choice is recorded for Tier-1 ending bias.
+```
+
+3–4 new tasks total across the two arms. The `branch_point` in scenario JSON v2 marks the fork; `leads_to` defines convergence. Tier 1 endings can read the Tier 2 choice as an additional signal (e.g. "Call the FBI" + Speedrunner trigger leans toward the FBI-helicopters ending).
+
+### Out of scope until further notice
+
+- Branching at Seal 1 or Seal 2 (would fragment the SPL learning ladder).
+- Player-choice menus in the UI (we want behaviour-driven branches, not visual-novel branching).
+- Multiple final vaults (the "seven seals → bonds" payoff stays canonical).
+
+Detailed task scripts, red herrings, and SPL paths for each branch will be authored in this document when the corresponding release is implemented.

@@ -1135,7 +1135,7 @@
       <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
       <span class="badge"><span class="dot green"></span> 5 Acts &middot; 26 Tasks</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
-      <span class="badge"><span class="dot green"></span> v2.3 &middot; Playable</span>
+      <span class="badge"><span class="dot green"></span> v2.9 &middot; Playable</span>
     </div>
 
     <div class="hero-line"></div>
@@ -1343,14 +1343,14 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk App <span class="tag live">v2.3</span></h4>
+          <h4>Splunk App <span class="tag live">v2.9</span></h4>
           <ul>
-            <li>4 indexes: <code>nakatomi_access</code>, <code>nakatomi_vault</code>, <code>nakatomi_building</code>, <code>nakatomi_comms</code></li>
-            <li>~2,200 events across 11 sourcetypes</li>
-            <li>7 CSV lookup tables + KV Store collection</li>
-            <li>9 dashboards (incl. Guided Investigation &amp; Progress Tracker)</li>
-            <li>3 alert-based puzzle clues (savedsearches.conf)</li>
-            <li>HEC data loader script</li>
+            <li>5 indexes incl. <code>nakatomi_sessions</code> (90&nbsp;d retention)</li>
+            <li>~2,200 events across 11 sourcetypes + live session telemetry</li>
+            <li>7 CSV lookup tables + KV Store collection (extended for telemetry)</li>
+            <li>10 dashboards incl. <strong>Facilitator Board</strong> for booth ops</li>
+            <li>3 live alert clues + new <code>hint_token_spent</code> / <code>pacifist_run_completed</code> events</li>
+            <li>HEC data loader + opt-in same-origin telemetry path</li>
           </ul>
         </div>
         <div class="arch-box">
@@ -1364,14 +1364,15 @@
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Game UI <span class="tag ready">v2.3</span></h4>
+          <h4>Game UI <span class="tag ready">v2.9</span></h4>
           <ul>
             <li>Dual mode: physical or digital</li>
             <li>Mission briefing intro &amp; act transition cinematics</li>
-            <li>3 difficulty modes, scoring, leaderboard</li>
-            <li>Pause, CRT themes, typewriter text, confetti</li>
+            <li><strong>5 difficulty modes</strong> incl. Iron Man (no hints) + Quick Demo</li>
+            <li><strong>Hint-token economy</strong> (3 tokens/scenario by default)</li>
+            <li>Pause, 4 CRT themes, typewriter text, confetti</li>
             <li>Text codes, multi-step tasks, trap codes</li>
-            <li>Achievements, dossier, decision points</li>
+            <li>Achievements (incl. Pacifist Run + Iron Man), dossier, decision points</li>
           </ul>
         </div>
 
@@ -1553,7 +1554,7 @@ flowchart TD
   end
 
   subgraph orchestration [Game Orchestration — game.html]
-    GO[Game Engine v2.3] -->|briefing, acts, scoring\ntimer, hints, leaderboard| PL
+    GO[Game Engine v2.9] -->|briefing, acts, scoring\ntimer, hint tokens, leaderboard\ntelemetry, multi-team, Iron Man| PL
     GO -->|task progression| SP
     VM -->|seal status| GO
   end
@@ -1692,36 +1693,37 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Data &amp; Puzzles <span class="status done">v2.3</span></h4>
+          <h4>Data &amp; Puzzles <span class="status done">v2.9</span></h4>
           <ul>
             <li class="done">26-task puzzle catalogue across 5 acts</li>
-            <li class="done">11 sourcetypes, 4 indexes, 7 lookups</li>
+            <li class="done">11 sourcetypes, 5 indexes, 7 lookups</li>
             <li class="done">Python data generator (~2,200 events)</li>
             <li class="done">Progressive hint system (4 levels + dynamic nudges)</li>
+            <li class="done"><strong>Hint-token economy</strong> — finite per-scenario pool</li>
             <li class="done">Scoring, trap codes, red herring enrichment</li>
             <li class="done">Text codes &amp; multi-step composite tasks</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Game UI <span class="status done">v2.3</span></h4>
+          <h4>Game UI <span class="status done">v2.9</span></h4>
           <ul>
             <li class="done">Mission briefing intro &amp; act cinematics</li>
-            <li class="done">3 difficulty modes (Rookie / Operative / Mastermind)</li>
-            <li class="done">Pause (P), shortcuts (?), CRT theme picker</li>
+            <li class="done"><strong>5 difficulty modes</strong> incl. Iron Man + Quick Demo</li>
+            <li class="done">Pause (P), shortcuts (?), 4-theme CRT picker</li>
             <li class="done">Local leaderboard (top 10, arcade initials)</li>
-            <li class="done">Achievements, decision points, shareable results</li>
+            <li class="done">Achievements (incl. Pacifist Run + Iron Man), decisions</li>
             <li class="done">Confetti, screen shake, typewriter text</li>
-            <li class="done">Detailed post-game statistics table</li>
+            <li class="done">Detailed post-game statistics table + token roll-up</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Splunk App <span class="status done">v2.3</span></h4>
+          <h4>Splunk App <span class="status done">v2.9</span></h4>
           <ul>
-            <li class="done">9 dashboards (incl. Guided Investigation &amp; Progress Tracker)</li>
-            <li class="done">KV Store collection for session tracking</li>
-            <li class="done">3 alert-based puzzle clues (savedsearches.conf)</li>
+            <li class="done">10 dashboards incl. Facilitator Board for booth ops</li>
+            <li class="done">KV Store collection extended for telemetry</li>
+            <li class="done">3 live alert clues + per-spend / pacifist-run telemetry</li>
             <li class="done">Packaged .spl for install</li>
-            <li class="done">HEC data loading script</li>
+            <li class="done">HEC data loading script + opt-in live telemetry</li>
           </ul>
         </div>
         <div class="roadmap-card">
@@ -1777,12 +1779,12 @@ flowchart LR
           <p>Dashboard wireframes, phase progression, hint delivery, fail/win states, digital mode, and app structure.</p>
         </a>
         <a href="game.html" class="doc-link">
-          <h4>Game UI v2.3</h4>
-          <p>Full game with mission briefing, 3 difficulties, scoring, leaderboard, CRT themes, achievements, and 26 tasks across 5 acts.</p>
+          <h4>Game UI v2.9</h4>
+          <p>Full game with mission briefing, 5 difficulty modes (incl. Iron Man), Quick Demo, hint-token economy, opt-in live telemetry, multi-team codes + QR handoff, attract loop, spectator second screen, and full WCAG 2.2 AA accessibility pass.</p>
         </a>
         <a href="RELEASE_NOTES.md" class="doc-link">
           <h4>Release Notes</h4>
-          <p>Full version history from v0.0.1 through v2.3.0 with detailed changelogs.</p>
+          <p>Full version history from v0.0.1 through v2.9.0 with detailed changelogs.</p>
         </a>
         <a href="docs/flow.html" class="doc-link">
           <h4>Flow Diagrams (standalone)</h4>
@@ -1797,7 +1799,7 @@ flowchart LR
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
     Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
-    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.3.0</button>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.9.0</button>
   </footer>
 
   <!-- Release Notes Modal -->
@@ -1811,9 +1813,126 @@ flowchart LR
 
         <div class="rn-version">
           <div class="rn-version-header">
+            <span class="rn-version-num">v2.9.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag rn-tag-latest">NPC Population + Data Realism (Phase 6a)</span>
+          </div>
+          <div class="rn-cat">NPC Baseline Population</div>
+          <ul>
+            <li>60 named NPCs across 5 work patterns: day shift (32), late engineers (10), cleaning crew (6), security (8), vendors (4)</li>
+            <li>~46k pre-heist badge-swipe events across Dec 17&ndash;24 &mdash; realistic corporate rhythm in SPL queries</li>
+            <li>All NPCs registered in <code>employee_directory.csv</code> with proper departments and clearance levels</li>
+          </ul>
+          <div class="rn-cat">Christmas-Party Guest Crowd</div>
+          <ul>
+            <li>47 dedicated party guests ensure floor 30 is unambiguously busiest for Seal 2 (&ldquo;Hostage Floor&rdquo;)</li>
+            <li>Discovery 1.1 SPL updated to <code>detail=&quot;*party*&quot;</code> for accurate guest headcount</li>
+          </ul>
+          <div class="rn-cat">Puzzle Data Fixes (4.1, 4.2, 4.4)</div>
+          <ul>
+            <li>4.1 Fire Alarm: dedicated alarm events with McClane&rsquo;s pull on floor 25 as the latest</li>
+            <li>4.2 C4 Charges: 4 hot HVAC roof readings &gt;95&deg;F + 2 lukewarm red herrings</li>
+            <li>4.4 Detonators: 5 inventory-tracking events showing 12 &rarr; 9 (3 stolen by McClane)</li>
+          </ul>
+          <div class="rn-cat">Booth Mode</div>
+          <ul>
+            <li><code>--booth-mode</code> flag produces ~750 puzzle-only events for fast conference demos</li>
+            <li>All critical-path puzzles verified across 4 seeds in both full and booth modes</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.6.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag">Hint-Token Economy + Iron Man</span>
+          </div>
+          <div class="rn-cat">Hint-Token Economy</div>
+          <ul>
+            <li>Per-difficulty starting count: <code>rookie</code> 5, <code>operative</code> 3, <code>mastermind</code> 1, <code>iron_man</code> 0, <code>demo</code> 5</li>
+            <li>HUD chip <code>TOK: 2/3</code> with spend-flash animations and <code>prefers-reduced-motion</code> fallbacks</li>
+            <li>Hint button reads <code>HINT 2/3 (-150 pts) &middot; 1 TOKEN (H)</code> &mdash; dual cost visible at decision time</li>
+            <li>Three terminal states: <code>ALL HINTS REVEALED</code>, <code>NO TOKENS LEFT</code>, normal &mdash; CSS distinguishes the two disabled states for colour-blind players</li>
+            <li>Post-game breakdown surfaces tokens spent + Pacifist Run callout</li>
+          </ul>
+          <div class="rn-cat">Iron Man Difficulty</div>
+          <ul>
+            <li>New top-tier preset: 50-min timer, 3 errors max, <strong>0 hint tokens</strong>, all trap codes armed, 3&times; score multiplier</li>
+            <li>Broken-out red/danger button on mode-select &mdash; can't be picked by accident</li>
+            <li>Hint button hidden entirely; HUD chip stays visible at <code>0/0</code> with iron-man styling so the player understands the contract</li>
+          </ul>
+          <div class="rn-cat">Achievements + Telemetry</div>
+          <ul>
+            <li><strong>Pacifist Run</strong> (&#x1F54A;&#xFE0F;) &mdash; complete the campaign without spending a single token</li>
+            <li><strong>Iron Man</strong> (&#x1F9CD;) &mdash; survive the no-hints, 50-min, 3-error gauntlet</li>
+            <li><code>Yippee-ki-yay</code> now also fires on Iron Man clears (was mastermind-only)</li>
+            <li>New <code>hint_token_spent</code> per spend + <code>pacifist_run_completed</code> on victory events</li>
+            <li><code>session_end</code> includes <code>hint_tokens_initial</code>, <code>hint_tokens_spent</code>, <code>hint_tokens_remaining</code> roll-up</li>
+            <li><code>props.conf</code> extended with explicit <code>EXTRACT-</code> rules for all new fields</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.4.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag">Live Multi-Team Booth Play</span>
+          </div>
+          <div class="rn-cat">Live Session Telemetry</div>
+          <ul>
+            <li>Opt-in HEC posting with strict event allow-list (NakaTelemetry module)</li>
+            <li>Offline-first event queue (capped 500, oldest-first eviction, drains on online/focus/pagehide)</li>
+            <li>New <code>nakatomi_sessions</code> index (90-day retention) + <code>nakatomi:session:event</code> sourcetype with explicit field extractions</li>
+            <li>Extended <code>vault_progress</code> KV Store schema (team code, booth, scenario, mode, completed/total tasks)</li>
+            <li>Same-origin / proxy security model &mdash; HEC tokens never URL-bound, never logged</li>
+            <li>Input sanitization for team_name / team_code / booth_id / scenario via narrow allow-lists</li>
+          </ul>
+          <div class="rn-cat">Facilitator Dashboard</div>
+          <ul>
+            <li>New 1920&times;1080 Dashboard Studio view (<code>facilitator_board.xml</code>): active teams, leaderboard, per-act funnel, trap log, hint distribution</li>
+            <li>Optional <code>booth_token</code> input scopes every panel to a single conference booth</li>
+            <li>Drilldown to per-team timeline from <code>vault_progress</code></li>
+            <li>Three saved searches now scheduled (5-min cron, 1h throttle) for live narrative alerts</li>
+          </ul>
+          <div class="rn-cat">Multi-Team Session UI</div>
+          <ul>
+            <li>4-character team-code generator (unambiguous alphabet, no O/0/I/1/L), persisted per tab, displayed in HUD</li>
+            <li>Handoff URL + QR code modal &mdash; shareable URL and inline-rendered QR for mobile join</li>
+            <li>Inline NakaQR encoder (hand-authored, byte-mode, EC level L, v1&ndash;v5) &mdash; zero supply-chain surface</li>
+            <li>Print-friendly CSS for paper handouts</li>
+          </ul>
+          <div class="rn-cat">Mobile, Tablet, and Accessibility (WCAG 2.2 AA)</div>
+          <ul>
+            <li>Phone (&le;480px) and tablet (&le;768px) breakpoints; (pointer: coarse) media query</li>
+            <li>Keypad and primary controls scale to &ge;48&times;48 px touch targets</li>
+            <li>Orientation prompt for landscape phones (dismissible per session)</li>
+            <li><code>prefers-reduced-motion</code> &mdash; static fallbacks for scanlines, VHS tracking, screen shake</li>
+            <li>High-contrast white-phosphor CRT theme alongside green/amber/blue (pattern + color, not color alone)</li>
+            <li><code>aria-live</code> regions for traps, correct codes, task completion, hints, victory, game over, timer milestones</li>
+            <li>Visible focus ring (<code>:focus-visible</code>) restored across the entire UI</li>
+            <li>Keyboard-navigable custom controls (theme dots, mode-select cards, difficulty selector) with proper ARIA</li>
+          </ul>
+          <div class="rn-cat">Conference / Booth / Kiosk</div>
+          <ul>
+            <li>Quick Demo difficulty &mdash; 15-minute, 3-task booth mode (Tasks 1.1, 2.1, 5.4); launches via button or <code>?demo=1</code></li>
+            <li>Attract loop &mdash; idle-aware overlay cycles teasers and leaderboard after 60 s on mode-select</li>
+            <li>Spectator URL (<code>?spectator=1</code>) &mdash; read-only second-screen mirror via <code>localStorage</code> / <code>storage</code> events</li>
+            <li>SPECTATOR button on QR handoff modal opens the spectator tab in one click</li>
+            <li>Privacy by design &mdash; spectator snapshots include only public progress (no codes, no answers, no SPL)</li>
+          </ul>
+          <div class="rn-cat">Documentation</div>
+          <ul>
+            <li>New <code>docs/DEPLOY.md</code> &mdash; deployment guide: security model, recommended same-origin reverse-proxy (nginx example), data retention, verification</li>
+            <li><code>docs/PLAYER_EXPERIENCE.md</code> v3 &mdash; new "Booth / Multi-Team Experience" section</li>
+            <li><code>docs/STORY_AND_MYSTERIES.md</code> Part 3 &mdash; planned branching-storyline tree (v2.10 + v2.11 design target)</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
             <span class="rn-version-num">v2.3.0</span>
             <span class="rn-version-date">15 Apr 2026</span>
-            <span class="rn-version-tag rn-tag-latest">Complete Polish</span>
+            <span class="rn-version-tag">Complete Polish</span>
           </div>
           <div class="rn-cat">Game Features</div>
           <ul>

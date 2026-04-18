@@ -8,4 +8,5 @@
     <view name="building_systems" />
     <view name="comms_terminal" />
     <view name="progress_tracker" />
+    <view name="facilitator_board" />
 </nav>

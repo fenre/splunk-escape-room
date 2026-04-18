@@ -272,8 +272,11 @@ The app nav shows only **Mission Brief**. No other dashboards. The search bar is
    cd generator
    python3 -m venv .venv && source .venv/bin/activate
    pip install -r requirements.txt
-   python3 generate.py
+   python3 generate.py            # Full dataset (~47k events, includes NPC baseline)
+   # OR for conference demos:
+   python3 generate.py --booth-mode  # Lean dataset (~750 events, puzzle-only)
    ```
+   The full dataset includes a week of realistic NPC badge-swipe traffic from 60 named employees across five work patterns (day shift, late engineers, cleaning crew, security, vendors). Booth mode skips the NPC baseline for fast 5-minute sessions but keeps all critical-path puzzle data intact.
 3. **Load the lookup CSVs** into the app's `lookups/` directory (or upload via Splunk UI).
 4. **Ingest the event data** using Splunk's `oneshot` command or the Add Data wizard:
    ```bash
@@ -284,7 +287,7 @@ The app nav shows only **Mission Brief**. No other dashboards. The search bar is
    splunk add oneshot generator/output/nakatomi_building.json \
      -index nakatomi_building -sourcetype _json
    ```
-5. **Verify**: Run `index=nakatomi_access | stats count` — should return ~500 events.
+5. **Verify**: Run `index=nakatomi_access | stats count` — should return ~47,000 events (full mode) or ~750 (booth mode).
 6. **Reset the physical vault model** (all seals locked, wrong-code counter at 0).
 7. **Start the timer and read the introduction.**
 
@@ -406,5 +409,140 @@ Audio initializes on the first user interaction (mode selection click) to comply
 
 ---
 
-*Document version: v2 (dual-mode update)*
-*Last updated: March 2026*
+## 7. Booth / Multi-Team Experience (v2.4)
+
+v2.4 turns `game.html` from a single-player demo into a facilitator-friendly multi-team experience. None of this changes solo play — it all degrades gracefully when telemetry isn't configured.
+
+### Quick Demo mode (15 minutes, 3 tasks)
+
+Selecting **QUICK DEMO · 15 MIN** on the mode-select screen (or appending `?demo=1` to the URL) runs a curated three-task subset:
+
+1. **Task 1.1 — Guest List** — `| stats dc(badge_id)` (teaches stats basics).
+2. **Task 2.1 — Cut Communications** — text-code task (teaches filtering + extraction).
+3. **Task 5.4 — The Ambulance** — text-code task (closes on a cinematic Die Hard beat).
+
+5 errors allowed, all 4 hint levels available, full campaign data restored when the player returns to mode-select.
+
+### Per-team codes and QR handoff
+
+The mode-select screen now shows a **team code** (4-character, unambiguous alphabet — no `O/0/I/1/L`). Players can:
+
+- Type their own code (saved to localStorage and used as the telemetry team identifier).
+- Generate a fresh code with **NEW CODE**.
+- Open a **QR handoff modal** with a shareable URL (`?team=NAKA&booth=…&scenario=…`) and an inline-rendered QR code. Print it for paper handouts or scan from a phone to join the session on any device.
+
+Team codes appear in the HUD top-corner throughout the game so the facilitator can match a session on the live board.
+
+### Live facilitator dashboard
+
+A new Splunk dashboard, **Facilitator Board** (`facilitator_board.xml`), is designed for a 1920×1080 booth TV behind the operator. Panels:
+
+- KPIs — active / completed / failed sessions; average win time.
+- Live leaderboard — ranked by score, with elapsed and act.
+- Per-act funnel — how many teams are in Act 1 vs Act 5 right now.
+- Trap-hit log — who tripped which decoy and when.
+- Hint distribution — column chart of hints used per task.
+- Recent session-end incidents — pinned victory / loss / timeout outcomes.
+
+Optional `booth_token` input filters every panel to a single conference booth without needing per-event index changes.
+
+### Spectator second screen
+
+Append `?spectator=1` (alias `?spectate=1`) to open `game.html` in **spectator mode**: a giant-text read-only mirror of another tab on the same machine.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SPECTATOR                              Team: NAKA          │
+│                                         Difficulty: operative│
+│                                                             │
+│                                                             │
+│                       12:34                                 │
+│                                                             │
+│                  ACT 3 — THE VAULT                          │
+│              Takagi's Refusal                               │
+│                                                             │
+│       ┌─────────┬──────────┬─────────┐                      │
+│       │PROGRESS │  SCORE   │MISTAKES │                      │
+│       │  3 / 8  │  24,500  │  1 / 7  │                      │
+│       └─────────┴──────────┴─────────┘                      │
+│       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░                   │
+│                                                             │
+│  Updated 1s ago · same-machine mirror                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+The player tab broadcasts a sanitized state snapshot to `localStorage` on every timer tick; the spectator tab listens for `storage` events and re-renders. **Public progress only** — no SPL queries, no codes, no answers leak through the channel. A **SPECTATOR** button on the QR handoff modal opens the spectator URL in one click.
+
+### Attract loop (unattended kiosk)
+
+When the mode-select screen sits idle for 60 s with telemetry configured (or `?attract=1` on the URL), an overlay cycles "TAP TO PLAY" teasers and the local leaderboard every 6 s. Honors `prefers-reduced-motion`. Any input (touch, key, mouse) dismisses immediately.
+
+### Live narrative alerts
+
+Three saved searches (`Vault Alert - Unauthorized Access Pattern Detected`, `Encrypted Radio Intercept`, `Suspicious HVAC Anomaly`) now run on a 5-minute cron with a 1-hour throttle, so booth visitors see narrative clues fire live in the alerts panel of their Splunk session.
+
+### Live session telemetry
+
+Opt-in HEC posting drives the facilitator board. The game emits `session_start`, `act_start`, `task_complete`, `task_fail`, `hint_used`, `trap_hit`, `pause`, `resume`, `session_end`, `achievement`, `heartbeat`, and `session_feedback` events with strict allow-listing (no free-form payload acceptance). When HEC is unreachable, events queue in `localStorage` (capped at 500, oldest-first eviction) and drain on `online` / `focus` / `pagehide`. The game never blocks on telemetry.
+
+Tokens are **never** accepted via URL params (would land in browser history, Referer headers, access logs). See [`docs/DEPLOY.md`](DEPLOY.md) for the recommended same-origin reverse-proxy pattern.
+
+### Accessibility (WCAG 2.2 AA)
+
+- `prefers-reduced-motion` honored — scanlines, VHS tracking, screen shake all become static fallbacks.
+- New high-contrast white-phosphor CRT theme alongside green / amber / blue.
+- `aria-live` regions announce traps, correct codes, task completion, hints revealed, victory, game over, and timer milestones (10 / 5 / 1 min remaining, 30 s).
+- Visible focus ring restored across the entire UI.
+- Custom controls (theme dots, mode-select cards, difficulty selector) wired as keyboard-navigable `radio` / `button` widgets with proper ARIA state.
+- Touch targets ≥ 48 × 48 px on coarse-pointer devices.
+- Decorative VHS / VCR overlays marked `aria-hidden`.
+
+---
+
+## 8. Hint-Token Economy (v2.6)
+
+v2.6 replaces the previous "unlimited hints, just take the score penalty" model with a **finite, scenario-wide token pool**. Every revealed hint costs one token, and tokens never refill mid-game. The score penalty stacks on top — so a careless team has to *both* spend a token *and* eat the points hit. Tokens are decremented when a hint level is actually revealed, **not** when the hint button is clicked but the player aborts the confirmation.
+
+### Per-difficulty starting count
+
+| Difficulty | Tokens | Hint levels per task | Notes |
+|---|---|---|---|
+| `rookie` | 5 | all 4 | forgiving, room to learn |
+| `operative` | 3 | 3 | default — encourages thinking before asking |
+| `mastermind` | 1 | 1 | matches the existing 1-hint-level cap; spend it well |
+| `iron_man` | **0** | 0 | no hints at all — Pacifist Run is the only outcome |
+| `demo` | 5 | all 4 | booth visitors should never feel locked out |
+
+### On-screen UI
+
+- **HUD chip** (`#hint-tokens`) — Renders `TOK: 2/3` next to the existing `HINTS:` counter. Goes red and styled as a depleted box when the pool reaches zero. For Iron Man, the chip stays visible at `0/0` with a distinct red-bordered "iron-man" treatment so the player can tell at a glance this is the no-hints mode rather than mid-game exhaustion.
+- **Spend animation** — On every successful spend, the chip pulses (or, for `prefers-reduced-motion`, briefly changes border colour). On exhaustion, a longer red flash + screen-reader-assertive announcement.
+- **Hint button label** — Now reads `HINT 2/3 (-150 pts) · 1 TOKEN (H)` so the dual cost (score penalty + token spend) is visible at the point of decision.
+- **Three terminal states** — `ALL HINTS REVEALED` (per-task limit hit), `NO TOKENS LEFT` (global pool exhausted), or the normal active prompt. CSS distinguishes the two disabled states so colour-blind players can tell them apart.
+- **Iron Man** — Hint button is hidden entirely; the chip alone communicates the no-hints contract.
+- **Post-game breakdown** — The victory overlay surfaces `Hint tokens spent: 2 / 3 (1 unused)`, or `0 / 3 — Pacifist Run` when nothing was spent.
+
+### Achievements
+
+- **Pacifist Run** (🕊️) — Awarded when `state.hintTokensSpent === 0` at the victory trigger. Functionally identical to "No Hints" today, but tracked separately so future content (e.g., free lore reveals in branching storylines, v2.10+) can decouple "hint shown" from "token spent" without migrating save data.
+- **Iron Man** (🧍) — Awarded for any iron-man completion. Iron Man clears automatically also earn Pacifist Run, the existing `Yippee-ki-yay` (now mastermind *or* iron-man), and any other criteria-based achievements.
+
+### Telemetry
+
+Two new event types extend the v2.4 schema:
+
+- **`hint_token_spent`** — Emitted on every successful hint reveal. Payload: `act`, `task_id`, `hint_level`, `tokens_remaining`, `tokens_initial`. Lets the facilitator board chart spending velocity per team.
+- **`pacifist_run_completed`** — Emitted on victory when `hintTokensSpent === 0`. Distinct from `session_end` so a dashboard can simply count distinct emitters without filtering a complex predicate.
+
+`session_end` itself now includes `hint_tokens_initial`, `hint_tokens_spent`, `hint_tokens_remaining` so the post-mortem panel can plot "spent / starting" alongside hints + errors without a separate query. All new fields have explicit `EXTRACT-` rules in `nakatomi_heist/default/props.conf`.
+
+### Accessibility
+
+- The HUD chip's `aria-label` changes per state: `2 of 3 hint tokens remaining` / `No hint tokens remaining` / `No hints available — Iron Man mode`. Screen readers tabbing to the chip get the right context.
+- Spend / exhaustion announcements go through the same polite/assertive `aria-live` regions used for traps and task completion.
+- The post-game breakdown's "Pacifist Run" callout is rendered as bold text in the same row as the token line, not as a separate `aria-live` flourish, so it doesn't double-announce after the victory celebration.
+
+---
+
+*Document version: v4 (hint-token economy update)*
+*Last updated: April 2026*
