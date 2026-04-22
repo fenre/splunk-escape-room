@@ -485,6 +485,86 @@
       50% { background: rgba(255,0,0,0.15); }
     }
 
+    /* ── v2.9 / Phase 6 — SIDE-STORY REVEAL TOAST ────────────────────
+       Deliberately NOT the same language as trap-warning (red/danger)
+       or victory-breakdown (green/success) — amber/lore palette so
+       players immediately read it as "narrative discovery". 8s dwell,
+       dismissible via × button or Esc key. Fixed width on desktop,
+       edge-to-edge on phones so the payoff text doesn't get cramped. */
+    .side-story-toast {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -40%) scale(0.95);
+      z-index: 9550;
+      width: min(540px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+      background: linear-gradient(180deg, rgba(25,15,5,0.98) 0%, rgba(15,10,5,0.98) 100%);
+      border: 2px solid #ffb020;
+      border-radius: 4px;
+      box-shadow:
+        0 0 24px rgba(255,176,32,0.35),
+        0 0 48px rgba(255,176,32,0.15),
+        0 8px 32px rgba(0,0,0,0.6);
+      opacity: 0;
+      transition: opacity 0.28s ease-out, transform 0.28s ease-out;
+      pointer-events: auto;
+      color: #ffe6b8;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .side-story-toast.visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .side-story-toast .sst-inner {
+      padding: 1.25rem 1.5rem 1rem;
+      position: relative;
+    }
+    .side-story-toast .sst-close {
+      position: absolute; top: 0.4rem; right: 0.5rem;
+      background: transparent; border: none; color: #ffb020;
+      font-size: 1.6rem; line-height: 1;
+      cursor: pointer; padding: 0.1rem 0.5rem;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .side-story-toast .sst-close:hover,
+    .side-story-toast .sst-close:focus-visible {
+      color: #ffd870; outline: none;
+    }
+    .side-story-toast .sst-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem; color: #ffb020;
+      letter-spacing: 0.15em; margin-bottom: 0.6rem;
+      text-shadow: 0 0 6px rgba(255,176,32,0.35);
+    }
+    .side-story-toast .sst-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem; color: #fff0c8;
+      letter-spacing: 0.05em; margin-bottom: 0.85rem;
+      text-shadow: 0 0 8px rgba(255,176,32,0.4);
+    }
+    .side-story-toast .sst-teaser {
+      font-size: 0.82rem; color: #ffd870;
+      font-style: italic; margin-bottom: 0.85rem;
+      line-height: 1.5;
+    }
+    .side-story-toast .sst-payoff {
+      font-size: 0.85rem; color: #ffe6b8;
+      line-height: 1.55; margin-bottom: 1rem;
+    }
+    .side-story-toast .sst-footer {
+      display: flex; justify-content: flex-end; align-items: center;
+      padding-top: 0.5rem; border-top: 1px dashed rgba(255,176,32,0.25);
+    }
+    .side-story-toast .sst-count {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem; color: #ffb020;
+      letter-spacing: 0.12em;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .side-story-toast { transition: opacity 0.1s linear; }
+    }
+
     /* ── PAUSE OVERLAY ──────────────────────────── */
     #overlay-pause {
       position: fixed; inset: 0; z-index: 9500;
@@ -509,6 +589,68 @@
       font-size: 0.85rem; cursor: pointer; letter-spacing: 0.08em;
     }
     #overlay-pause .pause-btn:hover { background: rgba(51,255,51,0.1); }
+
+    /* v2.9 / Phase 6 — Discoveries panel in the pause overlay. Uses
+       amber accents (same language as the side-story toast) so the
+       mental model is consistent: amber = narrative lore, green = act
+       progress, red = danger. */
+    .pause-discoveries {
+      margin-top: 1.25rem;
+      width: min(520px, calc(100vw - 48px));
+      border: 1px solid rgba(255,176,32,0.35);
+      background: rgba(25,15,5,0.6);
+      padding: 0.75rem 1rem;
+      font-family: 'Share Tech Mono', monospace;
+      text-align: left;
+      max-height: 45vh;
+      overflow-y: auto;
+    }
+    .pause-discoveries .pd-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem; color: #ffb020;
+      letter-spacing: 0.12em; margin-bottom: 0.6rem;
+    }
+    .pause-discoveries .pd-count { color: #fff0c8; }
+    .pause-discoveries .pd-list {
+      list-style: none; padding: 0; margin: 0;
+    }
+    .pause-discoveries .pd-row {
+      display: flex; gap: 0.6rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed rgba(255,176,32,0.12);
+    }
+    .pause-discoveries .pd-row:last-child { border-bottom: none; }
+    .pause-discoveries .pd-marker {
+      flex: 0 0 1.2rem;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.7rem;
+      color: #ffb020;
+      line-height: 1.1;
+    }
+    .pause-discoveries .pd-row.hidden-story .pd-marker { color: rgba(255,176,32,0.3); }
+    .pause-discoveries .pd-body { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+    .pause-discoveries .pd-title {
+      font-size: 0.78rem; color: #fff0c8; font-weight: 700;
+    }
+    .pause-discoveries .pd-row.hidden-story .pd-title {
+      color: rgba(255,176,32,0.35); letter-spacing: 0.1em;
+    }
+    .pause-discoveries .pd-teaser {
+      font-size: 0.72rem; color: #ffd870; font-style: italic;
+    }
+    .pause-discoveries .pd-row.hidden-story .pd-teaser { color: rgba(255,216,112,0.35); }
+    .pause-discoveries .pd-hint {
+      margin-top: 0.6rem; padding-top: 0.5rem;
+      border-top: 1px dashed rgba(255,176,32,0.25);
+      font-size: 0.72rem; color: #ffb020;
+      font-style: italic;
+    }
+    @media (max-width: 640px) {
+      .pause-discoveries { max-height: 50vh; font-size: 0.8rem; }
+      .pause-discoveries .pd-title { font-size: 0.72rem; }
+      .pause-discoveries .pd-teaser { font-size: 0.66rem; }
+    }
 
     /* ── SHORTCUTS HELP OVERLAY ────────────────── */
     #overlay-shortcuts {
@@ -744,6 +886,7 @@
       border: 1px solid #33ff33;
       box-shadow: 0 0 15px rgba(51,255,51,0.15), inset 0 0 15px rgba(51,255,51,0.05);
       animation: actBorderGlow 2s ease-in-out infinite alternate;
+      pointer-events: none;
     }
     @keyframes actTransIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes actTransOut { from { opacity: 1; } to { opacity: 0; } }
@@ -768,6 +911,7 @@
       border: 1px solid #33ff33;
       box-shadow: 0 0 15px rgba(51,255,51,0.15), inset 0 0 15px rgba(51,255,51,0.05);
       animation: actBorderGlow 2s ease-in-out infinite alternate;
+      pointer-events: none;
     }
     .mb-classified {
       font-size: 0.7rem; letter-spacing: 0.4em; text-transform: uppercase;
@@ -1963,6 +2107,18 @@
       text-shadow:
         0 0 6px rgba(255,68,68,0.7),
         0 0 14px rgba(255,68,68,0.35);
+    }
+    /* v2.9 / Phase 6 — side-story discover flash. Amber, not green
+       (green is reserved for "seal opened = act progress"). Amber is
+       distinct from the red/green/yellow digit palette and reads as
+       "you found something cool" without implying you advanced the
+       main objective. */
+    .seg-digits.discover .seg-digit.filled {
+      color: #ffb020;
+      text-shadow:
+        0 0 6px rgba(255,176,32,0.7),
+        0 0 14px rgba(255,176,32,0.35),
+        0 0 24px rgba(255,176,32,0.15);
     }
     @keyframes digitPop { 0% { transform: scale(1.3); } 100% { transform: scale(1); } }
 
@@ -3398,6 +3554,9 @@
   <div id="overlay-pause" class="hidden">
     <h1>PAUSED</h1>
     <div class="pause-sub">Timer frozen. Task hidden.</div>
+    <!-- v2.9 / Phase 6 — Discoveries panel. Populated by
+         renderDiscoveriesPanel() each time pause opens. -->
+    <div id="pause-discoveries" class="pause-discoveries" aria-live="polite"></div>
     <button class="pause-btn" onclick="togglePause()">RESUME [P]</button>
   </div>
 
@@ -3533,6 +3692,7 @@ var NakaTelemetry = (function() {
     'hint_used':               1,
     'hint_token_spent':        1, /* v2.6 — token-economy emission */
     'pacifist_run_completed':  1, /* v2.6 — finished without spending a token */
+    'side_story_discovered':   1, /* v2.9 / Phase 6 — one of 8 curated side mysteries discovered */
     'pause':                   1,
     'resume':                  1,
     'achievement':             1,
@@ -5464,7 +5624,12 @@ function initState() {
     totalPauseTime: 0,
     pauseStart: null,
     decisions: {},
-    multiStep: {}
+    multiStep: {},
+    /* v2.9 / Phase 6 — per-session map of which side mysteries the
+       team has surfaced. Key = story id ("affair", "petty_cash", …);
+       value = Date.now() timestamp of first discovery. Reset every
+       session so facilitator board counts are meaningful per-team. */
+    discoveredStories: {}
   };
   interceptsShown = {};
   mcclaneEventsShown = {};
@@ -5923,6 +6088,21 @@ function submitCode() {
       sd.classList.remove('correct');
       completeCurrentTask();
     }, 600);
+  } else if (!isText && SIDE_STORY_BY_CODE[state.codeInput]) {
+    /* v2.9 / Phase 6 — side-story discovery. Any of the 8 curated
+       4-digit codes unlocks a narrative reveal without penalty: no
+       wrong-count bump, no trap-fire, no scoring hit. We *do* briefly
+       highlight the keypad in a non-red "discover" flash (green on
+       default theme) and play a softer sealOpen variant so players
+       realise they just did something meaningful.
+
+       Guard: the codes all start with `9`, which never appears as the
+       first digit of a seal code (2/7/4/8/5/3) or a trap code
+       (1/0/1/1/1) in the shipped scenario. If a future scenario adds
+       a 9-prefixed seal/trap code we must renumber the side-story
+       codes, not change this control flow — otherwise the seal check
+       above would already have caught it (since it runs first). */
+    handleSideStoryDiscovery(sd, state.codeInput);
   } else if (TRAP_CODES_ENABLED && task.trapCodes && (isText ?
     task.trapCodes.some(function(tc) { return tc.toUpperCase() === state.codeInput.toUpperCase(); }) :
     task.trapCodes.indexOf(state.codeInput) !== -1)) {
@@ -6000,6 +6180,117 @@ function showTrapWarning() {
   document.body.appendChild(flash);
   setTimeout(function() { if(flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
   showRadioIntercept('SECURITY ALERT: Decoy code detected! Police notified of vault intrusion attempt.');
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   v2.9 / Phase 6 — side-story discovery reveal. Called from submitCode()
+   when the keypad input matches a SIDE_STORY_BY_CODE entry.
+
+   Behaviour contract:
+     - Re-entering an already-discovered code should replay the toast
+       (players sometimes want to re-read the payoff) but MUST NOT
+       double-count the achievement or re-emit telemetry.
+     - Play a positive, distinctly non-seal sound so it's obvious this
+       wasn't the actual act-completion.
+     - Use `a11yAnnounce` with polite priority (not assertive) — this
+       is a reward, not an urgent alert, and we don't want to interrupt
+       an SR user mid-puzzle.
+     - Telemetry payload stays compact (id + act + first_discovery
+       bool + count). Keep in sync with props.conf if you add fields. */
+function handleSideStoryDiscovery(sd, code) {
+  var story = SIDE_STORY_BY_CODE[code];
+  if (!story) return;
+
+  var alreadyFound = !!(state.discoveredStories && state.discoveredStories[story.id]);
+  var firstTime = !alreadyFound;
+
+  if (firstTime) {
+    state.discoveredStories[story.id] = Date.now();
+    NakaTelemetry.emit('side_story_discovered', {
+      story_id: story.id,
+      story_title: story.title,
+      act: state.actIdx + 1,
+      task_id: (currentTask() || {}).id || '',
+      discovered_count: countDiscoveredStories(),
+      total_stories: SIDE_STORIES.length
+    });
+    /* Re-evaluate achievements right away so the per-story + meta
+       achievements (curious / investigator / completionist) fire while
+       the team is still mid-session. evaluateAchievements() is cheap
+       and idempotent. */
+    try { evaluateAchievements(); } catch(e) {}
+  }
+
+  sd.classList.add('discover');
+  playSealOpen();
+  setTimeout(function() { sd.classList.remove('discover'); }, 600);
+
+  a11yAnnounce('Side story discovered: ' + story.title);
+  showSideStoryToast(story, firstTime);
+}
+
+/* Renders the lore-payoff toast. We build this fresh per call (and
+   replace any existing toast) so multiple rapid-fire discoveries don't
+   stack into an unreadable pile. 8s default dwell is long enough for
+   ~3-4 sentences but short enough not to block keypad input. Players
+   can dismiss it early by clicking the × or pressing Esc. */
+function showSideStoryToast(story, firstTime) {
+  var existing = document.getElementById('side-story-toast');
+  if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+
+  var toast = document.createElement('div');
+  toast.id = 'side-story-toast';
+  toast.className = 'side-story-toast';
+  toast.setAttribute('role', 'dialog');
+  toast.setAttribute('aria-modal', 'false');
+  toast.setAttribute('aria-label', 'Side story: ' + story.title);
+
+  toast.innerHTML =
+    '<div class="sst-inner">' +
+      '<button class="sst-close" type="button" aria-label="Dismiss side story reveal">\u00D7</button>' +
+      '<div class="sst-badge">' + (firstTime ? 'SIDE STORY DISCOVERED' : 'SIDE STORY (revisited)') + '</div>' +
+      '<div class="sst-title">' + escapeHtml(story.title) + '</div>' +
+      '<div class="sst-teaser">' + escapeHtml(story.teaser) + '</div>' +
+      '<div class="sst-payoff">' + escapeHtml(story.payoff) + '</div>' +
+      '<div class="sst-footer">' +
+        '<span class="sst-count">' + countDiscoveredStories() + ' / ' + SIDE_STORIES.length + ' discovered</span>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(toast);
+  requestAnimationFrame(function() { toast.classList.add('visible'); });
+
+  var closeBtn = toast.querySelector('.sst-close');
+  var dismissed = false;
+  var dismiss = function() {
+    if (dismissed) return;
+    dismissed = true;
+    toast.classList.remove('visible');
+    setTimeout(function() {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+      document.removeEventListener('keydown', escHandler);
+    }, 300);
+  };
+  closeBtn.addEventListener('click', dismiss);
+  var escHandler = function(e) { if (e.key === 'Escape') dismiss(); };
+  document.addEventListener('keydown', escHandler);
+  setTimeout(dismiss, 8000);
+}
+
+/* Small helper used by showSideStoryToast to keep lore strings safe
+   even though we author them ourselves — if a future scenario pack
+   pulls side_stories from scenario.yaml and that YAML includes a
+   character like `<` or `&`, we don't want to end up XSS-ing
+   ourselves. Belt-and-braces defence per CodeGuard input validation
+   guidance. */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /* ── TASK COMPLETION ────────────────────────── */
@@ -6325,6 +6616,73 @@ function triggerGameOver(reason) {
 }
 
 /* ── ACHIEVEMENTS ──────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────
+   v2.9 / Phase 6 — Side Stories (id: p6-side-stories)
+
+   Eight hand-authored side mysteries seeded into the dataset by the
+   Python generator (see generator/generate.py → generate_side_story_events
+   and generator/scenario.yaml → side_stories:). Each story is
+   discoverable via a dedicated SPL query path and reveals itself when
+   the player enters the story's unique 4-digit `code` on the keypad.
+
+   Design invariants:
+     - codes must NOT collide with seal codes (2512/7439/4291/8086/5765/3940)
+       or the trap-code set (1990/0911/1666/1988/1215). All side-story
+       codes start with `9` for that reason.
+     - entering a side-story code is *never* a wrong answer — it costs
+       nothing, it can't trip the max-wrong-codes fail state, and it
+       doesn't consume the task's current seal attempt.
+     - each story emits one side_story_discovered telemetry event on
+       first reveal so facilitator dashboards can see which stories
+       resonate with which teams.
+     - PER-SESSION state (state.discoveredStories) drives the UI, but
+       the *cross-run* achievements piggyback on the existing
+       nakatomi_achievements localStorage blob.
+
+   If you add / rename a story here you MUST also:
+     1. update generator/scenario.yaml (side_stories: list)
+     2. update generator/generate.py (generate_side_story_events)
+     3. update docs/STORY_AND_MYSTERIES.md
+     4. bump the v2.9 release notes / props.conf if the payload shape
+        changes for side_story_discovered telemetry. */
+var SIDE_STORIES = [
+  { id: 'affair',          code: '9012', title: 'The Affair',
+    teaser: "Someone's been visiting Holly's floor after hours.",
+    payoff: "Harry Ellis has been making late-night trips to floor 30 all week. Holly's office. Roses on Dec 20. A note: 'H. — tonight? — H.' They weren't just colleagues. Hans will never know — but you do." },
+  { id: 'petty_cash',      code: '9050', title: 'Petty Cash Skim',
+    teaser: "Something's off with the coffee-fund reimbursements.",
+    payoff: "Accounting clerk Ulysses Bekele (NP-2802) has been skimming $40-50 every few days for six months, logged as 'office supplies' and 'coffee fund'. Total take: $4,892. He was one tightening audit away from being caught." },
+  { id: 'ghost_account',   code: '9099', title: 'The Ghost Account',
+    teaser: "A terminated employee's badge is still warm.",
+    payoff: "Badge XG-9999 belongs to 'Evan Rutherford' — terminated eight months ago, but the badge still swipes into the server room on floor 25 after hours. Someone on IT never killed the credential. A backdoor hiding in plain sight." },
+  { id: 'y2k',             code: '9200', title: 'The Y2K Test',
+    teaser: "Something in the IT logs insists it's already 1900.",
+    payoff: "R&D's millennium-bug team ran a date-rollover test on Dec 22 that tipped every timestamp to 1900-01-01 for forty seconds — then quietly rolled back. The IT director's memo: 'do NOT tell the auditors.' Corporate America, ladies and gentlemen." },
+  { id: 'disgruntled_it',  code: '9315', title: 'The Disgruntled Sysadmin',
+    teaser: "One engineer's been poking everywhere he shouldn't be.",
+    payoff: "Robert Chen (NP-4471) has been pulling late-night admin swipes on floors 25 and B1 all week — he was passed over for a VP slot in October and HR has him on a PIP. An after-hours email drafted on his workstation read: 'they'll regret this.' He hit delete. He didn't hit purge." },
+  { id: 'pizza',           code: '9086', title: 'The Pineapple Incident',
+    teaser: "Someone started a war on floor 15 at 1pm yesterday.",
+    payoff: "On Dec 23 at 13:14 PST, Catering delivered 12 pizzas to the trading floor. One was Hawaiian. The resulting intranet thread ran 37 messages in 40 minutes before IT muted the channel. Nobody confessed to ordering it. The pizza was eaten anyway. Mostly." },
+  { id: 'theo_browser',    code: '9552', title: "Theo's Homework",
+    teaser: "The proxy log says someone's been researching something strange.",
+    payoff: "Theo (TH-0099) logged 147 proxy hits over the last three weeks — all on vault-cracking whitepapers, seismic demolition case studies, and the SEC filing for Nakatomi's $640M in bearer bonds. Masquerading as a catering vendor took some homework. He passed the exam." },
+  { id: 'bypassed_camera', code: '9425', title: 'The Blind Spot',
+    teaser: "One camera went down at the worst possible moment.",
+    payoff: "Camera CAM-25-NORTH went offline at 21:42 — 'scheduled maintenance' per the ticket. Nobody scheduled it. Eighteen minutes later, Hans's crew walked through the loading dock under it. Someone inside the building knew exactly which blind spot to use — and exactly when." }
+];
+
+/* Quick O(1) lookup. Rebuilt at script-eval time since SIDE_STORIES is
+   a const literal above. Keep in sync if you mutate SIDE_STORIES at
+   runtime (you shouldn't). */
+var SIDE_STORY_BY_CODE = (function() {
+  var map = {};
+  for (var i = 0; i < SIDE_STORIES.length; i++) {
+    map[SIDE_STORIES[i].code] = SIDE_STORIES[i];
+  }
+  return map;
+})();
+
 var ACHIEVEMENTS = [
   { id: 'no_hints',    icon: '\u{1F910}', name: 'No Hints',      test: function() { for (var k in state.hintsUsed) { if (state.hintsUsed[k] > 0) return false; } return true; } },
   /* v2.6 Pacifist Run — finished the campaign without spending a single hint
@@ -6343,8 +6701,39 @@ var ACHIEVEMENTS = [
      leaderboard so a player can tell "they survived the no-hint, 50-min,
      3-error gauntlet" at a glance. */
   { id: 'iron_man',    icon: '\u{1F9CD}',  name: 'Iron Man',      test: function() { return state.difficulty === 'iron_man'; } },
-  { id: 'bonus_hunter',icon: '\u{1F3AF}',  name: 'Bonus Hunter',  test: function() { var b = loadBonusState(); return BONUS_TASKS.every(function(t) { return !!b[t.id]; }); } }
+  { id: 'bonus_hunter',icon: '\u{1F3AF}',  name: 'Bonus Hunter',  test: function() { var b = loadBonusState(); return BONUS_TASKS.every(function(t) { return !!b[t.id]; }); } },
+  /* v2.9 / Phase 6 — side-story achievements. We evaluate these both on
+     discovery (so the banner pops immediately) and at session end (so
+     the breakdown screen shows them). Counting uses the per-session
+     state.discoveredStories map; the localStorage-backed
+     nakatomi_achievements blob persists the "earned" state across runs
+     like every other achievement. */
+  { id: 'curious',      icon: '\u{1F50D}', name: 'Curious',        test: function() { return countDiscoveredStories() >= 1; } },
+  { id: 'investigator', icon: '\u{1F575}', name: 'Investigator',   test: function() { return countDiscoveredStories() >= 3; } },
+  { id: 'completionist',icon: '\u{1F451}', name: 'Completionist',  test: function() { return countDiscoveredStories() >= SIDE_STORIES.length; } },
+  /* Per-story achievements. Auto-generated from SIDE_STORIES so we
+     never forget to add one when a new story ships. Each gets the id
+     "side_<story-id>" which matches the pattern used in scenario.yaml. */
+  { id: 'side_affair',          icon: '\u{1F339}', name: "Side Story: The Affair",              test: function() { return !!(state.discoveredStories && state.discoveredStories.affair); } },
+  { id: 'side_petty_cash',      icon: '\u{1F4B8}', name: 'Side Story: Petty Cash Skim',         test: function() { return !!(state.discoveredStories && state.discoveredStories.petty_cash); } },
+  { id: 'side_ghost',           icon: '\u{1F47B}', name: 'Side Story: The Ghost Account',       test: function() { return !!(state.discoveredStories && state.discoveredStories.ghost_account); } },
+  { id: 'side_y2k',             icon: '\u{1F552}', name: 'Side Story: The Y2K Test',            test: function() { return !!(state.discoveredStories && state.discoveredStories.y2k); } },
+  { id: 'side_disgruntled',     icon: '\u{1F620}', name: 'Side Story: The Disgruntled Sysadmin',test: function() { return !!(state.discoveredStories && state.discoveredStories.disgruntled_it); } },
+  { id: 'side_pizza',           icon: '\u{1F355}', name: 'Side Story: The Pineapple Incident',  test: function() { return !!(state.discoveredStories && state.discoveredStories.pizza); } },
+  { id: 'side_theo',            icon: '\u{1F9D1}', name: "Side Story: Theo's Homework",         test: function() { return !!(state.discoveredStories && state.discoveredStories.theo_browser); } },
+  { id: 'side_camera',          icon: '\u{1F4F9}', name: 'Side Story: The Blind Spot',          test: function() { return !!(state.discoveredStories && state.discoveredStories.bypassed_camera); } }
 ];
+
+/* Helper used by the three meta-achievements above. Kept here next to
+   ACHIEVEMENTS so the two are visually coupled. */
+function countDiscoveredStories() {
+  if (!state.discoveredStories) return 0;
+  var n = 0;
+  for (var k in state.discoveredStories) {
+    if (Object.prototype.hasOwnProperty.call(state.discoveredStories, k)) n++;
+  }
+  return n;
+}
 
 function loadAchievements() {
   try { return JSON.parse(localStorage.getItem('nakatomi_achievements') || '{}'); } catch(e) { return {}; }
@@ -6546,6 +6935,19 @@ function triggerVictory() {
     hint_tokens_initial: state.hintTokensInitial || 0,
     hint_tokens_spent: state.hintTokensSpent || 0,
     hint_tokens_remaining: state.hintTokensRemaining || 0,
+    /* v2.9 / Phase 6: side-story discovery roll-up. Exposes both the
+       count and a CSV of ids so facilitator dashboards can answer
+       "which team was most curious?" without a separate query of the
+       side_story_discovered events. */
+    side_stories_discovered: countDiscoveredStories(),
+    side_stories_total: SIDE_STORIES.length,
+    side_stories_ids: (function() {
+      var ids = [];
+      for (var k in state.discoveredStories) {
+        if (Object.prototype.hasOwnProperty.call(state.discoveredStories, k)) ids.push(k);
+      }
+      return ids.join(',');
+    })(),
     difficulty: state.difficulty,
     mode: state.mode
   });
@@ -6602,12 +7004,29 @@ function triggerVictory() {
     var tokSpent = state.hintTokensSpent || 0;
     var tokInit = state.hintTokensInitial || 0;
     var tokRemain = state.hintTokensRemaining || 0;
+    /* v2.9 / Phase 6 — side-story tally in the post-game breakdown.
+       This is cosmetic (stories don't affect the score), but tells the
+       team "you found 3/8 mysteries — come back and dig deeper next
+       time". Omit the row entirely if the team didn't find any,
+       rather than shaming them with "0 / 8" on their celebration
+       screen. */
+    var ssFound = countDiscoveredStories();
+    var ssTotal = SIDE_STORIES.length;
+    var ssLabel = '';
+    if (ssFound > 0) {
+      ssLabel = '<div class="vb-row"><span class="vb-label">Side mysteries uncovered</span>' +
+        '<span class="vb-value">' + ssFound + ' / ' + ssTotal +
+        (ssFound === ssTotal ? ' \u2014 <b>Completionist</b>' :
+         (ssFound >= 3 ? ' \u2014 <b>Investigator</b>' : ' \u2014 <b>Curious</b>')) +
+        '</span></div>';
+    }
     bd.innerHTML =
       '<div class="vb-row"><span class="vb-label">Base points (' + totalTasks() + ' tasks)</span><span class="vb-value">+' + totalBase + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Speed bonuses</span><span class="vb-value">+' + totalTimeBonus + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Hint penalties (' + totalHints + ' used)</span><span class="vb-value penalty">-' + totalHintPen + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Error penalties (' + totalWrongs + ' wrong)</span><span class="vb-value penalty">-' + totalWrongPen + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Hint tokens spent</span><span class="vb-value">' + tokSpent + ' / ' + tokInit + (tokRemain > 0 ? ' (' + tokRemain + ' unused)' : '') + (tokSpent === 0 && tokInit > 0 ? ' \u2014 <b>Pacifist Run</b>' : '') + '</span></div>' +
+      ssLabel +
       (SCORE_MULTIPLIER !== 1 ? '<div class="vb-row"><span class="vb-label">Difficulty multiplier</span><span class="vb-value">\u00d7' + SCORE_MULTIPLIER + '</span></div>' : '') +
       '<div class="vb-row vb-total"><span class="vb-label">TOTAL</span><span class="vb-value">' + finalScore + '</span></div>' +
       '<button class="stats-toggle" onclick="toggleStatsTable()">Detailed Stats \u25BC</button>' +
@@ -7389,11 +7808,66 @@ function togglePause() {
     state.pauseStart = Date.now();
     state.gameState = 'paused';
     document.getElementById('overlay-pause').classList.remove('hidden');
+    /* v2.9 / Phase 6 — rebuild the Discoveries panel every time pause
+       opens so it reflects the latest discovered-count without having
+       to hook every call site that updates state.discoveredStories. */
+    try { renderDiscoveriesPanel(); } catch(e) {}
     NakaTelemetry.emit('pause', {
       act: state.actIdx + 1,
       task_id: currentTask() ? currentTask().id : ''
     });
   }
+}
+
+/* v2.9 / Phase 6 — Discoveries panel in the pause overlay.
+
+   Shows the cumulative count of side-stories surfaced this session
+   plus a one-line teaser for each. Stories not yet discovered are
+   rendered as redacted ██████ to avoid spoilers while hinting that
+   more remains to find. Booth mode (30-min) still gets the panel —
+   the stories are low-volume and a team that finds one during booth
+   can brag about it.
+
+   Kept intentionally minimal (no achievement icons or detailed
+   payoffs) so the pause menu stays quickly scannable. The full
+   payoff replay happens via re-entering the 4-digit code on the
+   keypad, which reuses showSideStoryToast(). */
+function renderDiscoveriesPanel() {
+  var el = document.getElementById('pause-discoveries');
+  if (!el) return;
+
+  var total = SIDE_STORIES.length;
+  var found = countDiscoveredStories();
+
+  var rows = '';
+  for (var i = 0; i < SIDE_STORIES.length; i++) {
+    var s = SIDE_STORIES[i];
+    var discovered = !!(state.discoveredStories && state.discoveredStories[s.id]);
+    rows += '<li class="pd-row ' + (discovered ? 'discovered' : 'hidden-story') + '">' +
+      '<span class="pd-marker">' + (discovered ? '\u2713' : '?') + '</span>' +
+      '<span class="pd-body">' +
+        (discovered
+          ? '<span class="pd-title">' + escapeHtml(s.title) + '</span>' +
+            '<span class="pd-teaser">' + escapeHtml(s.teaser) + '</span>'
+          : '<span class="pd-title">\u2588\u2588\u2588\u2588\u2588\u2588\u2588</span>' +
+            '<span class="pd-teaser">Not yet discovered</span>') +
+      '</span>' +
+    '</li>';
+  }
+
+  el.innerHTML =
+    '<div class="pd-header">' +
+      '<span class="pd-label">SIDE STORIES DISCOVERED</span>' +
+      '<span class="pd-count">' + found + ' / ' + total + '</span>' +
+    '</div>' +
+    '<ul class="pd-list">' + rows + '</ul>' +
+    '<div class="pd-hint">' +
+      (found === 0
+        ? 'Rumor has it there are eight side mysteries hidden in the data. Find them with SPL.'
+        : (found < total
+          ? 'Keep hunting — side mysteries reveal themselves when you enter a 9-prefixed 4-digit code.'
+          : 'All eight mysteries discovered. You know more about Nakatomi than Hans does.')) +
+    '</div>';
 }
 
 /* ── SHORTCUTS HELP ────────────────────────── */
