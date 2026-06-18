@@ -230,7 +230,7 @@ jobs:
         # Best-effort: if the release doesn't exist yet, create a draft
         # one. This keeps the publishing workflow lightweight without
         # requiring an outside-the-action release-please run.
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           files: |
