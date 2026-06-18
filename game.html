@@ -4464,7 +4464,7 @@
             <div class="crt-glare"></div>
             <div class="crt-content">
               <header id="game-header" role="banner">
-                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.17</span> <span class="gh-team-code" id="hud-team-code" style="display:none"></span></div>
+                <div class="gh-title">NAKATOMI VAULT CONTROL <span>v2.17.1</span> <span class="gh-team-code" id="hud-team-code" style="display:none"></span></div>
                 <!-- HUD stats (v2.4 a11y): aria-labels make the abbreviated
                      "PTS:" / "ERR:" / etc. comprehensible to screen readers,
                      which would otherwise read out the literal acronym. -->
@@ -4517,7 +4517,7 @@
                   <span class="gf-power-led" id="power-led" onclick="handlePowerClick()" title=""></span>
                   <span id="power-label">ONLINE</span>
                 </div>
-                <div class="gf-version">NAKATOMI-OS 2.17 &middot; 24-DEC-88</div>
+                <div class="gf-version">NAKATOMI-OS 2.17.1 &middot; 24-DEC-88</div>
               </footer>
               <!-- Clue overlay (inside CRT) -->
               <div id="clue-overlay" class="hidden">
@@ -6866,7 +6866,7 @@ function runBoot(onComplete) {
     'DIFFICULTY: ' + (boothPreset ? boothPreset.label.toUpperCase() : 'BOOTH'),
     'SYSTEM READY.', '', '> INITIATING HEIST PROTOCOL...'
   ] : [
-    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.17',
+    'NAKATOMI CORP. VAULT CONTROL SYSTEM v2.17.1',
     'COPYRIGHT (C) 1988 NAKATOMI TRADING CORPORATION',
     '', 'BIOS VERSION 2.0.88 — 24 DEC 1988', '',
     'MEMORY TEST.......... 640K OK',
@@ -6877,7 +6877,7 @@ function runBoot(onComplete) {
     '  RF RECEIVER........ OK', '  RADIO INTERCEPT.... OK',
     '  CAMERA FEEDS....... OK', '  PHONE TAP.......... OK', '',
     'LOADING VAULT OS...', '__BAR__', '',
-    'VAULT STATUS: 26 TASKS / 5 ACTS / v2.17',
+    'VAULT STATUS: 26 TASKS / 5 ACTS / v2.17.1',
     'DIFFICULTY: ' + (DIFFICULTY_PRESETS[selectedDifficulty] ? DIFFICULTY_PRESETS[selectedDifficulty].label.toUpperCase() : 'OPERATIVE'),
     gameSeed ? 'SEED: ' + gameSeed + ' (randomized codes)' : 'CODES: STANDARD',
     'AUTHORIZATION: GRUBER, HANS', '',
@@ -7258,13 +7258,13 @@ var ACTS = [
         spl:'index=nakatomi_building sourcetype="nakatomi:building:elevator" override_code=*',
         hints:['The elevator system has an override function.','Search for elevator override events in the building index.','Try: index=nakatomi_building sourcetype="nakatomi:building:elevator" override_code=*','Override code 4401. Enter 4401.'],
         storyBeat:'Elevators locked. No one goes up or down without our say.' },
-      { id:'2.3', name:'Guard Rotation', type:'code', code:'0012',
-        trapCodes:['0015','0010'],
+      { id:'2.3', name:'Guard Rotation', type:'code', code:'0008',
+        trapCodes:['0012','0015','0010'],
         speaker:'HANS',
         objective:'\u201cSecurity guards patrol on a schedule. Find the gap between patrols on floor 30 \u2014 that\'s our window, in minutes. The shift change log lists 15-minute intervals, but the actual camera timestamps tell a different story.\u201d',
         spl:'index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap',
-        hints:['Camera logs show guard patrols \u2014 look for timestamps.','Floor 30 patrols \u2014 check the time between each pass.','Try: index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap','12-minute gap. Enter 0012.'],
-        storyBeat:'Twelve minutes. That\'s all we need. Time it right.' },
+        hints:['Camera logs show guard patrols \u2014 look for timestamps.','Floor 30 patrols \u2014 check the time between each pass. Splunk\'s delta returns seconds.','Try: index=nakatomi_building sourcetype="nakatomi:security:camera" floor=30 event_type=guard_patrol | sort _time | delta _time as gap','480 seconds between passes \u2014 eight minutes. Enter 0008.'],
+        storyBeat:'Eight minutes. That\'s all we need. Time it right.' },
       { id:'2.4', name:'Hostage Floor', type:'code', code:'0030',
         trapCodes:['0034','0028'],
         speaker:'HANS',
@@ -14115,6 +14115,7 @@ function render() {
 function renderCodeDisplay() {
   var task = currentTask();
   var sd = document.getElementById('seg-digits');
+  if (!sd) return;
   if (task && task.codeType === 'text') {
     sd.innerHTML = '';
     var maxLen = Math.max((task.code || '').length, state.codeInput.length, 4);
@@ -14127,8 +14128,19 @@ function renderCodeDisplay() {
     }
     return;
   }
-  var digits = document.querySelectorAll('.seg-digit');
-  for (var i = 0; i < digits.length && i < 4; i++) {
+  /* Numeric codes always use exactly 4 cells. Rebuild when a text task
+     (e.g. EXT7700) left extra spans — otherwise ghost digits like "700"
+     linger at the end of the display after switching tasks. */
+  if (sd.querySelectorAll('.seg-digit').length !== 4) {
+    sd.innerHTML = '';
+    for (var j = 0; j < 4; j++) {
+      var blank = document.createElement('span');
+      blank.className = 'seg-digit';
+      sd.appendChild(blank);
+    }
+  }
+  var digits = sd.querySelectorAll('.seg-digit');
+  for (var i = 0; i < 4; i++) {
     var c = state.codeInput[i];
     digits[i].textContent = c || '8';
     digits[i].classList.toggle('filled', !!c);

@@ -13,7 +13,7 @@ The first six seals open with codes discovered through SPL. The **seventh seal**
 
 The game supports **dual mode**: play with the physical vault model, or go fully digital with `game.html` — an on-screen keypad, clue card reveals, and a hidden power element for Seal 7.
 
-**Current version: 2.17.0** — See [RELEASE_NOTES.md](RELEASE_NOTES.md) for full changelog.
+**Current version: 2.17.1** — See [RELEASE_NOTES.md](RELEASE_NOTES.md) for full changelog.
 
 ## How It Works
 

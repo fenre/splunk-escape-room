@@ -129,6 +129,57 @@ assert('5.3 spl scopes FBI power-cut window', t53 && t53.spl.indexOf('23:20:00')
 const t21 = tasks.find(t => t.id === '2.1');
 assert('2.1 no TRUNK trap', t21 && !t21.trapCodes.includes('TRUNK'));
 
+const t23 = tasks.find(t => t.id === '2.3');
+assert('2.3 answer matches 8-minute patrol gap', t23 && t23.code === '0008');
+assert('2.3 traps include guard-badge red herring 0012', t23 && t23.trapCodes.includes('0012'));
+
+/* guard_patrol seed data — floor-30 patrols are 480s (8 min) apart */
+const cameraSeedPath = path.join(REPO_ROOT, 'generator', 'infrastructure', 'nakatomi_security_camera.json');
+const cameraLines = fs.readFileSync(cameraSeedPath, 'utf8').trim().split('\n');
+const patrolTimes = [];
+for (const line of cameraLines) {
+  const rec = JSON.parse(line);
+  if (rec.event && rec.event.indexOf('event_type=guard_patrol') >= 0 && rec.event.indexOf('floor=30') >= 0) {
+    patrolTimes.push(rec.time);
+  }
+}
+patrolTimes.sort((a, b) => a - b);
+let patrolGapsOk = patrolTimes.length >= 2;
+for (let gi = 1; gi < patrolTimes.length; gi++) {
+  if (Math.abs(patrolTimes[gi] - patrolTimes[gi - 1] - 480) > 0.001) patrolGapsOk = false;
+}
+assert('floor-30 guard_patrol events are 480s apart', patrolGapsOk);
+
+/* renderCodeDisplay — numeric path must reset 7 text cells (no ghost "700") */
+const renderMatch = html.match(/function renderCodeDisplay\(\) \{[\s\S]*?\n\}/);
+assert('renderCodeDisplay found', !!renderMatch);
+if (renderMatch) {
+  const mockSd = {
+    _spans: ['E', 'X', 'T', '7', '7', '0', '0'].map(function(ch) {
+      return { className: 'seg-digit filled', textContent: ch, classList: { toggle() {} } };
+    }),
+    get innerHTML() { return ''; },
+    set innerHTML(_v) { this._spans = []; },
+    querySelectorAll(sel) {
+      return sel === '.seg-digit' ? this._spans : [];
+    },
+    appendChild(el) { this._spans.push(el); }
+  };
+  const ctx = {
+    document: {
+      getElementById: function(id) { return id === 'seg-digits' ? mockSd : null; },
+      createElement: function() {
+        return { className: '', textContent: '', classList: { toggle() {} } };
+      }
+    },
+    currentTask: function() { return { codeType: 'numeric', code: '1015' }; },
+    state: { codeInput: '' }
+  };
+  vm.runInNewContext(renderMatch[0] + '; renderCodeDisplay();', ctx);
+  assert('numeric display rebuilds to 4 cells', mockSd._spans.length === 4);
+  assert('numeric display clears ghost digits', mockSd._spans.every(function(d) { return d.textContent === '8'; }));
+}
+
 console.log('\n══ Game Tasks Test Summary ══');
 console.log(`${passed} pass, ${failed} fail`);
 if (failed) {

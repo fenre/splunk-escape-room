@@ -79,7 +79,7 @@ const STUB_ACTS = [
     { id: '1.2', name: 'Decoy A',            type: 'code',  code: '1234' }
   ]},
   { name: 'Act 2', quote: '"q2"', tasks: [
-    { id: '2.3', name: 'Guard Rotation', type: 'code', code: '0012' }
+    { id: '2.3', name: 'Guard Rotation', type: 'code', code: '0008' }
   ]},
   { name: 'Act 3', quote: '"q3"', tasks: [
     { id: '3.3', name: "Takagi's Refusal",   type: 'code',  code: '4291' },

@@ -8,6 +8,24 @@ Versioning follows [Semantic Versioning](https://semver.org/): **MAJOR.MINOR.PAT
 
 ---
 
+---
+
+## 2.17.1 — 2026-06-17
+
+**Theme: Playability patch — keypad display and guard-patrol puzzle parity.**
+
+### Fixed
+
+- **Keypad ghost digits** — switching from a text-code task (e.g. `EXT7700`) to a 4-digit numeric task no longer leaves trailing characters (`700`) in the segment display; `renderCodeDisplay()` rebuilds exactly four cells for numeric codes.
+- **Task 2.3 Guard Rotation** — camera `guard_patrol` timestamps on floor 30 are consistently **8 minutes** (480 s) apart; answer corrected from `0012` to `0008`. Trap `0012` (guard badge SE-0012) replaces the old correct code; hints note that Splunk `delta _time` returns seconds.
+- **Infrastructure seed** — patrol timestamps after 21:04 corrected so every floor-30 gap is 480 s; `nakatomi_security_camera.log` regenerated.
+
+### Tests
+
+- Regression suite: **1073 assertions** across 13 modules (adds patrol-interval and display-rebuild checks in `test_game_tasks.js`).
+
+---
+
 ## 2.17.0 — 2026-04-26
 
 **Theme: Facilitator dashboard catches up — three new rows surface every v2.13/v2.14 telemetry event that was queuing into Splunk with no panel showing it.** Pure dashboard work, no `game.html` changes, no new event types. Closes the visualisation gap flagged in the v2.16 QC checklist (Section 5.3) so QC observers can actually watch booth kiosk operations / post-session feedback / facilitator activity light up live during testing.
