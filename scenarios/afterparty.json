@@ -1,0 +1,26 @@
+{
+  "$schema_version": 2,
+  "$id": "afterparty",
+  "$description": "After-party reskin: the heist already happened. You're McClane, alone in the building post-takedown, and the dataset's reframed as forensic recovery — same 26 tasks, but every story beat is now a debrief / witness statement / evidence log.",
+  "metadata": {
+    "name": "After-party Edition",
+    "tone": "forensic debrief",
+    "duration_minutes": 90,
+    "version": "1.0.0",
+    "author": "Nakatomi Heist Project"
+  },
+  "ambient": {
+    "label": "Distant 80s radio",
+    "description": "Soft 80s radio chatter on the ambient bus, with the default low-pad drone suppressed to half. Periodic walkie-talkie clicks suggest the FBI is staging in the lobby."
+  },
+  "story_beats": {
+    "act_1_open": "It's the morning after. Christmas Day, 1988. The lights are on and the bodies are bagged. You're walking the building with the FBI investigation lead, reconstructing what happened from the logs Hans's team left behind.",
+    "act_5_intro": "The vault's open. The bonds are gone. The seventh-seal log entry holds the clue to who actually pulled the power — and why the FBI's official report won't mention them."
+  },
+  "intercepts": {
+    "lobby_alarm_replacement": "FBI Field Lead: \"Walk me through this one more time. Who hit the seventh seal — and where the hell were you when it happened?\""
+  },
+  "endings": {
+    "default_intro_override": "The reconstruction is complete. The FBI files the report. The bonds are still missing. \"Welcome to the morning after, pal.\""
+  }
+}

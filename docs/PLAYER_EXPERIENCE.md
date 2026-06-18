@@ -435,16 +435,40 @@ Team codes appear in the HUD top-corner throughout the game so the facilitator c
 
 ### Live facilitator dashboard
 
-A new Splunk dashboard, **Facilitator Board** (`facilitator_board.xml`), is designed for a 1920×1080 booth TV behind the operator. Panels:
+A new Splunk dashboard, **Facilitator Board** (`facilitator_board.xml`), is designed for a 1920×2860 booth TV behind the operator (grew from 1920×1080 in v2.4, to 1920×1450 in v2.9 for discovery analytics, to 1920×1790 in v2.10 for the Adaptive Hans row, to 1920×2120 for the facilitator phone-call cinematic row, to 1920×2360 for the v2.10 investigation-board analytics row, to 1920×2620 for the v2.11 Floor-30 hub analytics row, and to 1920×2860 for the v2.12 Ending Branches row). Panels:
 
 - KPIs — active / completed / failed sessions; average win time.
 - Live leaderboard — ranked by score, with elapsed and act.
 - Per-act funnel — how many teams are in Act 1 vs Act 5 right now.
-- Trap-hit log — who tripped which decoy and when.
+- Trap-hit log — who tripped which decoy and when; the `has_lore` field shows whether it was a narrative trap or a silent one.
 - Hint distribution — column chart of hints used per task.
 - Recent session-end incidents — pinned victory / loss / timeout outcomes.
+- **Discovery Analytics (v2.9)** — three tables answering "what did my booth actually find?":
+  - **Top 10 side stories** — ranked by unique teams who discovered them, with a booth-share percentage (e.g., `9086 The Pineapple Incident · 12 · 63%`).
+  - **Top 10 easter eggs** — same shape but split by discovery trigger (`konami` → Konami code, `keypad` → keypad 6xxx, otherwise SPL-only).
+  - **Top 10 curiosity teams** — ranked by `dc(story_id) + dc(egg_id)` per team, with a `rank · team · stories · eggs · total` row so curiosity becomes a first-class scoreboard axis alongside speed and accuracy.
+- **Adaptive Hans (v2.10)** — three panels surfacing antagonist activity:
+  - **Hans Reactions Today** single-value KPI — daily count of reactive lines fired across the booth.
+  - **Recent Hans Reactions** table — last 25 lines with `ts / team_code / act / trigger_label / tone / reaction_id`.
+  - **Hans Trigger + Tone Mix** stacked column — 24 h reactions grouped by `trigger`, stacked by `tone`, so facilitators can verify the act-5 sinister bias is actually firing.
+- **Facilitator Phone Calls (v2.10)** — three panels surfacing the cinematic phone-call system:
+  - **Phone Calls Today** single-value KPI — daily `phone_call_incoming` count across the booth.
+  - **Recent Phone Calls** table — last 25 events with `ts / team_code / state (incoming/answered/missed) / caller_label / delivery_type / line_preset_id`.
+  - **Phone Mix** stacked column — 24 h incoming calls by `caller`, split by `delivery_type` (preset vs. adhoc), so facilitators can see at a glance whether cinematics are mostly rotated presets or live improvisation.
+- **Investigation Board (v2.10)** — three panels surfacing the meta-puzzle corkboard:
+  - **Board Pins Today** single-value KPI — daily `clue_pinned` count across the booth.
+  - **Pin Type Mix** stacked column — 24 h pins by `pin_type` (task / story / intercept / egg / lore / suspect), split by `source` (task_complete / side_story / easter_egg / phone_call / trap_code / drag_drop). Answers "what are teams actually connecting?"
+  - **Top Investigating Teams** table — top 10 teams by `detective_score = pins + threads × 2 + notes + exports × 5`, so post-session debriefs can recognise teams who invested in the meta-puzzle, not just the critical path.
+- **Floor-30 Hub (v2.11)** — three panels surfacing the free-roam hub overlay:
+  - **Hub Sessions Today** single-value KPI — distinct teams that opened the hub at least once today.
+  - **Station Click Mix** stacked column — 24 h `hub_station_clicked` events by `station_id` (terminal / keypad / leads / briefing / blueprint / comms / board), stacked by `availability` (available / locked / hidden). Facilitators can see at a glance whether teams are hitting the same few stations or exploring the full map — and, crucially, whether anyone is **repeatedly hammering locked stations**, a strong "I'm stuck, I don't understand the gating" signal that calls for a facilitator nudge.
+  - **Hub Dwell Time** stats table — median and max `elapsed_ms` grouped by `close_trigger` (esc / station_click / backdrop_click / hotkey / game_over / reset). High median dwell on `esc` suggests teams use the hub as a strategic overview; high dwell on `station_click` suggests they use it as a launchpad.
+- **Ending Branches (v2.12)** — three panels surfacing the tonal Act-5 classifier:
+  - **Endings Today** single-value KPI — daily count of `ending_classified` events across the booth (each victory contributes exactly one).
+  - **Ending Distribution** stacked column — 24 h `ending_id` counts (analyst / cowboy / speedrunner / default), stacked by `difficulty`. Answers "how did the booth actually play tonight?" and surfaces tonal drift across the evening (e.g. early teams trend Analyst, late-evening teams trend Cowboy as fatigue sets in).
+  - **Recent Endings** table — 20 most-recent classifications with `ts / team_code / ending_id / elapsed / wrong_count / hint_tokens_spent / side_stories_discovered / difficulty`. Lets facilitators ground-truth the classifier at a glance: every Speedrunner row should have `elapsed < 50 %` of the timer, every Analyst row should have `wrong_count ≤ 1 ∧ side_stories_discovered ≥ 3`, etc.
 
-Optional `booth_token` input filters every panel to a single conference booth without needing per-event index changes.
+Optional `booth_token` input filters every panel to a single conference booth without needing per-event index changes — the discovery, Hans, phone, investigation-board, hub, and ending panels all honour the same filter via the existing `$booth_token$` pattern.
 
 ### Spectator second screen
 
@@ -544,5 +568,259 @@ Two new event types extend the v2.4 schema:
 
 ---
 
-*Document version: v4 (hint-token economy update)*
+## 9. Populated World — NPCs, Side Mysteries, Red Herrings, Easter Eggs, Lore (v2.9)
+
+v2.9 grows the data world around the main heist without changing the critical path. Five complementary layers ship together:
+
+### 9.1 Background population
+
+The `generate.py` generator emits a full week of pre-heist baseline badge traffic (`Dec 17 → Dec 24`) from **60 named NPCs** across five work patterns: `day_shift` (32), `late_engineers` (10), `cleaning_crew` (6), `security_rotation` (8), `vendors` (4). A dedicated **Christmas-party guest crowd** (47 badges, `GUEST-001`–`GUEST-047`) floods floor 30 during 20:00–22:00 so Seal 2's `dc(badge_id) by floor` is unambiguously floor 30.
+
+Booth operators skip the baseline with `python3 generate.py --booth-mode` — the resulting ~1,172-event dataset keeps all puzzles, side stories, easter eggs, and lore bulletins solvable while staying legible for 5-minute demos.
+
+### 9.2 Side mysteries
+
+Eight hand-authored trails live in the dataset. Each is reachable by entering a unique **`9xxx`** code on the keypad — the 9-prefix namespace is reserved for side stories and never triggers wrong-answer penalties. On discovery, a golden toast reveals the narrative payoff and an achievement unlocks:
+
+| Code | Title | What it teaches |
+|---|---|---|
+| `9012` | The Affair | Correlating badge locations with diary entries |
+| `9050` | Petty Cash Skim | Arithmetic anomaly detection in finance logs |
+| `9086` | The Pineapple Incident | Filtering catering/order streams |
+| `9099` | The Ghost Account | Cross-referencing lookups with event activity (terminated employees who still swipe) |
+| `9200` | The Y2K Test | Scanning for future-dated test events |
+| `9315` | The Disgruntled Sysadmin | Identifying insider-threat signals in IT logs |
+| `9425` | The Blind Spot | Spotting gaps in camera coverage |
+| `9552` | Theo's Homework | Proxy-log forensics |
+
+Meta achievements unlock at **1 story** (Curious), **4 stories** (Investigator), and **all 8** (Completionist). A **Discoveries panel** in the pause menu shows the current count and lists discovered titles; undiscovered stories appear as redacted placeholders. Side-story events are present in both full and booth modes so even a 15-minute run can stumble onto one.
+
+### 9.3 Red herrings
+
+Three patterns deliberately tempt naive approaches, then reward the player (via lore or a narrative toast) when the correct technique is applied:
+
+- **Debounce "ghost reads"** — Badge reader `RDR-30-NORTH` has a documented hardware bug: every swipe by Joseph Takagi (`JT-0001`) during the party window emits a ghost duplicate 0.4–0.8s later with `ghost_read=true`. A naive `| stats count by badge_id` overcounts; the taught correction is `| dedup _time badge_id reader` or `| bin _time span=2s | stats …`. 8 primary + 8 ghost swipes = 16 events, all scoped to `sourcetype=nakatomi:access:badge`.
+- **Cross-index echoes** — 13 events in `index=nakatomi_building` carry `ref_badge=JT-0001` / `HT-0001` / `HE-3301` / `TH-0099` in their message text across `intranet:it`, `intranet:hr`, and `proxy:http` sourcetypes. Players doing `index=* badge_id=JT-0001` see the extra hits and learn to scope: `index=nakatomi_access` for swipes, not `index=*`. Echoes never land in access sourcetypes, so correctly scoped queries see zero false positives.
+- **Trap-code lore** — Four existing trap codes (`1990`, `0911`, `1666`, `1988`) gained narrative lore cards that appear ~0.9s after the penalty lands. The penalty still hits (`wrong_count` bumps, audio sting plays); the lore toast lives at the bottom of the viewport in a red/alert palette (distinct from the amber side-story palette) for 4.5s. Wired into tasks 1.2 (Find Takagi), 2.5 (Intercept the Call), 3.4 (The Roof Trap), and 5.4 (Final Extraction) respectively.
+
+Facilitator dashboards can filter `trap_hit` events by the new `has_lore=true` field to see whether teams who encounter lore-tagged decoys learn faster than those who only hit silent traps.
+
+### 9.4 Easter eggs
+
+Fifteen hidden moments reward curiosity without punishing the player. Fourteen are claimable via the new **`6xxx`** keypad namespace — a dedicated range that checks before the wrong-answer penalty fires, so entering an egg code never hurts the score. Each keypad egg has a **data anchor** somewhere in the generated dataset (diary entry, maintenance ticket, intercepted radio traffic, proxy-log oddity, …) so players can discover the code via SPL queries instead of brute-forcing:
+
+| Code | Title | Where the data anchor lives |
+|---|---|---|
+| `6024` | Holly's Diary, Dec 24 | `index=nakatomi_building sourcetype=intranet:diary` |
+| `6030` | Floor 30 Elevator (Fixed Again) | `NAK-88-2204` ticket in `intranet:it` |
+| `6042` | The Coffee Murder | `EM-30-2` espresso machine in `building:sensors` |
+| `6089` | The Pineapple War, Round 2 | `#trading-floor` chat in `intranet:chat` |
+| `6093` | Ode to Joy | Culture-committee bulletin in `intranet:culture` |
+| `6147` | Theo's 147 | Proxy-summary entry for `TH-0099` |
+| `6199` | Yippee-Ki-Yay | `intercept:mcclane` on `nakatomi_comms` |
+| `6220` | No More Table | `intercept:hans` on `nakatomi_comms` |
+| `6252` | Ho. Ho. Ho. | `intercept:hans` with a base64 attachment |
+| `6401` | Argyle on the Carphone | `intercept:argyle` on `nakatomi_comms` |
+| `6404` | The Archive Door | `FAC-30-v7` schematic in `intranet:facilities` |
+| `6411` | D-A-D in Morse | Slow-loop Morse on `intercept:morse` |
+| `6777` | Roy Rogers Checks In | Guest badge `GUEST-ROY-ROGERS` in `intranet:security` |
+| `6911` | HAL 9000 User Agent | Proxy log with HAL 9000 UA string |
+
+The fifteenth egg is a **Konami code** (↑ ↑ ↓ ↓ ← → ← → B A anywhere on the keyboard) that triggers a 30-second BIOS-era credits roll. The overlay respects `prefers-reduced-motion` (becomes a static credit card instead of scrolling) and emits `easter_egg_found{trigger=konami}` for the facilitator dashboard.
+
+Discovering eggs unlocks three new meta-achievements: **Secret Keeper** (5 eggs), **Egg Hunter** (10 eggs), and **Ultimate Completionist** (all side stories + all eggs in a single run). The **Discoveries panel** gains a second section alongside the side-story list; undiscovered entries render as count-only placeholders so players never see spoilers for eggs they haven't found.
+
+A new `nakatomi_comms` data path is exercised for the first time in v2.9. Facilitators running `scripts/load_data.sh` must include `nakatomi_comms` in the HEC token's allowed-indexes list; without it, the five comms-tier eggs (McClane's yippee, Hans's ho-ho-ho and no-more-table, Argyle's carphone, D-A-D in Morse) still claim from the keypad but are not SPL-discoverable.
+
+### 9.5 World-building lore (codex + intranet announcements)
+
+The fifth layer is pure texture — no new puzzles, no new codes, no new telemetry. It makes the tower feel lived-in and gives facilitators canonical answers to the "who is this person?" questions that side stories and easter eggs provoke.
+
+**`docs/NAKATOMI_LORE.md`** — the authoritative world bible. It covers:
+
+- **A brief history of Nakatomi Plaza** (1974 groundbreaking → 1977 topping-out → 1981 full occupancy → 1985 Car #2 elevator fire → 1986 clearance-tier rollout → 1987 Room 30-B incident → 1988 status quo → the Y2K side-story setup).
+- **Two prior incidents** with case references, locations, outcomes, and lessons learned. These aren't just lore: they explain why Eduardo Vasquez is the head of Facilities in 1988 (promoted after the 1985 fire), why Takagi is the CEO and not the COO (promoted after the 1987 hostage situation), and why Sergeant Al Powell knows the building blueprint (1987 liaison officer).
+- **Department + tenancy table** — every floor 1–39 mapped to a tenant, function, and head of floor. Side-story and red-herring queries now resolve into a coherent building instead of an abstract event bag.
+- **~20 character bios** — Executives & Key Staff, Building Security, Facilities & Janitorial, Engineering/IT/R&D, Admin & Finance, Catering & Vendors, External Parties, and Antagonists. Every bio carries a badge ID, department, role, and a short narrative beat explaining why the character shows up in the logs.
+- **"How this lore appears in Splunk"** — SPL pointers from the codex directly into the announcements, HR memos, diary entries, schematics, comms intercepts, and sensor telemetry, so facilitators can show the connections live on a screen during a booth shift.
+- **Authoring rules** for future contributors (no new codes, no collisions with seal/trap/side-story/easter-egg namespaces, tone and era constraints).
+
+**Seven intranet announcements** seed the codex into the dataset itself, so the lore is reachable by SPL without anyone needing to open a markdown file:
+
+| Bulletin ID | Author | Topic |
+|---|---|---|
+| `ANN-88-CEO-HOLIDAY` | Joseph Takagi | Holiday message referencing the Room 30-B incident |
+| `ANN-88-HR-RSVP` | Olivia Park-Hammond | RSVP reminder for the Dec 24 Christmas party |
+| `ANN-88-FAC-HVAC` | Eduardo Vasquez | Roof-chiller service window, Zone 4 |
+| `ANN-88-SEC-PARKING` | James Marsh | B2 reduced capacity for party-catering staging |
+| `ANN-88-IT-MAINT` | Mads Sorensen | Y2K pilot maintenance window (cross-link to side story `9200`) |
+| `ANN-88-FAC-ANNIVERSARY` | Eduardo Vasquez | Plaza's upcoming 13-year anniversary |
+| `ANN-88-SEC-DRILL` | James Marsh | Q4 fire-safety drill recap |
+
+All seven live in `index=nakatomi_building sourcetype=intranet:announcements`. Every bulletin is **pure texture**: the generator runs a reserved-code scanner at every build and fails loud if any `subject` or `message` contains any 4-digit number that matches a seal, trap, side-story, or easter-egg code. Contributors cannot accidentally introduce a false lead.
+
+Booth mode ships all seven announcements (~1 KB total); the full-mode count is unchanged at ~47k.
+
+### 9.6 Integrity guarantees
+
+Seals remain deterministic across seeds and modes: Takagi's latest badge floor (Seal 1.2) stays at **30**, and the busiest party floor by `dc(badge_id)` (Seal 2) stays at **30 / 67** even with all Phase-6 noise added. The 14 easter-egg anchor events carry unique identifiers (`egg_id`, `egg_code`) but never collide with seal codes, trap codes, or side-story codes — the generator fails loud if any future scenario edit introduces a clash. The seven intranet announcements are likewise scanned for standalone 4-digit numbers at build time; any collision with a reserved code aborts the build with a pointer at the offending bulletin.
+
+### 9.7 Booth-wide discovery analytics (v2.9)
+
+The facilitator board's Discovery Analytics row turns the sum of individual sessions into a booth-level story. Every `side_story_discovered` and `easter_egg_found` event a player emits is aggregated live into three tables:
+
+1. **Top 10 side stories** — "The Pineapple Incident was found by 12 of 19 teams today (63%)." Helps facilitators see which mysteries land and which ones are too obscure to stumble on.
+2. **Top 10 easter eggs** — The same ranking for the 15 eggs, split by discovery trigger so the Konami code cinematic doesn't visually dominate the SPL-only eggs.
+3. **Top 10 curiosity teams** — `dc(story_id) + dc(egg_id)` per team, ranked. Gives the booth operator a "most inquisitive team of the day" line for the closing announcement — a parallel scoreboard to the pure-speed leaderboard.
+
+All three respect the existing `$booth_token$` filter, so a single shared dashboard URL cleanly partitions per-booth views when multiple booths run at once. No new telemetry events, no new indexes, no new HEC paths — everything is derived from events already emitted since v2.9's Phase 6b and 6d shipped, so pre-existing session data benefits retroactively.
+
+### 9.8 Adaptive Hans (v2.10)
+
+Hans Gruber now reacts to what players are doing. The `HansAntagonist` engine watches six signals — idle teams (≥2 min quiet), lazy broad queries (no filters), keypad spam (6 wrongs in 60 s), fast solves, side-story discoveries, and the Konami code — and fires one of 36 hand-authored reaction lines. A tone bias driven by act number steers the selection: acts 1–2 favour **light** lines (taunting, arrogant), acts 4–5 favour **sinister** lines (intimate, menacing). Each team sees at most one reaction every 5 minutes, and the same reaction ID can't repeat within a 3-line window per tone bucket, so the system feels atmospheric rather than nagging.
+
+Where do players find Hans's reactions? Two places at once:
+
+- **In-world:** the raw intercept drops into `index=nakatomi_comms sourcetype=intercept:hans` alongside the hand-authored transcripts, indistinguishable by SPL. A player searching `intercept:hans "your hesitation"` won't be able to tell whether Hans said it at build time or 30 seconds ago in response to their idle stretch.
+- **For facilitators:** a lightweight `hans_reaction` metadata event (no transcript) lands on `index=nakatomi_sessions`, driving the Adaptive Hans row on the facilitator board (recent reactions table, trigger + tone mix, daily count KPI).
+
+Why do it this way? The dual-destination wire format keeps the narrative texture rich on the comms index (where players look for story) while keeping the session index tight for analytics (no free-text blobs bloating the dashboards). A v2.10 `INTERCEPT_TARGETS` allow-list in `NakaTelemetry` deny-by-default blocks any future caller from spraying events at arbitrary indexes; the only approved target is `intercept:hans`, and every reaction line passes through the same `safeId()` / `safeText()` sanitizers as player input. The regression test `scripts/tests/test_hans_antagonist.js` asserts the HEC token never leaks into a queued payload even when telemetry is fully configured.
+
+A speech-bubble UI overlay surfaces each reaction in the game pane for 6 seconds, auto-dismissing without stealing focus. Screen readers announce each line via the existing `a11yAnnounce()` live region, so the effect isn't visual-only. Reactions are suspended while the game is paused — the throttle clock only runs during active play — so pausing for a break doesn't silently exhaust your Hans budget.
+
+### 9.9 Facilitator phone-call cinematic (v2.10)
+
+Sitting alongside Adaptive Hans is a **facilitator-directed phone cinematic** — a one-shortcut way to inject a scripted in-character call mid-session. A top-right overlay rings, the ambient synth bed smooth-ducks to 30%, and when the player accepts the call the transcript is rendered and voiced via the browser's `SpeechSynthesis` with a caller-specific voice profile (Powell sounds measured and warm; Hans sounds clipped and European; Holly sounds urgent). Browsers without speech synth still render the transcript as text so no dialogue is silently lost.
+
+Three callers, three narrative purposes:
+
+- **Sgt. Al Powell** — tactical support / hint nudge. Use when a team has stalled on an act without asking for a hint token; Powell's line is always a gentle "have you looked at X?" prompt that doesn't spoil the puzzle.
+- **Hans Gruber** — antagonist threat. Use when a team just discovered a side story or cracked the Konami code; Hans's line acknowledges their cleverness and threatens retaliation. Higher z-index than the Adaptive Hans speech bubble so a concurrent call visually takes precedence.
+- **Holly Gennero** — emotional beat. Use sparingly — Holly's lines land best at the narrative mid-point, when a team has bought the Act 2 heist briefing but hasn't yet entered the vault.
+
+Three trigger paths:
+
+1. **Hotkey** — `Ctrl+Shift+1/2/3` (or `⌘⇧1/2/3` on macOS) summons Powell / Hans / Holly. Active during pause, so you can cue a cinematic while holding the floor for a booth talk. Ignored when a text input is focused.
+2. **URL hash** — `#call=powell` fires a preset rotation line on load. For live booth talks, `#call=hans:Listen+carefully+Mr+Gennero` fires an ad-hoc facilitator-authored line via live TTS. The hash is cleared after trigger so browser-back doesn't re-ring.
+3. **Programmatic** — `PhoneCalls.trigger(caller, customLine?)` from the browser console or a future KV-Store poll. This is how a facilitator dashboard could eventually push calls from their own screen.
+
+Telemetry captures the cinematic on three new event types on `index=nakatomi_sessions`: `phone_call_incoming` (fires when the call is queued, carries `caller` / `delivery_type` / `line_preset_id` / `act` / `task_id`), `phone_call_answered` (fires on accept, carries `latency_ms` from ring to answer), and `phone_call_missed` (fires on decline / ESC / 30 s auto-expire, carries `ring_duration_ms`). A dedicated **Facilitator Phone Calls** row on the facilitator board shows a daily KPI, a recent-events table, and a caller × delivery-type stacked chart.
+
+**Privacy note:** when a facilitator uses the ad-hoc `#call=hans:...` path to improvise a line tied to a specific audience, **the raw text is never written to telemetry** — only the fact that an ad-hoc call fired, with `delivery_type=adhoc` and `line_preset_id=adhoc`. This is a deliberate design decision so live booth improvisation stays off the retained log. The regression test `scripts/tests/test_phone_calls.js` asserts this property so a future refactor cannot regress it silently.
+
+Accessibility: the ringing pulse animation is suppressed under `prefers-reduced-motion`; the accept / decline buttons are ≥48 px and reachable by tab order; ESC dismisses an active call with the highest-priority overlay escape path (so it always cancels a mistaken cue, even if other overlays are open). Muting the game audio cancels any in-flight TTS and stops the ring immediately — muting is a real audio kill switch, not just an ambient-bed switch. `PhoneCalls.setMuted(true)` exposes a phone-specific mute for facilitators who want to keep ambient music playing but suppress TTS during a talk.
+
+### 9.10 Investigation board (v2.10)
+
+The **investigation board** is a full-screen corkboard overlay (hotkey `B`, also reachable from the pause menu) where teams connect the evidence they've gathered into a visible detective narrative. It's the answer to a long-standing booth observation: teams find a lot of stuff (phone intercepts, side stories, easter eggs, lore bulletins), but the stuff lives in scattered toasts and a progress bar, and nothing on-screen lets them say "*this* call relates to *that* side story." The board turns that implicit mental model into a physical, exportable artefact.
+
+Six pin categories, each with its own colour and telemetry facet:
+
+- **Task** (amber) — completed story-beat objectives, pinned automatically when an act task completes.
+- **Side story** (cyan) — optional `9xxx` mysteries, pinned on first discovery via `handleSideStoryDiscovery`.
+- **Intercept** (teal) — answered phone calls from the Phase 5i cinematic system, pinned on accept with a weak fingerprint so replaying the same preset doesn't duplicate the pin.
+- **Easter egg** (magenta) — `6xxx` secrets found via SPL or the Konami code.
+- **Lore** (grey-amber) — decoy keypad codes (`1990`, `0911`, `1666`, `1988`) whose narrative payoff is worth preserving alongside the real finds.
+- **Suspect** (red) — manually flagged by right-clicking (or long-pressing on touch) an existing pin to upgrade it, for the "who is actually behind this" moment late in a session.
+
+**Auto-pin hooks fire from six game events**, so teams don't manually transcribe what they've already found: task completion, side-story discovery, easter-egg discovery, answered phone call, trap-code lore toast, and manual drag from the clue tray. Every auto-pin carries a stable `sourceId` — a second auto-pin with the same sourceId is a no-op, so the board never accumulates duplicates even across replays.
+
+**Connection threads** — click a pin, then click a second pin, and a red string renders between them in an SVG overlay beneath the pins. Threads survive pin deletion by being pruned when their endpoint goes away. **Freehand notes** (double-click the canvas) are length-capped at 300 characters and are stored purely in `localStorage` — note bodies are deliberately **not emitted** to telemetry, following the same ad-hoc-text rule as the phone cinematic.
+
+**PNG export** — a `DOWNLOAD PNG` button on the victory breakdown (and in the pause menu) renders the board to a 1920×1080 canvas with the team code + timestamp watermark. The render path intentionally **does not** serialize the DOM; it redraws each pin's text through the module's local `esc()` helper so a pin title containing `<script>` tags can only corrupt the attacker's own PNG. The image is downloaded via a blob URL — it is never uploaded or posted anywhere.
+
+**Booth mode** (`?booth=1`) simplifies the board to pin-only: the tray and pins remain, but threads and notes are hidden. Keeps the "see what you've found" value for 5-minute queue visitors without adding cognitive load under time pressure.
+
+**Cap with eviction** — the persistent state is bounded at 200 pins / 300 threads / 50 notes. Overflow evicts oldest-first (and prunes dangling threads), so long marathon sessions don't blow the `localStorage` quota. The cap is enforced at mutation time, not at save time — a caller that triggers `autoPin()` 10,000 times in a loop cannot amplify to a storage DoS.
+
+**Facilitator board (v2.10) investigation-board row** — three panels on the live booth TV:
+
+- **Board Pins Today** — daily KPI across all teams in the booth.
+- **Pin Type Mix** — stacked column chart by `pin_type`, split by `source`. Facilitators can see at a glance "are teams finding the easter eggs tonight, or mostly just completing tasks?"
+- **Top Investigating Teams** — a table ranked by `detective_score = pins + threads × 2 + notes + exports × 5`. A useful post-session talking point: recognise teams who invested in the meta-puzzle, not just the critical path.
+
+**Telemetry** is four new event types, all on `index=nakatomi_sessions sourcetype=nakatomi:session:event`: `clue_pinned` (pin_id, pin_type, source, running totals), `thread_drawn` (thread_id, from/to pin types, same_type boolean), `note_added` (note_id, note_length — **not** the body), and `board_exported` (trigger, counts, elapsed_seconds — **not** the image). All four are on the `NakaTelemetry.EVENT_TYPES` allow-list; emit-time validation rejects events with any other type.
+
+**Accessibility** — the board is a full-screen modal with a labelled close button, keyboard navigation between pins (arrow keys + Enter to open a pin's inspector), screen-reader announcements via the existing `a11yAnnounce()` live region, touch support for drag + long-press-to-flag, and ≥48 px tap targets throughout. Honors `prefers-reduced-motion` (no animated thread-drawing transition, no pulse on new auto-pin). ESC closes the board without clearing state.
+
+**Regression coverage** — `scripts/tests/test_investigation_board.js` extracts `NakaTelemetry` + `InvestigationBoard` into a sandboxed `vm` context with stubbed DOM and canvas, asserting 69 behaviours including module surface, registry integrity, event allow-list, auto-pin happy path + dedup + 200-pin cap + type fallback, XSS resistance, `localStorage` persistence, `clear()` semantics, `exportPNG()` telemetry, and `isOpen()`/`toggle()` round-trip. With the existing Hans (69) and Phone (84) harnesses, the module test suite is now **222 assertions, all passing**.
+
+### 9.11 Free-roam Floor-30 hub (v2.11)
+
+The **Floor-30 hub** is a full-screen blueprint-style overlay (hotkey `M`, also reachable from the pause menu via the new `FLOOR-30 MAP` button) that turns a linear 26-task escape-room march into a visibly explorable crime scene. It's the first tranche of Phase 8 on the game-polish roadmap: a shippable **UI layer** over the existing linear flow, without yet changing any scenario JSON. The deeper scenario-schema-v2 additions (dynamic `available_when` / `completes_when` logic, hub-driven branching leads, side-stories as discoverable leads instead of implicit background goals) land in a later v2.x release and will load on top of v2.11 without breaking anything built for 2.11.
+
+The hub sits at `z-index:9450`, deliberately between the Investigation Board (9500) and the pause menu (9800), so pausing always still wins and the board can route through the hub without fighting for focus. Opening the hub from the pause menu auto-dismisses the pause overlay — the two become siblings, not stacking peers.
+
+**Seven interactive stations** live on a blueprint-style floor plan with a subtle pulsing glow on the vault:
+
+- **Security Terminal** (always available) — opens the scenario briefing intro and surfaces the current task's pre-filled SPL assist. The canonical "I forgot what I'm supposed to be doing" station.
+- **Vault Keypad** (locked until Act ≥ 3) — focuses the keypad entry field even if the hub was opened from the pause menu. The locked tooltip reads something like "Vault remains sealed until the code chain reassembles" so the gating feels diegetic.
+- **Leads Ledger** (always available) — opens the in-game dossier with the Leads tab pre-selected. Shows discovered side stories, trap-code lore, and intercept echoes in one reviewable list.
+- **Briefing Wall** (always available) — replays the current act's scripted briefing cinematic on demand. For teams who paused through it the first time and want to re-hear the narrative framing.
+- **Blueprint** (available once the first discovery fires) — opens the Nakatomi Plaza floor-30 blueprint viewer overlay. A physical anchor for the where-am-I question.
+- **Comms Intercepts** (always available) — opens the dossier with the Comms tab pre-selected. Hans + Powell + Holly transcripts, both generator-authored and live facilitator-pushed (the v2.10 phone cinematic lines land here too).
+- **Investigation Board** (hidden in `?booth=1` mode, otherwise always available) — closes the hub and defers to `InvestigationBoard.open('hub')`, so the two overlays never fight for focus.
+
+**Availability engine** — each station's default-availability rule is evaluated on every `refresh()`. States are `available` (clickable, lit), `locked` (visible but disabled, tooltip explains the unlock condition), or `hidden` (completely absent from the DOM, reserved for modes where the station doesn't apply — e.g., `board` in booth mode). `HubOverlay.setAvailability(overrides)` lets future scenarios override the defaults without forking the module.
+
+**Live status panel** — the hub's right-hand side panel refreshes on every open with current act / current task / elapsed session time / hint tokens remaining / side stories discovered / easter eggs found / trap codes tripped / (when the Investigation Board has content) board pin / thread / note counts. Values are sourced directly from `state.*` and `InvestigationBoard.stats()` so there's no duplicate-state drift risk.
+
+**Three entry points, all instrumented:**
+
+1. **`M` hotkey** — `M` for "Map" toggles the hub from anywhere (except text inputs / textareas, and except while a phone-call overlay is active). Listed in the `?` shortcuts help overlay.
+2. **Pause menu** — `FLOOR-30 MAP [M]` button joins the pause overlay (auto-dismisses pause when clicked).
+3. **Programmatic** — `HubOverlay.open('autoload')` for future scenario-driven entry. Scenario pack v2 will add an optional `auto_open_hub_at_act` key that calls this on act transition; until then it's a manual / hotkey experience.
+
+**Telemetry** is three new event types, all on `index=nakatomi_sessions sourcetype=nakatomi:session:event`:
+
+- `hub_opened` (trigger ∈ {hotkey, pause_menu, autoload}, act, task_id, available/locked/hidden station counts)
+- `hub_closed` (trigger ∈ {hotkey, station_click, esc, backdrop_click, game_over, reset}, `elapsed_ms` for this open, `interactions` count of station clicks during this open)
+- `hub_station_clicked` (station_id from the `STATION_IDS` allow-list, `availability` ∈ {available, locked, hidden}, act, task_id)
+
+All three are on the `NakaTelemetry.EVENT_TYPES` allow-list; emit-time validation rejects any other type, and `hub_station_clicked` also validates the `station_id` against the allow-list so a compromised caller can't spray telemetry at arbitrary station IDs.
+
+**Facilitator board (v2.11) Floor-30 Hub row** — three panels on the live booth TV:
+
+- **Hub Sessions Today** — daily KPI of distinct teams that opened the hub at least once.
+- **Station Click Mix** — stacked column chart by `station_id`, split by `availability`. Facilitators can see at a glance which stations are popular, **and, critically, whether teams are repeatedly clicking locked stations** (strong signal they don't understand the current gating and need a nudge).
+- **Hub Dwell Time** — stats table with median and max `elapsed_ms` grouped by `trigger`. Teaches facilitators how their cohort actually uses the hub: as a strategic overview (high dwell on `esc`), as a launchpad (high dwell on `station_click`), or accidentally (spikes on `backdrop_click` may indicate teams don't realise click-outside dismisses the overlay).
+
+All hub panels honour the per-booth `booth_token` input alongside the discovery, Hans, phone, and board panels.
+
+**Accessibility** — arrow keys cycle focus across available stations; `Enter` / `Space` activates the focused station; `Escape` closes and restores focus to wherever it was before the hub opened. Every station is a real `<button>` with an `aria-label`, and the status panel updates are announced via the shared `a11yAnnounce()` live region. Honors `prefers-reduced-motion` (no ambient vault-pulse, no station hover scale-up); the hub still functions identically, only the embellishments are dropped.
+
+**Security posture** — the hub has **no** `localStorage` writes (it's a pure presentational overlay over existing game state), **no** `eval` / `new Function` / `innerHTML`-from-user-input paths (station routing is a hard-coded switch on the `STATION_IDS` allow-list), and station labels/icons are emitted via the module's local `esc()` helper identical to the Investigation Board pattern. In `?booth=1` mode the board station is hidden entirely (no module load), further narrowing the attack surface for queue visitors.
+
+**Regression coverage** — `scripts/tests/test_hub_overlay.js` extracts `NakaTelemetry` + `HubOverlay` into a sandboxed `vm` context with stubbed DOM + global helpers (`toggleDossier`, `showActIntro`, `togglePause`, `a11yAnnounce`, `toast`), asserting 68 behaviours including module surface, event allow-list, `STATION_IDS` registry integrity, default availability rules (`keypad` locked at Act 1 → available at Act ≥ 3; `board` hidden under booth mode), open/close idempotency, toggle correctness, unknown-station safety, locked-station telemetry (clicks register but route handlers don't fire), `setAvailability()` overrides, HEC-token hygiene (token never in any queued payload), and pause-handoff (opening the hub while paused auto-dismisses pause). With the existing Hans (69), Phone (84), and Investigation Board (69) harnesses, the module test suite is now **290 assertions, all passing**.
+
+### 9.12 Ending-only branches (v2.12)
+
+The **ending-only branches** system (Phase 7 Tier 1 on the game-polish roadmap) adds four tonally distinct Act-5 denouements that are selected from cumulative performance the instant a team wins. The underlying task order never changes, no mid-game fork appears (that's Phase 7 Tier 2, gated on live telemetry signals from v2.11), and the feature adds **zero runtime cost** to the critical path — the classifier runs exactly once, inside `triggerVictory()`, before `session_end` is emitted.
+
+The four branches, in priority order (only one is ever assigned):
+
+1. **Speedrunner** — wins if `elapsed_seconds < 0.5 × TIMER_SECONDS`. Tonally breathless: "Hans is still mid-sentence on the radio when the last vault tumbler drops. Theo looks up: 'That's… not possible.'" Any time-cap beats every other ending. Colour: ice-blue.
+2. **Analyst** — wins if `wrong_count ≤ 1 ∧ hint_tokens_spent ≤ 1 ∧ side_stories_discovered ≥ 3`. Tonally measured: "Carl Winslow lights a cigarette on the roof. 'The FBI finally showed up. Whoever ran point tonight — tell 'em the Bureau is hiring.'" Rewards clean, curious play. Colour: amber.
+3. **Cowboy** — wins if `wrong_count ≥ 4` (team wins anyway despite being messy). Tonally exasperated: "Powell: 'You're a cop, aren't you? I'm a cop too. A cop does not open seven wrong vault codes before finding the right one.'" Colour: red-orange.
+4. **Default** — fallback for everyone else: "$640 million in bearer bonds. A holiday party that didn't go quite as anyone planned." Colour: soft green. This is the canonical "Welcome to the party, pal." ending.
+
+**Per-ending content** — each branch supplies its own `title`, `subtitle`, and `narrative` paragraph, injected into the victory overlay between the "Yippee-ki-yay" tagline and the elapsed-time row. The overlay also gets an ending-specific CSS class for the colour theme. Each branch has its own **audio sting** replacing the default victory arpeggio: `playVictoryAnalyst()` (reflective low-pad), `playVictoryCowboy()` (brassy cavalry motif), `playVictorySpeedrunner()` (compressed staccato pulse), and `default` falls through to the original `playVictory()`. And each branch fires its own **achievement badge**: `ending_analyst`, `ending_cowboy`, `ending_speedrunner`, or `ending_default` — they stack with every other victory achievement the team earned (Pacifist Run, Iron Man, etc.).
+
+**Telemetry** is a single new event type on `index=nakatomi_sessions sourcetype=nakatomi:session:event`: `ending_classified`, emitted **before** `session_end` so both share the victory timestamp. Payload: `ending_id`, `elapsed_seconds`, `wrong_count`, `hint_tokens_spent`, `side_stories_discovered`, `difficulty`, `mode`, `act` — the full set of classifier inputs so the decision is auditable post-hoc. No PII, no raw SPL text, no DOM content. Added to the `NakaTelemetry.EVENT_TYPES` allow-list.
+
+**Facilitator board (v2.12) Ending Branches row** — three panels on the live booth TV (canvas extended `1920×2620 → 1920×2860`):
+
+- **Endings Today** — daily KPI of `ending_classified` events (one per victory).
+- **Ending Distribution** — stacked column by `ending_id`, split by `difficulty`. A booth stuffed with Cowboy endings on `iron-man` difficulty tells a different story than the same count on `demo` difficulty — the split makes the tonal signal legible.
+- **Recent Endings** — 20 most-recent classifications with `ts / team_code / ending_id / elapsed / wrong_count / hint_tokens_spent / side_stories_discovered / difficulty`. Lets facilitators ground-truth the classifier visually: every Speedrunner row should have `elapsed < 50 %` of the timer, every Analyst row should have `wrong_count ≤ 1 ∧ side_stories_discovered ≥ 3`.
+
+All ending panels honour the per-booth `booth_token` input alongside every other row.
+
+**Security posture** — the `Endings` module is a pure IIFE. `classify()` has **no** side effects (no DOM, no audio, no telemetry); every output path (overlay paint, audio sting, achievement fire, telemetry emit) is driven off the `state.endingId` value it returns. All narrative content is HTML-escaped via a module-local `_esc()` helper before rendering — this matters because the v2 scenario JSON schema (documented in the module header) will eventually let scenario packs override the default endings, at which point the content becomes untrusted input and the escape is already wired. The module has **no** `localStorage` / IndexedDB writes; `state.endingId` lives in the same `state` object cleared by `resetGame()`.
+
+**Regression coverage** — `scripts/tests/test_endings.js` extracts the `Endings` IIFE, `NakaTelemetry` allow-list, and victory-overlay painter into a sandboxed `vm` context with DOM stubs plus fakes for the `playVictory*` audio functions, asserting **120 behaviours** including registry shape, classification priority (speedrunner > analyst > cowboy > default across every boundary combination), threshold edges (`wrong_count = 1 / 4`, `hint_tokens_spent = 1`, `side_stories_discovered = 3`, `elapsed < 0.5 × TIMER_SECONDS` strict inequality), `_esc` XSS hygiene, overlay application (repeated calls don't stack classes), audio dispatch routing, and headless null-safety for stripped Splunk Cloud contexts. With the existing Hans (69), Phone (84), Investigation Board (69), and Hub (68) harnesses, the module test suite is now **410 assertions, all passing**.
+
+---
+
+*Document version: v13 (v2.12 ending-only branches — four tonal Act-5 outcomes, pure priority-based classifier, dedicated `ending_classified` telemetry event, facilitator distribution panel, 410-assertion regression suite)*
 *Last updated: April 2026*

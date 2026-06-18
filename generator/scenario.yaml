@@ -8,7 +8,7 @@ game:
   title: "Nakatomi Plaza: Vault Heist"
   duration_minutes: 60
   max_wrong_codes: 3
-  date: "2025-12-24"
+  date: "1988-12-24"
   timezone: "America/Los_Angeles"
 
 # Random seed — same seed = same dataset. Change for a new game.
@@ -16,20 +16,20 @@ seed: 19881215
 
 # ── Timeline (ISO 8601, local time) ──────────────────────────────
 timeline:
-  party_setup:          "2025-12-24T18:00:00"
-  party_start:          "2025-12-24T20:00:00"
-  takeover:             "2025-12-24T22:00:00"
-  lobby_secured:        "2025-12-24T22:02:00"
-  floors_secured:       "2025-12-24T22:10:00"
-  takagi_confrontation: "2025-12-24T22:20:00"
-  takagi_session_end:   "2025-12-24T22:25:00"
-  vault_work_begins:    "2025-12-24T22:30:00"
-  mcclane_first:        "2025-12-24T22:45:00"
-  fbi_arrives:          "2025-12-24T23:00:00"
-  power_cut:            "2025-12-24T23:15:00"
-  roof_setup:           "2025-12-24T23:30:00"
-  final_act:            "2025-12-24T23:45:00"
-  midnight:             "2025-12-25T00:00:00"
+  party_setup:          "1988-12-24T18:00:00"
+  party_start:          "1988-12-24T20:00:00"
+  takeover:             "1988-12-24T22:00:00"
+  lobby_secured:        "1988-12-24T22:02:00"
+  floors_secured:       "1988-12-24T22:10:00"
+  takagi_confrontation: "1988-12-24T22:20:00"
+  takagi_session_end:   "1988-12-24T22:25:00"
+  vault_work_begins:    "1988-12-24T22:30:00"
+  mcclane_first:        "1988-12-24T22:45:00"
+  fbi_arrives:          "1988-12-24T23:00:00"
+  power_cut:            "1988-12-24T23:15:00"
+  roof_setup:           "1988-12-24T23:30:00"
+  final_act:            "1988-12-24T23:45:00"
+  midnight:             "1988-12-25T00:00:00"
 
 # ── Seal Codes ───────────────────────────────────────────────────
 seals:
@@ -47,7 +47,7 @@ seals:
     index: nakatomi_access
     sourcetype: "nakatomi:access:badge"
     embed_field: detail
-    embed_value: "exec_calendar: vault maintenance cycle 7439 — rotation scheduled 2025-12-25T02:00"
+    embed_value: "exec_calendar: vault maintenance cycle 7439 — rotation scheduled 1988-12-25T02:00"
 
   3:
     code: "4291"
@@ -402,6 +402,424 @@ red_herrings:
       status: terminated
       note: "CEO badge — terminated tonight"
 
+  # ── v2.9 / Phase 6 — Dedup trap (seal_2 teaching moment) ────────
+  # Badge reader RDR-30-NORTH on floor 30 has a documented debounce
+  # bug: every swipe registers twice, 0.4–0.8s apart. A player doing
+  #   | stats count by badge_id
+  # on seal_2's data gets double-counted hits. The intended teaching
+  # is `| dedup _time badge_id` or `| bin _time span=2s | stats …`.
+  # We seed 8 known-doubled swipes for Takagi's vault-check cycle,
+  # each already paired with a "ghost" second hit produced at
+  # generation time. No new badges, no new puzzle — just realism.
+  dedup_traps:
+    - badge_id: JT-0001
+      floor: 30
+      room: Vault Access Corridor
+      reader: RDR-30-NORTH
+      count: 8
+      ghost_delay_seconds_min: 0.4
+      ghost_delay_seconds_max: 0.8
+      detail: "badge reader debounce glitch — double-read"
+
+  # ── v2.9 / Phase 6 — Cross-index echoes (multi-index scoping) ───
+  # These sit in nakatomi_building (intranet:it / maintenance tickets)
+  # and REFERENCE the puzzle-critical badge IDs in their message text.
+  # A player doing `index=* badge_id=JT-0001` or searching loosely
+  # across indexes sees these hits and may miscount or misread.
+  # Teaching: scope queries to `index=nakatomi_access` for badge
+  # swipes, not `index=*`.
+  cross_index_echoes:
+    - badge_id: JT-0001
+      count: 4
+      source: intranet:it
+      message_template: "IT ticket #{tid} — inventory audit references badge {badge} for vault maintenance scheduling; no action required"
+    - badge_id: HT-0001
+      count: 3
+      source: intranet:hr
+      message_template: "HR note #{tid} — performance review packet for {badge} forwarded to exec archive; admin only"
+    - badge_id: HE-3301
+      count: 3
+      source: intranet:it
+      message_template: "IT ticket #{tid} — badge {badge} flagged for re-issue (worn magstripe); schedule replacement Jan 2"
+    - badge_id: TH-0099
+      count: 3
+      source: proxy:http
+      message_template: "proxy log — user_badge={badge} referenced url_category=business; allow"
+
+# ── Trap Code Lore (v2.9 / Phase 6) ──────────────────────────────
+# Historically the keypad "trap codes" just triggered a security
+# alert + wrong-count penalty. v2.9 promotes each to a proper
+# red-herring side path: hitting a trap now also flashes a
+# one-sentence lore card explaining *why* that number is a
+# reasonable-looking guess. Still penalising (the wrong_count still
+# bumps), but now it teaches narrative rather than punishing
+# silently.
+#
+# Consumed by game.html at script-eval time (see TRAP_CODE_LORE)
+# via the existing handleTrapCode() flow. Keep entries terse — the
+# toast is transient (~3.5s) and shouldn't distract from the main
+# puzzle.
+trap_code_lore:
+  "1990": "The year Takagi finalised the Nakatomi charter. Historically meaningful — not vault-meaningful."
+  "0911": "Emergency dispatch. McClane might approve. Hans never would."
+  "1666": "The Great Fire of London. Hans admires the architecture — not the arson."
+  "1988": "The current year, sir. Hans would never choose something so obvious."
+
+# ── Side Stories (v2.9 / Phase 6) ────────────────────────────────
+# Eight hand-authored side mysteries seeded into the dataset. Each
+# one is independently discoverable by a curious analyst — none are
+# required to finish the main heist, but together they paint a
+# richer portrait of Nakatomi Plaza on Christmas Eve 1988.
+#
+# Each story embeds a unique 4-digit `discovery_code` somewhere in
+# its event trail (usually in a `detail=` or `message=` field). The
+# in-game keypad recognises these codes as side-story reveals and
+# pops a toast with the narrative payoff. The `spl_hint` field
+# documents the intended query path (used by facilitator tooling
+# and docs/STORY_AND_MYSTERIES.md).
+#
+# Naming: `id` stays short/snake_case (used as a JS key). Codes are
+# chosen to be memorable but unlikely to collide with seal codes
+# (2512 / 7439 / 4291 / 8086 / 5765 / 3940) or the existing trap
+# codes (1990 / 0911 / 1666 / 1988 / 1215). Clearance flag: codes
+# starting with 9 are reserved for side-story reveals.
+side_stories:
+  - id: affair
+    title: "The Affair"
+    category: romance
+    discovery_code: "9012"
+    achievement: side_affair
+    spl_hint: 'index=nakatomi_access badge_id=HE-3301 floor=30 earliest=-4d@d | sort _time'
+    teaser: "Someone's been visiting Holly's floor after hours."
+    payoff: "Harry Ellis has been making late-night trips to floor 30 all week. Holly's office. Roses on Dec 20. A note: 'H. — tonight? — H.' They weren't just colleagues. Hans will never know — but you do."
+  - id: petty_cash
+    title: "Petty Cash Skim"
+    category: fraud
+    discovery_code: "9050"
+    achievement: side_petty_cash
+    spl_hint: 'index=nakatomi_building sourcetype=intranet:finance amount<100 | stats sum(amount) by requester'
+    teaser: "Something's off with the coffee-fund reimbursements."
+    payoff: "Accounting clerk Ulysses Bekele (NP-2802) has been skimming $40-50 every few days for six months, logged as 'office supplies' and 'coffee fund'. Total take: $4,892. He was one tightening audit away from being caught."
+  - id: ghost_account
+    title: "The Ghost Account"
+    category: security
+    discovery_code: "9099"
+    achievement: side_ghost
+    spl_hint: 'index=nakatomi_access | lookup employee_directory.csv badge_id | search status=terminated'
+    teaser: "A terminated employee's badge is still warm."
+    payoff: "Badge XG-9999 belongs to 'Evan Rutherford' — terminated eight months ago, but the badge still swipes into the server room on floor 25 after hours. Someone on IT never killed the credential. A backdoor hiding in plain sight."
+  - id: y2k
+    title: "The Y2K Test"
+    category: comedy
+    discovery_code: "9200"
+    achievement: side_y2k
+    spl_hint: 'index=nakatomi_building sourcetype=intranet:it "Y2K"'
+    teaser: "Something in the IT logs insists it's already 1900."
+    payoff: "R&D's millennium-bug team ran a date-rollover test on Dec 22 that tipped every timestamp to 1900-01-01 for forty seconds — then quietly rolled back. The IT director's memo: 'do NOT tell the auditors.' Corporate America, ladies and gentlemen."
+  - id: disgruntled_it
+    title: "The Disgruntled Sysadmin"
+    category: insider
+    discovery_code: "9315"
+    achievement: side_disgruntled
+    spl_hint: 'index=nakatomi_access badge_id=NP-4471 earliest=-7d@d | where date_hour>21 | stats count by floor'
+    teaser: "One engineer's been poking everywhere he shouldn't be."
+    payoff: "Robert Chen (NP-4471) has been pulling late-night admin swipes on floors 25 and B1 all week — he was passed over for a VP slot in October and HR has him on a PIP. An after-hours email drafted on his workstation read: 'they'll regret this.' He hit delete. He didn't hit purge."
+  - id: pizza
+    title: "The Pineapple Incident"
+    category: comedy
+    discovery_code: "9086"
+    achievement: side_pizza
+    spl_hint: 'index=nakatomi_building "pineapple"'
+    teaser: "Someone started a war on floor 15 at 1pm yesterday."
+    payoff: "On Dec 23 at 13:14 PST, Catering delivered 12 pizzas to the trading floor. One was Hawaiian. The resulting intranet thread ran 37 messages in 40 minutes before IT muted the channel. Nobody confessed to ordering it. The pizza was eaten anyway. Mostly."
+  - id: theo_browser
+    title: "Theo's Homework"
+    category: insider
+    discovery_code: "9552"
+    achievement: side_theo
+    spl_hint: 'index=nakatomi_building sourcetype=proxy:http user_badge=TH-0099 | stats count by url_category'
+    teaser: "The proxy log says someone's been researching something strange."
+    payoff: "Theo (TH-0099) logged 147 proxy hits over the last three weeks — all on vault-cracking whitepapers, seismic demolition case studies, and the SEC filing for Nakatomi's $640M in bearer bonds. Masquerading as a catering vendor took some homework. He passed the exam."
+  - id: bypassed_camera
+    title: "The Blind Spot"
+    category: security
+    discovery_code: "9425"
+    achievement: side_camera
+    spl_hint: 'index=nakatomi_building system=security event_type=camera_offline'
+    teaser: "One camera went down at the worst possible moment."
+    payoff: "Camera CAM-25-NORTH went offline at 21:42 — 'scheduled maintenance' per the ticket. Nobody scheduled it. Eighteen minutes later, Hans's crew walked through the loading dock under it. Someone inside the building knew exactly which blind spot to use — and exactly when."
+
+# ── Easter Eggs (v2.9 / Phase 6d) ────────────────────────────────
+# Fifteen hidden moments scattered across the game and the dataset.
+# Fourteen are discovered by SPL + keypad entry (6xxx namespace);
+# one (the Konami code) lives entirely in game.html. The TOAST text
+# and registry authoritatively live in game.html → EASTER_EGGS; this
+# YAML block drives the generator's data seeding ONLY.
+#
+# Each entry specifies where the hint appears in the dataset so the
+# Python generator can emit exactly one matching event per egg. Text
+# and timestamps are authored for narrative effect — not for puzzle
+# difficulty — so booth demos still get the full easter-egg roster.
+#
+# Naming:
+#   id              — matches EASTER_EGG id in game.html
+#   discovery_code  — matches EASTER_EGG code in game.html (6xxx
+#                     namespace; Konami has no code)
+#   index/sourcetype — where the event lands for SPL discovery
+#   timestamp_hint  — ISO-ish "YYYY-MM-DDTHH:MM:SS" PST (no tz); the
+#                     generator reinterprets relative to the scenario
+#                     timeline
+#   fields          — key=value pairs to embed in the event (all
+#                     narrative fingerprints — "yippee", "HAL9000",
+#                     "pineapple", etc. — should appear here so a
+#                     naive SPL search finds the egg)
+#
+# Do NOT renumber discovery_code without also updating game.html
+# EASTER_EGGS[].code. The registry sync check in tests/easter_egg_*.py
+# enforces alignment.
+easter_eggs:
+  - id: holly_diary
+    discovery_code: "6024"
+    index: nakatomi_building
+    sourcetype: "intranet:diary"
+    timestamp_hint: "1988-12-24T07:14:03"
+    fields:
+      author: "Holly Gennero"
+      folder: "personal"
+      entry_id: "HG-DIARY-1224"
+      message: 'Christmas Eve. I told John he should come for Christmas. I don''t know if he''ll show. I''m not sure I want him to — and I''m not sure I don''t.'
+
+  - id: floor30_elevator
+    discovery_code: "6030"
+    index: nakatomi_building
+    sourcetype: "intranet:it"
+    timestamp_hint: "1988-12-24T15:22:09"
+    fields:
+      ticket_id: "NAK-88-2204"
+      status: "closed"
+      team: "maintenance"
+      message: 'Fixed elevator Car #4 — guests keep stopping it on Floor 30. Party is on Floor 30. This is NOT a Christmas miracle.'
+
+  - id: coffee_murder
+    discovery_code: "6042"
+    index: nakatomi_building
+    sourcetype: "building:sensors"
+    timestamp_hint: "1988-12-24T19:42:03"
+    fields:
+      device: "EM-30-2"
+      device_type: "espresso_machine"
+      floor: "30"
+      status: "out_of_beans"
+      message: "Bean hopper empty. Brew cycle halted. No party coffee past 19:42."
+
+  - id: pineapple_war
+    discovery_code: "6089"
+    index: nakatomi_building
+    sourcetype: "intranet:chat"
+    timestamp_hint: "1988-12-24T13:21:44"
+    fields:
+      channel: "#trading-floor"
+      user: "anonymous"
+      thread_id: "pizza-war-1224"
+      message: "No pineapple. Never pineapple. This is not negotiable."
+
+  - id: ode_to_joy
+    discovery_code: "6093"
+    index: nakatomi_building
+    sourcetype: "intranet:culture"
+    timestamp_hint: "1988-12-20T10:00:12"
+    fields:
+      author: "culture.committee"
+      bulletin_id: "CUL-88-ODE"
+      title: "Holiday Sheet Music — Freude, schoener Goetterfunken"
+      message: "Opening bars of Beethoven's 9th — Ode to Joy. Attached ASCII rendering. Freude, schoener Goetterfunken, Tochter aus Elysium."
+
+  - id: theo_147
+    discovery_code: "6147"
+    index: nakatomi_building
+    sourcetype: "proxy:http"
+    timestamp_hint: "1988-12-24T11:47:00"
+    fields:
+      user_badge: "TH-0099"
+      url_category: "research.summary"
+      dest_url: "https://intranet/proxy-summary?user=TH-0099"
+      total_hits_30d: "147"
+      message: "Proxy summary (last 30d): TH-0099 = 147 hits across vault research, seismic demolition, bearer-bond SEC filings."
+
+  - id: yippee_ki_yay
+    discovery_code: "6199"
+    index: nakatomi_comms
+    sourcetype: "intercept:mcclane"
+    timestamp_hint: "1988-12-24T23:59:01"
+    fields:
+      channel: "security_primary"
+      speaker: "mcclane.J"
+      message: "yippee-ki-yay, mother------"
+
+  - id: no_more_table
+    discovery_code: "6220"
+    index: nakatomi_comms
+    sourcetype: "intercept:hans"
+    timestamp_hint: "1988-12-24T20:13:44"
+    fields:
+      channel: "vault_primary"
+      speaker: "Hans"
+      message: "I wanted this to be professional. Efficient. Adult. But Mr. Cowboy made it personal. Now I ask you — do you really think you have a chance against us, Mr. Cowboy? No more table."
+
+  - id: ho_ho_ho
+    discovery_code: "6252"
+    index: nakatomi_comms
+    sourcetype: "intercept:hans"
+    timestamp_hint: "1988-12-24T21:01:18"
+    fields:
+      channel: "vault_primary"
+      speaker: "Hans"
+      attachment: "santa_suit_base64.txt"
+      message: "Now I have a machine gun. Ho. Ho. Ho."
+
+  - id: argyle
+    discovery_code: "6401"
+    index: nakatomi_comms
+    sourcetype: "intercept:argyle"
+    timestamp_hint: "1988-12-24T19:48:22"
+    fields:
+      vehicle: "LIM-NAK-07"
+      speaker: "Argyle"
+      channel: "carphone_local"
+      message: "Hey buddy! You're missing one beautiful party up there. I'm on my fourth rum and Coke and the limo radio is playing Christmas in Hollis. This is the best night of my life."
+
+  - id: blueprint_door
+    discovery_code: "6404"
+    index: nakatomi_building
+    sourcetype: "intranet:facilities"
+    timestamp_hint: "1988-12-15T14:04:00"
+    fields:
+      schematic_id: "FAC-30-v7"
+      author: "facilities.ops"
+      note: "Reserved archive door inventory"
+      message: "Schematic FAC-30-v7 — north wall of Vault Access Corridor. 1.2m x 2.4m steel door. Label: |-- RESERVED ARCHIVE — L. TAKAGI PERSONAL --|. Access: owner only."
+
+  - id: dad_in_morse
+    discovery_code: "6411"
+    index: nakatomi_comms
+    sourcetype: "intercept:morse"
+    timestamp_hint: "1988-12-24T20:47:11"
+    fields:
+      channel: "security_primary"
+      analyst: "signal.analysis"
+      signal_pattern: "-..|.-|-.."
+      repeat_interval_s: "14"
+      message: "Slow-loop noise pattern on security_primary: -.. / .- / -.. repeating every 14s. Morse: D-A-D."
+
+  - id: roy_rogers
+    discovery_code: "6777"
+    index: nakatomi_access
+    sourcetype: "intranet:security"
+    timestamp_hint: "1988-12-24T23:41:00"
+    fields:
+      guest_badge: "GUEST-ROY-ROGERS"
+      sponsor_badge: "J.McClane"
+      access_level: "roof"
+      visitor_log_id: "ROGER-ROY-88"
+      message: "Badge issued to guest 'Roy Rogers'. No employer listed. Sponsor: J.McClane. Access: Roof."
+
+  - id: hal9000_ua
+    discovery_code: "6911"
+    index: nakatomi_building
+    sourcetype: "proxy:http"
+    timestamp_hint: "1988-12-24T22:03:09"
+    fields:
+      user_agent: "Mozilla/5.0 (compatible; HAL9000/1.0; DiscoveryOne) Likes/music/Daisy"
+      dest_host: "corporate.nakatomi.local"
+      action: "allow"
+      message: "Proxy entry 22:03 PST — unknown agent HAL9000/1.0 from internal network. Nobody in Nakatomi IT owns a HAL 9000."
+
+# ── Intranet Announcements (v2.9 / Phase 6e — lore bulletin board) ──
+# Seven hand-authored, world-building bulletins seeded into
+# `index=nakatomi_building sourcetype=intranet:announcements`. They
+# are pure texture: none of them contain seal codes, trap codes,
+# side-story codes, or easter-egg codes. See docs/NAKATOMI_LORE.md § 5.1
+# for the canonical list.
+#
+# Contributor rules (enforced by generate_intranet_announcements in
+# generate.py):
+#
+#   * Each bulletin must have a unique `bulletin_id`.
+#   * Must not contain any 4-digit value that matches a seal, trap,
+#     side-story, or easter-egg code. The generator fails loud if a
+#     collision is introduced (so a future lore edit can't
+#     accidentally duplicate a puzzle answer).
+#   * Timestamps are naive PST ISO strings; the generator attaches
+#     the scenario TZ_OFFSET so `_time` lines up with the rest of
+#     the dataset.
+#   * Always run in BOTH booth and full modes — total volume is
+#     trivial (~7 events) and even a 5-minute demo should be able
+#     to surface the "CEO Holiday Message" bulletin for a curious
+#     booth visitor.
+announcements:
+  - bulletin_id: "ANN-88-CEO-HOLIDAY"
+    timestamp: "1988-12-20T09:00:00"
+    author: "J.Takagi"
+    author_name: "Joseph Takagi"
+    author_title: "CEO, Nakatomi Trading"
+    department: "Executive"
+    subject: "Holiday Message from the CEO"
+    message: "A year ago this month, the Room 30-B incident reminded us that the people in this building — not the glass around them — are what make Nakatomi work. We close out this year with our strongest Q4 in the Pacific division's history, in a tower that celebrates its 13th birthday next July. I am grateful for every one of you. Enjoy the party. Go home safely. Merry Christmas."
+
+  - bulletin_id: "ANN-88-HR-RSVP"
+    timestamp: "1988-12-22T10:30:00"
+    author: "hr.events"
+    author_name: "Olivia Park-Hammond"
+    author_title: "Head of HR"
+    department: "HR"
+    subject: "Christmas Party RSVP — Final Call"
+    message: "Final RSVP reminder: the Christmas party begins Friday Dec 24 at 20:00 on Floor 30. Dress is business formal. Plus-ones welcome but must be pre-registered with Cyrus (Floor 1 reception) by EOD Thursday. Guests without pre-registration will not be issued a visitor badge. No exceptions."
+
+  - bulletin_id: "ANN-88-FAC-HVAC"
+    timestamp: "1988-12-22T13:14:00"
+    author: "facilities.ops"
+    author_name: "Eduardo Vasquez"
+    author_title: "Building Operations Lead"
+    department: "Facilities"
+    subject: "HVAC Zone 4 Service Window — Roof Chiller Maintenance"
+    message: "Tri-Air Mechanical (contractor: Halima Senghor, VND-004) on-site Friday Dec 22 approx 13:30 for roof chiller filter service in HVAC Zone 4. Floors 20 and above may see a 2-3 degree temperature drift 14:00-16:30. This is a routine six-monthly visit. No evacuation required."
+
+  - bulletin_id: "ANN-88-SEC-PARKING"
+    timestamp: "1988-12-22T16:15:00"
+    author: "sec.ops"
+    author_name: "James Marsh"
+    author_title: "Senior Security Lead"
+    department: "Security"
+    subject: "Holiday Parking Adjustments — B1 / B2"
+    message: "Parking Level B2 will run at reduced capacity Friday evening Dec 24 to accommodate party-guest vehicles and catering staging. Employees who typically park in B2 are asked to use B1 west side. The vault-access corridor on B1 is OFF LIMITS to employee parking at all times — as always."
+
+  - bulletin_id: "ANN-88-IT-MAINT"
+    timestamp: "1988-12-23T20:00:00"
+    author: "it.ops"
+    author_name: "Mads Sorensen"
+    author_title: "IT Operations"
+    department: "IT"
+    subject: "Scheduled Maintenance — Mail & Proxy"
+    message: "R&D's Y2K compatibility pilot (J. Hanada, ENG-2504) will run a small date-rollover test on the legacy mail and proxy fleet overnight Dec 23-24. Brief service blips (under a minute) are possible. The pilot is part of our proactive remediation for the January 1 2000 calendar rollover. No user action required."
+
+  - bulletin_id: "ANN-88-FAC-ANNIVERSARY"
+    timestamp: "1988-12-17T08:00:00"
+    author: "facilities.ops"
+    author_name: "Eduardo Vasquez"
+    author_title: "Building Operations Lead"
+    department: "Facilities"
+    subject: "Plaza Anniversary Note — Thirteen Years In"
+    message: "Nakatomi Plaza turns thirteen next July. If you've been here a while you'll remember the October 1985 elevator fire and the fire-suppression retrofit that followed in 1986. Most of you won't — and that's the point. The building today is safer, quieter, and better maintained than at any time since topping out. Thank you to the Facilities and Security teams who make that true every single day."
+
+  - bulletin_id: "ANN-88-SEC-DRILL"
+    timestamp: "1988-12-19T11:00:00"
+    author: "sec.ops"
+    author_name: "James Marsh"
+    author_title: "Senior Security Lead"
+    department: "Security"
+    subject: "Fire-Safety Drill Recap — Dec 17"
+    message: "Thank you to every floor for full participation in Monday's drill. Evacuation time was 7 minutes 42 seconds — our fastest since the 1985 fire. The lessons from 1985 and 1987 still shape how we run these drills; if either year means nothing to you, ask a colleague who was here. The answer is worth asking."
+
 # ── Output ───────────────────────────────────────────────────────
 output:
   directory: "output"
@@ -422,6 +840,7 @@ output:
       sourcetypes:
         - "nakatomi:building:hvac"
         - "nakatomi:building:security"
+        - "intranet:announcements"
   lookups:
     - filename: "floor_directory.csv"
     - filename: "employee_directory.csv"

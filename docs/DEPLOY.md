@@ -222,6 +222,69 @@ a console warning and the token is not honored. This is enforced in
   `NakaTelemetry.setOptOut(true)` from DevTools). When opted out, the
   game continues to function locally with no network activity.
 
+### 7.1. KV-Store retention (30-day target)
+
+Splunk does not auto-expire KV-Store records the way it auto-freezes
+indexed events. The `vault_progress` collection grows unbounded
+unless you prune it. For a 30-day window, schedule the following
+saved search to run nightly (set `dispatch.earliest_time = -1d`):
+
+```spl
+| inputlookup vault_progress
+| where _time < relative_time(now(), "-30d@d")
+| outputlookup vault_progress
+```
+
+This is a destructive search; review the rows it would delete with
+the same query minus `outputlookup` before scheduling.
+
+### 7.2. GDPR / DSAR scripts (v2.15)
+
+Two helper scripts ship with the app for ad-hoc data subject access
+requests against `nakatomi_sessions` + `vault_progress`:
+
+```bash
+# Export every record matching a team_code or session_id.
+SPLUNK_HOST=https://splunk.example.com:8089 \
+SPLUNK_TOKEN=$(cat ~/.nakatomi/dsar.token) \
+bash scripts/export_sessions.sh --team-code NAKA --output naka.json
+
+# Right-to-erasure: delete the same set. Requires --confirm.
+SPLUNK_HOST=https://splunk.example.com:8089 \
+SPLUNK_TOKEN=$(cat ~/.nakatomi/dsar.token) \
+bash scripts/purge_sessions.sh --team-code NAKA --confirm yes-i-mean-it
+```
+
+**Token requirements** — both scripts require a token bound to a
+dedicated `nakatomi_dsar` role (per
+[`codeguard-0-data-storage`](.cursor/rules/codeguard-0-data-storage)
+least-privilege guidance):
+
+| Capability | Need | Used by |
+| --- | --- | --- |
+| `search` + `read` on `nakatomi_sessions` | Both | export, purge |
+| `read/write` on `vault_progress` collection | Both | export, purge |
+| `can_delete` on the search head | **purge only** | purge |
+| Read-only on every other index | Yes (defense-in-depth) | both |
+
+Do **not** reuse the booth-display token (which has read-only access
+to non-PII indexes only) — DSAR scripts need elevated capabilities
+that the booth role explicitly does not have.
+
+The scripts:
+
+- Reject any filter value containing characters outside `[A-Za-z0-9._-]`
+  (defends against SPL injection per
+  [`codeguard-0-input-validation-injection`](.cursor/rules/codeguard-0-input-validation-injection)).
+- Pass auth via `Authorization: Bearer` headers, never URL params
+  (per [`codeguard-0-authentication-mfa`](.cursor/rules/codeguard-0-authentication-mfa)).
+- Write export output with `umask 077` so a JSON sitting on a
+  shared host doesn't leak by default.
+- Audit-log every purge with a SHA-256 hash of the filter (not the
+  raw team_code) to `/var/log/nakatomi/purge.log` when present, or
+  stdout otherwise. The purge audit retains who did what without
+  storing the original identifier.
+
 ---
 
 ## 8. Verifying the Deployment

@@ -20,7 +20,7 @@ Total: ~1,250 events. Enough to create a realistic haystack without overwhelming
 
 ## 2. Timeline
 
-All events occur on **2025-12-24** (Christmas Eve). The timeline mirrors the Die Hard film:
+All events occur on **1988-12-24** (Christmas Eve). The timeline mirrors the Die Hard film:
 
 | Time Window | Phase | What's Happening |
 |-------------|-------|------------------|
@@ -48,7 +48,7 @@ Badge swipe events from the building's access control system. Every badge tap at
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time (ISO 8601) | `2025-12-24T20:15:33.000-0800` |
+| `_time` | timestamp | Event time (ISO 8601) | `1988-12-24T20:15:33.000-0800` |
 | `badge_id` | string | Employee or visitor badge identifier | `NP-4472`, `HG-1988`, `MAINT-007` |
 | `name` | string | Badge holder name | `Naomi Park`, `Hans Gruber` |
 | `department` | string | Department or affiliation | `Vault Operations`, `external` |
@@ -61,7 +61,7 @@ Badge swipe events from the building's access control system. Every badge tap at
 **`_raw` format** (key=value pairs, one event per line):
 
 ```
-2025-12-24T20:15:33.000-0800 badge_id=NP-4472 name="Naomi Park"
+1988-12-24T20:15:33.000-0800 badge_id=NP-4472 name="Naomi Park"
   department="Vault Operations" floor=30 room="Main Hall"
   action=swipe outcome=allow detail="regular access"
 ```
@@ -87,7 +87,7 @@ Door state change events from the building management system.
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time | `2025-12-24T22:03:16.000-0800` |
+| `_time` | timestamp | Event time | `1988-12-24T22:03:16.000-0800` |
 | `door_id` | string | Door identifier | `D1-SEC-01`, `D30-CONF-B` |
 | `floor` | integer or string | Floor number | `1`, `30` |
 | `room` | string | Room | `Security Office` |
@@ -97,7 +97,7 @@ Door state change events from the building management system.
 **`_raw` format**:
 
 ```
-2025-12-24T22:03:16.000-0800 door_id=D1-SEC-01 floor=1
+1988-12-24T22:03:16.000-0800 door_id=D1-SEC-01 floor=1
   room="Security Office" state=open method=badge
 ```
 
@@ -115,7 +115,7 @@ Vault terminal session events. Each interaction with the vault system generates 
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time | `2025-12-24T22:21:15.000-0800` |
+| `_time` | timestamp | Event time | `1988-12-24T22:21:15.000-0800` |
 | `session_id` | string | Vault session identifier | `VS-0042`, `VS-0001` |
 | `user` | string | Terminal user | `takagi`, `hans`, `ellis`, `system` |
 | `action` | string | Session event type | `session_begin`, `code_attempt`, `session_end`, `system_check` |
@@ -125,7 +125,7 @@ Vault terminal session events. Each interaction with the vault system generates 
 **`_raw` format**:
 
 ```
-2025-12-24T22:21:15.000-0800 session_id=VS-0042 user=takagi
+1988-12-24T22:21:15.000-0800 session_id=VS-0042 user=takagi
   action=code_attempt detail="input=4" result=fail
 ```
 
@@ -154,7 +154,7 @@ Vault infrastructure events — system status, protocol documentation, maintenan
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time | `2025-12-24T14:30:00.000-0800` |
+| `_time` | timestamp | Event time | `1988-12-24T14:30:00.000-0800` |
 | `system` | string | Subsystem | `vault_protocol`, `vault_monitor`, `vault_power` |
 | `event` | string | Event category | `documentation`, `status`, `alert` |
 | `action` | string | What happened | `system_note`, `heartbeat`, `power_check` |
@@ -163,7 +163,7 @@ Vault infrastructure events — system status, protocol documentation, maintenan
 **`_raw` format**:
 
 ```
-2025-12-24T14:30:00.000-0800 system=vault_protocol
+1988-12-24T14:30:00.000-0800 system=vault_protocol
   event=documentation action=system_note
   message="VAULT PROTOCOL 7: Secondary release —
   electromagnetic failsafe. Final lock disengages on power loss.
@@ -187,7 +187,7 @@ Building management system telemetry — temperature, pressure, humidity, elevat
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time | `2025-12-24T23:12:00.000-0800` |
+| `_time` | timestamp | Event time | `1988-12-24T23:12:00.000-0800` |
 | `system` | string | Building subsystem | `hvac`, `elevator`, `power`, `fire` |
 | `event` | string | Event type | `temp_reading`, `car_call`, `grid_status`, `alarm_test` |
 | `floor` | integer or string | Floor | `roof`, `30`, `1` |
@@ -199,7 +199,7 @@ Building management system telemetry — temperature, pressure, humidity, elevat
 **`_raw` format**:
 
 ```
-2025-12-24T23:12:00.000-0800 system=hvac event=temp_reading
+1988-12-24T23:12:00.000-0800 system=hvac event=temp_reading
   floor=roof zone=mechanical value=98.7 unit=F
   encoded_message="GURER VF AB CBJRE JVGUBHG PBQR 8086"
 ```
@@ -226,7 +226,7 @@ Building security system events — alarms, camera alerts, radio intercepts, per
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `_time` | timestamp | Event time | `2025-12-24T23:18:45.000-0800` |
+| `_time` | timestamp | Event time | `1988-12-24T23:18:45.000-0800` |
 | `system` | string | Security subsystem | `security`, `radio`, `camera`, `alarm` |
 | `event_type` | string | Event category | `radio_intercept`, `alarm_trigger`, `camera_motion` |
 | `floor` | integer or string | Floor (if applicable) | `0` (exterior), `1`, `30` |
@@ -238,7 +238,7 @@ Building security system events — alarms, camera alerts, radio intercepts, per
 **`_raw` format**:
 
 ```
-2025-12-24T23:18:45.000-0800 system=radio event_type=radio_intercept
+1988-12-24T23:18:45.000-0800 system=radio event_type=radio_intercept
   floor=0 zone=exterior channel=freq_14 severity=high
   message="FBI FIELD CMD // GRID-SEC-7 // AUTH:5765
   // PRIORITY:IMMEDIATE // CONFIRM POWER DISCONNECT"
@@ -329,8 +329,8 @@ Employee badge registry. ~50 entries. Key rows for the puzzles:
 | NP-4471 | Robert Chen | IT Operations | LEVEL-3 | active | 2020-06-01 |
 | JT-0001 | Joseph Takagi | CEO | LEVEL-6 | terminated | 2018-01-10 |
 | HE-3301 | Harry Ellis | International Trade | LEVEL-2 | active | 2021-09-20 |
-| HG-1988 | Hans Gruber | External Contractor | EXTERNAL | active | 2025-12-24 |
-| KA-2205 | Karl Vreski | External Contractor | EXTERNAL | active | 2025-12-24 |
+| HG-1988 | Hans Gruber | External Contractor | EXTERNAL | active | 1988-12-24 |
+| KA-2205 | Karl Vreski | External Contractor | EXTERNAL | active | 1988-12-24 |
 | AG-0077 | Argyle | Building Services | LEVEL-1 | active | 2024-11-01 |
 | HP-1015 | Holly Gennaro | International Trade | LEVEL-4 | active | 2017-05-22 |
 | MAINT-007 | Eduardo Vasquez | Facilities | LEVEL-2 | active | 2016-08-14 |

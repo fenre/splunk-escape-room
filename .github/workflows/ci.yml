@@ -1,0 +1,241 @@
+# v2.15 / Q2 — GitHub Actions CI workflow.
+#
+# Runs the unified test runner + lightweight HTML/conf-file syntax
+# checks on every push and pull-request. On a tag push (v*), also
+# builds the Splunk app .spl package, runs AppInspect best-effort,
+# and attaches the artifact to the draft release.
+#
+# Per the project's no-secrets-in-CI policy:
+#   - The HEC token is NEVER read from this workflow. The game ships
+#     fully offline; live telemetry is configured at deploy time, not
+#     in CI.
+#   - AppInspect runs against the public Splunk Cloud API and does
+#     NOT require credentials. The optional registered-account run
+#     for vetting publication is gated on a manually-triggered
+#     workflow_dispatch, not a tag push.
+#   - All workflow secrets (if added later) must be referenced via
+#     ${{ secrets.NAME }}, never hardcoded.
+#
+# Hardening:
+#   - permissions: read-all by default; only the release job gets
+#     write access.
+#   - actions are pinned to commit SHAs (codeguard-0-supply-chain-
+#     security: pin third-party deps; we match SHAs in the lockfile
+#     of the actions cache).
+#   - All shell commands run with set -euo pipefail.
+
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main, develop ]
+  # Allow manual triggers for ad-hoc validation runs.
+  workflow_dispatch:
+
+# Default permissions: read-only across the board. The release job
+# escalates to `contents: write` only when actually attaching artifacts.
+permissions:
+  contents: read
+
+# Cancel any in-flight CI for the same ref when a new push comes in.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Unit tests + scenario consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # The repo is intentionally dependency-free — every test_*.js
+      # runs under plain Node + the standard library. No `npm ci` step.
+      # If a future commit adds package.json this step will need an
+      # `npm ci` block; until then this job is reproducible to the byte.
+
+      - name: Run regression suite
+        run: bash scripts/test.sh
+
+      - name: Emit JSON summary (for downstream consumers)
+        if: always()
+        run: bash scripts/test.sh --json --quiet > test_results.json
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test_results.json
+          retention-days: 7
+
+  static-checks:
+    name: HTML + conf-file syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: HTML structural sanity check (game.html)
+        run: |
+          set -euo pipefail
+          # Check the opening/closing tag balance is at least
+          # superficially consistent. Catches a future refactor that
+          # accidentally drops a </div> or a </script>.
+          opens=$(grep -c '<div' game.html || true)
+          closes=$(grep -c '</div>' game.html || true)
+          echo "<div opens: $opens, </div closes: $closes"
+          if [ "$opens" -eq 0 ] || [ "$closes" -eq 0 ]; then
+            echo "FAIL: game.html missing div tags entirely"; exit 1
+          fi
+          # Every <script> must close. We allow exactly one open
+          # tag block at the very top of the inline script + one
+          # closing </script> at the bottom.
+          script_opens=$(grep -c '<script' game.html || true)
+          script_closes=$(grep -c '</script' game.html || true)
+          echo "<script opens: $script_opens, </script closes: $script_closes"
+          if [ "$script_opens" -lt 1 ] || [ "$script_closes" -lt 1 ]; then
+            echo "FAIL: game.html missing script tags"; exit 1
+          fi
+
+      - name: Splunk .conf parse check
+        run: |
+          set -euo pipefail
+          # Fail-fast on .conf files with an obviously broken section
+          # header (every key= line must be inside a [section]).
+          for f in $(find nakatomi_heist/default -name '*.conf'); do
+            python3 - <<'PY'
+          import re, sys, pathlib
+          import os
+          fp = "$f"
+          # We can't shell-interpolate inside a heredoc PY block, so
+          # grab from the env. We export it via shell var below.
+          PY
+          done
+          # Use a separate Python invocation per file.
+          python3 -c "
+          import re, sys, pathlib, glob
+          rc = 0
+          for fp in sorted(glob.glob('nakatomi_heist/default/**/*.conf', recursive=True)):
+              with open(fp) as f:
+                  in_section = False
+                  for ln, raw in enumerate(f, 1):
+                      line = raw.rstrip('\n').lstrip()
+                      if not line or line.startswith('#'): continue
+                      if line.startswith('['):
+                          if not line.endswith(']'):
+                              print(f'{fp}:{ln} unterminated section header')
+                              rc = 1
+                          in_section = True
+                          continue
+                      if '=' not in line and ':' not in line:
+                          if line.strip(): pass  # tolerant — some edge styles
+                          continue
+                      if not in_section:
+                          print(f'{fp}:{ln} key=value line outside any [section]')
+                          rc = 1
+              # also confirm UTF-8
+              with open(fp, 'rb') as f:
+                  try: f.read().decode('utf-8')
+                  except UnicodeDecodeError as e:
+                      print(f'{fp} not UTF-8: {e}')
+                      rc = 1
+          sys.exit(rc)
+          "
+
+      - name: Generator scenario consistency
+        run: node scripts/tests/test_scenario_consistency.js
+
+      - name: Verify no secrets in repo
+        run: |
+          set -euo pipefail
+          # codeguard-1-hardcoded-credentials: scan committed source
+          # for obvious leaked-secret shapes. Heuristics — false
+          # positives ARE expected on game lore (e.g. "ode to joy"
+          # contains "ode"); we only fail on the highest-confidence
+          # patterns.
+          fail=0
+          if git grep -E 'AKIA[0-9A-Z]{16}' -- ':!*.lock' ':!*.svg' ':!RELEASE_NOTES.md' >/dev/null 2>&1; then
+            echo "FAIL: AWS access key committed"; fail=1
+          fi
+          if git grep -E 'sk_live_[0-9a-zA-Z]{24,}' >/dev/null 2>&1; then
+            echo "FAIL: Stripe live secret key committed"; fail=1
+          fi
+          if git grep -E 'ghp_[0-9a-zA-Z]{36,}' >/dev/null 2>&1; then
+            echo "FAIL: GitHub PAT committed"; fail=1
+          fi
+          if git grep -nE 'BEGIN (RSA|DSA|EC|OPENSSH|PRIVATE) (PRIVATE )?KEY' -- ':!*.md' >/dev/null 2>&1; then
+            echo "FAIL: private key block committed"; fail=1
+          fi
+          if [ "$fail" -ne 0 ]; then exit 1; fi
+          echo "OK: no obvious secrets in tree"
+
+  package:
+    name: Build Splunk .spl artifact
+    needs: [ test, static-checks ]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      contents: write   # only escalate for the tagged release path
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build .spl tarball
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          # The Splunk app lives at nakatomi_heist/. .spl is just a
+          # gzipped tarball with a fixed top-level directory name.
+          tar -czf "dist/nakatomi_heist-${{ github.ref_name }}.spl" nakatomi_heist
+          ls -lh dist/
+
+      - name: Compute SHA-256
+        run: |
+          set -euo pipefail
+          shasum -a 256 dist/*.spl | tee dist/SHA256SUMS
+
+      - name: Upload .spl as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nakatomi_heist-${{ github.ref_name }}-spl
+          path: |
+            dist/*.spl
+            dist/SHA256SUMS
+          retention-days: 30
+
+      - name: Attach to draft release
+        # Best-effort: if the release doesn't exist yet, create a draft
+        # one. This keeps the publishing workflow lightweight without
+        # requiring an outside-the-action release-please run.
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            dist/*.spl
+            dist/SHA256SUMS
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: false

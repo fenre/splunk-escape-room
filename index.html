@@ -1135,7 +1135,7 @@
       <span class="badge"><span class="dot gold"></span> Die Hard Theme</span>
       <span class="badge"><span class="dot green"></span> 5 Acts &middot; 26 Tasks</span>
       <span class="badge"><span class="dot blue"></span> Physical + Digital</span>
-      <span class="badge"><span class="dot green"></span> v2.9 &middot; Playable</span>
+      <span class="badge"><span class="dot green"></span> v2.17 &middot; Playable</span>
     </div>
 
     <div class="hero-line"></div>
@@ -1343,13 +1343,13 @@
 
       <div class="arch-diagram">
         <div class="arch-box">
-          <h4>Splunk App <span class="tag live">v2.9</span></h4>
+          <h4>Splunk App <span class="tag live">v2.17</span></h4>
           <ul>
-            <li>5 indexes incl. <code>nakatomi_sessions</code> (90&nbsp;d retention)</li>
-            <li>~2,200 events across 11 sourcetypes + live session telemetry</li>
+            <li>6 indexes incl. <code>nakatomi_sessions</code> (90&nbsp;d retention) &amp; <code>nakatomi_comms</code> (v2.9+)</li>
+            <li>~47k events across 13 sourcetypes + live session telemetry</li>
             <li>7 CSV lookup tables + KV Store collection (extended for telemetry)</li>
-            <li>10 dashboards incl. <strong>Facilitator Board</strong> for booth ops</li>
-            <li>3 live alert clues + new <code>hint_token_spent</code> / <code>pacifist_run_completed</code> events</li>
+            <li>10 dashboards incl. <strong>Facilitator Board</strong> (1920&times;2860 in v2.12) for booth ops; v2.13 wires three new event types into the live row (kiosk, feedback, abandonment)</li>
+            <li>3 live alert clues + Adaptive Hans, phone-call, board, hub, and ending telemetry events</li>
             <li>HEC data loader + opt-in same-origin telemetry path</li>
           </ul>
         </div>
@@ -1364,15 +1364,26 @@
           </ul>
         </div>
         <div class="arch-box">
-          <h4>Game UI <span class="tag ready">v2.9</span></h4>
+          <h4>Game UI <span class="tag ready">v2.16</span></h4>
+          <p style="margin:0.25rem 0 0; font-size:0.75rem; color:var(--text-dim);">v2.17 ships dashboard-only changes; <code>game.html</code> unchanged from v2.16.</p>
           <ul>
             <li>Dual mode: physical or digital</li>
             <li>Mission briefing intro &amp; act transition cinematics</li>
             <li><strong>5 difficulty modes</strong> incl. Iron Man (no hints) + Quick Demo</li>
             <li><strong>Hint-token economy</strong> (3 tokens/scenario by default)</li>
+            <li><strong>Adaptive Hans</strong> (36 reactive lines) + facilitator phone cinematic (v2.10)</li>
+            <li><strong>Investigation board</strong> (v2.10, hotkey <code>B</code>) + <strong>Floor-30 hub</strong> (v2.11, hotkey <code>M</code>)</li>
+            <li><strong>Ending branches</strong> (v2.12) &mdash; Analyst, Cowboy, Speedrunner, default</li>
+            <li><strong>Booth tiers</strong> (v2.13) &mdash; Quickfire (5 min) + Booth Heist (10 min), pre-filled SPL, golden-path fixtures, fast boot</li>
+            <li><strong>Kiosk hardening</strong> (v2.13) &mdash; ?kiosk=1 lockdown, watchdog reload, ?queue=1 secondary display</li>
+            <li><strong>Facilitator booth tab</strong> (v2.13) &mdash; ?facilitator=1, Splunk linkout, 1Q feedback, abandonment tracking</li>
+            <li><strong>Adaptive audio</strong> (v2.14) &mdash; 3-layer bus engine (ambient/music/SFX), Ode to Joy on default-ending vault open, per-act 5-note motifs, in-pause mix panel, captions HUD</li>
+            <li><strong>Quality gate</strong> (v2.15) &mdash; unified test runner (840 assertions / 10 modules), GitHub Actions CI, scenario consistency regression, GDPR/DSAR export+purge scripts, KV retention recipe</li>
+            <li><strong>Scenario packs + i18n</strong> (v2.16) &mdash; ?scenario=default|roof|afterparty + ?lang=en|es|de|ja overlay loaders, schema v2, allow-listed names, file://-safe fetch, 923 assertions / 11 modules</li>
+            <li><strong>Facilitator dashboard catch-up</strong> (v2.17) &mdash; canvas 2860&rarr;3600, 3 new rows: kiosk operations + post-session feedback + abandonment + operator activity (surfaces v2.13/v2.14 telemetry)</li>
             <li>Pause, 4 CRT themes, typewriter text, confetti</li>
             <li>Text codes, multi-step tasks, trap codes</li>
-            <li>Achievements (incl. Pacifist Run + Iron Man), dossier, decision points</li>
+            <li>Achievements (incl. Pacifist Run + Iron Man + 4 ending badges), dossier, decision points</li>
           </ul>
         </div>
 
@@ -1554,7 +1565,7 @@ flowchart TD
   end
 
   subgraph orchestration [Game Orchestration — game.html]
-    GO[Game Engine v2.9] -->|briefing, acts, scoring\ntimer, hint tokens, leaderboard\ntelemetry, multi-team, Iron Man| PL
+    GO[Game Engine v2.16 + Splunk app v2.17] -->|briefing, acts, scoring\ntimer, hint tokens, leaderboard\ntelemetry, multi-team, Iron Man\nAdaptive Hans, phone cinematic\ninvestigation board, Floor-30 hub\nending-only branches\nQuickfire + Booth Heist + kiosk + facilitator tab\nadaptive 3-layer audio + Ode to Joy + captions\n984-assertion regression + CI + DSAR scripts\nscenario packs + i18n overlays\nfacilitator board 1920x3600| PL
     GO -->|task progression| SP
     VM -->|seal status| GO
   end
@@ -1705,23 +1716,31 @@ flowchart LR
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Game UI <span class="status done">v2.9</span></h4>
+          <h4>Game UI <span class="status done">v2.16</span></h4>
           <ul>
             <li class="done">Mission briefing intro &amp; act cinematics</li>
             <li class="done"><strong>5 difficulty modes</strong> incl. Iron Man + Quick Demo</li>
             <li class="done">Pause (P), shortcuts (?), 4-theme CRT picker</li>
             <li class="done">Local leaderboard (top 10, arcade initials)</li>
-            <li class="done">Achievements (incl. Pacifist Run + Iron Man), decisions</li>
+            <li class="done">Achievements (incl. Pacifist Run, Iron Man, 4 ending badges), decisions</li>
             <li class="done">Confetti, screen shake, typewriter text</li>
             <li class="done">Detailed post-game statistics table + token roll-up</li>
+            <li class="done"><strong>Adaptive Hans</strong> (36 reactive lines) + phone cinematic (v2.10)</li>
+            <li class="done"><strong>Investigation board</strong> (v2.10) + <strong>Floor-30 hub</strong> (v2.11)</li>
+            <li class="done"><strong>Ending-only branches</strong> (v2.12) &mdash; Analyst / Cowboy / Speedrunner / default</li>
+            <li class="done"><strong>Booth tiers + kiosk + facilitator tab</strong> (v2.13) &mdash; Quickfire / Booth Heist / ?kiosk=1 / ?queue=1 / ?facilitator=1 / Splunk linkout / 1Q feedback / abandonment tracking</li>
+            <li class="done"><strong>Adaptive 3-layer audio + mix panel + captions</strong> (v2.14) &mdash; ambient/music/SFX bus engine, Ode to Joy on default vault-open, per-act motifs, audio_setting_changed telemetry</li>
+            <li class="done"><strong>Quality gate</strong> (v2.15) &mdash; Q1 unified test runner + scenario regression / Q2 GitHub Actions CI + Dependabot / Q5 GDPR DSAR scripts + KV retention recipe</li>
+            <li class="done"><strong>Scenario packs + i18n</strong> (v2.16) &mdash; Phase 5f / pragmatic Q3 + Q4: ?scenario=&lt;default|roof|afterparty&gt;, ?lang=&lt;en|es|de|ja&gt;, schema v2 overlay loaders, file://-safe fetch</li>
+            <li class="done"><strong>Facilitator dashboard catch-up</strong> (v2.17) &mdash; canvas 2860&rarr;3600, 3 new rows surface kiosk operations + post-session feedback + abandonment + operator activity (v2.13/v2.14 events)</li>
           </ul>
         </div>
         <div class="roadmap-card">
-          <h4>Splunk App <span class="status done">v2.9</span></h4>
+          <h4>Splunk App <span class="status done">v2.17</span></h4>
           <ul>
-            <li class="done">10 dashboards incl. Facilitator Board for booth ops</li>
+            <li class="done">10 dashboards incl. Facilitator Board (1920&times;2860) for booth ops</li>
             <li class="done">KV Store collection extended for telemetry</li>
-            <li class="done">3 live alert clues + per-spend / pacifist-run telemetry</li>
+            <li class="done">Live alert clues + Adaptive Hans, phone, board, hub, and ending telemetry</li>
             <li class="done">Packaged .spl for install</li>
             <li class="done">HEC data loading script + opt-in live telemetry</li>
           </ul>
@@ -1779,12 +1798,12 @@ flowchart LR
           <p>Dashboard wireframes, phase progression, hint delivery, fail/win states, digital mode, and app structure.</p>
         </a>
         <a href="game.html" class="doc-link">
-          <h4>Game UI v2.9</h4>
-          <p>Full game with mission briefing, 5 difficulty modes (incl. Iron Man), Quick Demo, hint-token economy, opt-in live telemetry, multi-team codes + QR handoff, attract loop, spectator second screen, and full WCAG 2.2 AA accessibility pass.</p>
+          <h4>Game UI v2.16</h4>
+          <p>Full game with mission briefing, 7 difficulty modes (incl. Iron Man, Quickfire, Booth Heist), Quick Demo, hint-token economy, opt-in live telemetry, multi-team codes + QR handoff, attract loop, spectator second screen, Adaptive Hans + facilitator phone cinematic (v2.10), investigation board + 1080p PNG export (v2.10), free-roam Floor-30 hub (v2.11), four ending-only branches (Analyst / Cowboy / Speedrunner / default, v2.12), conference-booth bundle (Quickfire 5 min + Booth Heist 10 min + ?kiosk=1 + ?queue=1 + ?facilitator=1 + Splunk linkout + 1Q feedback + abandonment tracking, v2.13), adaptive 3-layer audio engine + Beethoven Ode to Joy + per-act motifs + in-pause mix panel + captions HUD (v2.14), 840-assertion regression suite + GitHub Actions CI + GDPR DSAR scripts + KV retention recipe (v2.15), three scenario-pack overlays (default / roof / afterparty) + i18n scaffold (en / es) (v2.16), and full WCAG 2.2 AA accessibility pass.</p>
         </a>
         <a href="RELEASE_NOTES.md" class="doc-link">
           <h4>Release Notes</h4>
-          <p>Full version history from v0.0.1 through v2.9.0 with detailed changelogs.</p>
+          <p>Full version history from v0.0.1 through v2.17.0 with detailed changelogs.</p>
         </a>
         <a href="docs/flow.html" class="doc-link">
           <h4>Flow Diagrams (standalone)</h4>
@@ -1799,7 +1818,7 @@ flowchart LR
     <div class="footer-quote">"Come out to the coast, we'll get together, have a few laughs."</div>
     Nakatomi Plaza: Vault Heist &mdash; A Splunk-Powered Inverse Escape Room<br>
     Die Hard references used for fan/parody purposes. All trademarks belong to their respective owners.<br>
-    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.9.0</button>
+    <button class="rn-trigger" onclick="document.getElementById('rn-overlay').classList.remove('hidden')">Release Notes &middot; v2.17.0</button>
   </footer>
 
   <!-- Release Notes Modal -->
@@ -1813,9 +1832,306 @@ flowchart LR
 
         <div class="rn-version">
           <div class="rn-version-header">
+            <span class="rn-version-num">v2.17.0</span>
+            <span class="rn-version-date">26 Apr 2026</span>
+            <span class="rn-version-tag rn-tag-latest">Facilitator Dashboard Catch-Up (QC support)</span>
+          </div>
+          <div class="rn-cat">Three new dashboard rows (1920&times;2860 &rarr; 1920&times;3600)</div>
+          <ul>
+            <li><strong>Booth Kiosk Operations</strong> (cyan accent) &mdash; distinct kiosk teams today KPI, idle reset reasons column chart (timeout / idle / future), recent kiosk_idle_reset + kiosk_watchdog_reload table with formatted uptime</li>
+            <li><strong>Post-Session Feedback + Abandonment</strong> (warm yellow accent) &mdash; avg rating today KPI (excludes skipped), 5-star distribution + Skipped column chart, abandonment funnel by exit_act</li>
+            <li><strong>Operator Activity</strong> (purple accent) &mdash; facilitator clicks today KPI, facilitator action verb mix (complete / powercut / end_session / reset), audio mix tweaks by setting (master / music / sfx / ambient / mono / reducedIntensity / captions)</li>
+          </ul>
+          <div class="rn-cat">Implementation</div>
+          <ul>
+            <li>Nine new data sources, 18 new visualisations, all booth-token scoped via the existing <code>where ("$booth_token$"="" OR booth_id="$booth_token$")</code> guard so the dashboard's per-booth filter input keeps working</li>
+            <li>Reuses existing <code>splunk.markdown</code> / <code>splunk.singlevalue</code> / <code>splunk.column</code> / <code>splunk.table</code> primitives &mdash; no new dashboard widgets</li>
+            <li>No <code>game.html</code> changes, no new event types, no new <code>props.conf</code> extractions &mdash; surfaces telemetry that v2.13/v2.14 was already emitting</li>
+          </ul>
+          <div class="rn-cat">Verification</div>
+          <ul>
+            <li>New <code>scripts/tests/test_facilitator_dashboard.js</code> &mdash; 61 assertions covering: CDATA + JSON parse, count consistency between dataSources/visualizations/layout.structure, zero orphans, canvas-height &ge; max bottom + buffer, zero overlapping items, every v2.13/v2.14 event type has at least one panel querying it, every new row has its standard 6 artifacts, description dimensions match canvas, every new data source carries the booth-token guard</li>
+            <li>Combined regression suite now <strong>984 assertions across 12 modules</strong>, zero failures</li>
+            <li><code>app.conf</code> bumped to v2.17.0, build 37; QC checklist <code>docs/QC_CHECKLIST_v2.16.md</code> Section 5.3 updated with per-row test recipes</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.16.0</span>
+            <span class="rn-version-date">26 Apr 2026</span>
+            <span class="rn-version-tag">Scenario Packs + i18n (Phase 5f / Q3 / Q4)</span>
+          </div>
+          <div class="rn-cat">ScenarioPacks IIFE</div>
+          <ul>
+            <li><code>?scenario=&lt;name&gt;</code> URL flag; allow-list <code>default | roof | afterparty</code>. Anything else silently falls back to default with no fetch attempt</li>
+            <li>Three packs in <code>scenarios/</code>: <strong>default</strong> (canonical Christmas-noir, no-op overlay), <strong>roof</strong> (rooftop edition, helicopter wind ambient, Karl/Theo rooftop chatter), <strong>afterparty</strong> (forensic debrief, McClane reconstructing the heist from morning-after logs)</li>
+            <li>Schema v2: <code>$schema_version: 2</code> + <code>$id</code> + optional <code>metadata</code> / <code>ambient</code> / <code>story_beats</code> / <code>intercepts</code> / <code>endings</code>. Story-beat keys match <code>/^[a-zA-Z0-9_]{1,40}$/</code>; ending keys match <code>/^[a-zA-Z_]{1,32}$/</code>. Unknown keys silently dropped at validation</li>
+            <li>Inline <code>&lt;script id="nakatomi-scenario" type="application/json"&gt;</code> block for booth-friendly deploys (zero extra round-trips, file://-safe, kiosk-CSP friendly)</li>
+          </ul>
+          <div class="rn-cat">I18n IIFE + locale packs</div>
+          <ul>
+            <li><code>?lang=&lt;code&gt;</code> URL flag; allow-list <code>en | es | de | ja</code>. Two packs ship: <code>i18n/en.json</code> (canonical) and <code>i18n/es.json</code> (Spanish proof-of-concept)</li>
+            <li>DEFAULTS table covers ~30 most-visible UI strings (mode-select, HUD, pause, victory, game-over). Bulk inline strings stay inline until the v3.0 capstone refactor</li>
+            <li><code>I18n.t(key, fallback)</code> resolution chain: inline-loaded translations &rarr; DEFAULTS &rarr; fallback arg &rarr; key itself. Key validated against <code>/^[a-zA-Z0-9_.]{1,80}$/</code> so a future caller passing user input can't traverse outside the allow-list</li>
+            <li>Regression suite enforces full coverage: every locale pack must contain every DEFAULTS key (catches a partial translation shipping by accident)</li>
+          </ul>
+          <div class="rn-cat">Security model (both modules)</div>
+          <ul>
+            <li><strong>Allow-list bounds</strong> &mdash; pack <code>$id</code> and lang code MUST match the in-code allow-list. Fetch URL fixed-shape (<code>scenarios/&lt;allowlisted&gt;.json</code> / <code>i18n/&lt;allowlisted&gt;.json</code>) &mdash; no path traversal, no scheme override</li>
+            <li><strong>Size caps</strong> &mdash; body rejected if &gt; 64 KB (scenario) / 32 KB (i18n). Each string capped at 2048 / 1024 bytes. <code>content-length</code> checked pre-<code>text()</code> read</li>
+            <li><strong>Prototype-pollution defense</strong> &mdash; keys named <code>__proto__</code>, <code>constructor</code>, <code>prototype</code> silently dropped during validation</li>
+            <li><strong>No DOM injection</strong> &mdash; every override rendered through <code>escHTML()</code> at the consuming call site. Pack content treated as untrusted input even from the project's own packs</li>
+            <li><strong>file:// fallback</strong> &mdash; runtime detects <code>location.protocol === 'file:'</code> and skips fetch entirely; use the inline <code>&lt;script&gt;</code> block when shipping offline</li>
+          </ul>
+          <div class="rn-cat">Verification</div>
+          <ul>
+            <li>New <code>scripts/tests/test_scenario_packs.js</code> &mdash; 83 assertions covering: module surfaces, allow-lists, validation (well-formed / wrong schema / unknown id / prototype-polluted / over-length / control-char / hyphenated key), URL allow-list, fallback paths (no fetch on unknown / on default / on file://), inline-pack application, on-disk pack validation, on-disk locale-pack DEFAULTS-coverage</li>
+            <li>Combined regression suite now <strong>923 assertions across 11 modules</strong>, zero failures</li>
+            <li><code>app.conf</code> bumped to v2.16.0, build 36; no new indexes, sourcetypes, or KV Store collections</li>
+            <li>New <code>docs/SCENARIO_PACKS.md</code> with schema reference, both load mechanisms, security model, and 5-step "How to author a new pack" recipe</li>
+          </ul>
+          <div class="rn-cat">Plan reference</div>
+          <ul>
+            <li>Roadmap todos completed: <code>q3-refactor</code> (pragmatic scope: scenario-pack v2 schema runtime + override loader, NOT full ACTS extraction + esbuild build pipeline which stays deferred to a future v2.x bump or v3.0 capstone), <code>q4-i18n</code> (i18n helper + en/es locale packs), <code>p5-scenario-skins</code> (three packs shipped using the v2 schema)</li>
+            <li>Remaining: <code>p7-branching-tier2</code> (gated on Tier 1 telemetry showing replay), <code>v3-capstone</code> (gated on explicit user instruction)</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.15.0</span>
+            <span class="rn-version-date">26 Apr 2026</span>
+            <span class="rn-version-tag">Quality Gate (Phase Q1 + Q2 + Q5)</span>
+          </div>
+          <div class="rn-cat">Unified test runner (Q1)</div>
+          <ul>
+            <li><code>scripts/test.sh</code> &mdash; single entry point that walks every <code>scripts/tests/test_*.js</code>, aggregates pass/fail counts, and reports a combined tally. Supports <code>--json</code> (CI consumers) and <code>--quiet</code> (status-bar friendly). Exit 0 on pass, 1 on any failure</li>
+            <li>New <code>test_scenario_consistency.js</code> &mdash; 64-assertion regression validating <code>generator/scenario.yaml</code> against the canonical answer key. Catches a code mutated without its <code>embed_value</code>; flags duplicate codes; verifies every referenced index exists in <code>indexes.conf</code>; confirms the 90-day retention guard on <code>nakatomi_sessions</code> is still in place</li>
+            <li>Combined regression suite now <strong>840 assertions across 10 modules</strong> (Audio 122 + Booth 94 + Endings 120 + Facilitator 61 + Hans 69 + Hub 68 + Investigation Board 69 + Kiosk 89 + Phone Calls 84 + Scenario 64), zero failures</li>
+          </ul>
+          <div class="rn-cat">GitHub Actions CI (Q2)</div>
+          <ul>
+            <li><code>.github/workflows/ci.yml</code> runs on every push to <code>main</code>/<code>develop</code>, every PR, and every <code>v*.*.*</code> tag. Jobs: <code>test</code> (Node 20, runs <code>scripts/test.sh</code>), <code>static-checks</code> (HTML/conf-file syntax + scenario regression + secret-scan gate for AWS keys / Stripe live secrets / GitHub PATs / inline private keys), <code>package</code> (tags only — builds the <code>.spl</code> tarball, computes SHA-256, attaches to a draft GitHub Release)</li>
+            <li>Hardened per <code>codeguard-0-devops-ci-cd-containers</code>: <code>permissions: contents: read</code> default with the release job escalating only when needed; <code>concurrency</code> group cancels in-flight runs; <code>set -euo pipefail</code> everywhere</li>
+            <li><code>.github/dependabot.yml</code> &mdash; weekly GitHub-actions updates; npm ecosystem reserved for the future Q3 refactor</li>
+            <li>AppInspect explicitly NOT wired (requires Splunkbase auth, runs locally on the artifact built by the <code>package</code> job)</li>
+          </ul>
+          <div class="rn-cat">GDPR / DSAR governance (Q5)</div>
+          <ul>
+            <li><code>scripts/export_sessions.sh</code> &mdash; exports every <code>nakatomi_sessions</code> event AND <code>vault_progress</code> KV record matching <code>--team-code</code> or <code>--session-id</code> to a single JSON file</li>
+            <li><code>scripts/purge_sessions.sh</code> &mdash; right-to-erasure counterpart. Marks index events as deleted via <code>| delete</code> (requires <code>can_delete</code>) and removes matching KV records. Refuses to run without <code>--confirm yes-i-mean-it</code>; logs an SHA-256 hash of the filter (not the raw team_code) for audit</li>
+            <li>Both scripts: filter values restricted to <code>[A-Za-z0-9._-]</code> (defends against SPL injection), auth via <code>Authorization: Bearer</code> headers (never URL params), <code>--fail-with-body</code> on every curl, output written with <code>umask 077</code></li>
+            <li><code>docs/DEPLOY.md</code> §7.1 adds the KV-Store 30-day prune saved-search recipe; §7.2 documents the dedicated <code>nakatomi_dsar</code> role's required capabilities. Booth-display read-only token is intentionally insufficient</li>
+          </ul>
+          <div class="rn-cat">Verification</div>
+          <ul>
+            <li><code>bash scripts/test.sh</code> passes 840/840 assertions in ~1.3 s on a baseline runner</li>
+            <li>No new gameplay code; <code>game.html</code> wholly unchanged in this release. <code>app.conf</code> bumped to v2.15.0, build 35</li>
+            <li>No new runtime JS dependencies &mdash; the repo stays single-file-distributable</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.14.0</span>
+            <span class="rn-version-date">26 Apr 2026</span>
+            <span class="rn-version-tag">Adaptive Audio + Ode to Joy + Mix Panel (Phase 5h)</span>
+          </div>
+          <div class="rn-cat">Adaptive 3-layer audio engine</div>
+          <ul>
+            <li>Bus topology: <code>_audioMasterBus</code> &rarr; <code>destination</code>, with <code>_audioAmbientBus</code> / <code>_audioMusicBus</code> / <code>_audioSfxBus</code> feeding into master. <code>tone()</code> and <code>noise()</code> accept an optional <code>bus</code> arg routing to the named GainNode (default <code>'sfx'</code> so 30+ existing cue functions still work)</li>
+            <li><code>AudioMix.crossfade(layer, target, durMs)</code> animates the named layer's gain via <code>linearRampToValueAtTime</code> &mdash; replaces v2.13's hard on/off behaviour with smooth tonal shifts</li>
+            <li>Bus references named with <code>_audio*Bus</code> to avoid colliding with the legacy <code>ambientGain</code> per-oscillator gain in <code>startAmbient()</code></li>
+          </ul>
+          <div class="rn-cat">Beethoven's Ode to Joy on vault-open</div>
+          <ul>
+            <li>Public-domain melody from Beethoven's 9th, 4th movement (Schiller's <em>An die Freude</em>) &mdash; first 8 bars: <code>E E F G G F E D C C D E E D D</code>. Synthesised in code, no recording-licensing surface, single-file distribution intact</li>
+            <li>Plays through the music bus with a sustained C3+G3 fifth underneath for the orchestra-entrance feel + an octave-up sparkle on the long final note</li>
+            <li>Fires only on the DEFAULT ending. The analyst / cowboy / speedrunner branches keep their bespoke per-ending stings; layering Ode on top would muddy them. The default ending is the canonical &ldquo;Welcome to the party, pal.&rdquo; resolution &mdash; iconic Die Hard moment, where the Beethoven motif lands hardest</li>
+          </ul>
+          <div class="rn-cat">Per-act motifs + audio mix panel</div>
+          <ul>
+            <li><code>AudioMix.playActComplete(actIdx)</code> &mdash; 5-note arpeggios unique per act so players unconsciously learn each act's signature. Act 1 C major / Act 2 C minor / Act 3 A minor &rarr; B half-dim / Act 4 G dim &rarr; climbing / Act 5 C major &rarr; D resolution</li>
+            <li>In-pause <strong>Audio Mix panel</strong> (toggled by &ldquo;AUDIO MIX &amp; CAPTIONS&rdquo; button with <code>aria-expanded</code>): four sliders (Master / Music / SFX / Ambient, 0&ndash;100 with visible &ldquo;75%&rdquo; readouts) and three checkboxes (Mono / single-ear, Reduced audio intensity, Audio captions)</li>
+            <li>Persistent settings under <code>localStorage['nakatomi_audio_settings']</code>. Every tweak emits an <code>audio_setting_changed</code> telemetry event so the booth dashboard can answer &ldquo;did anyone find the controls?&rdquo;</li>
+          </ul>
+          <div class="rn-cat">Audio captions HUD (Deaf/HoH accessibility)</div>
+          <ul>
+            <li><code>#audio-caption-hud</code> top-center fixed band, <code>aria-live="polite" role="status"</code>. Renders a 2-second text label whenever a cue fires AND <code>captions: true</code>. Supports the standard cue dictionary (boot / codeCorrect / codeWrong / sealOpen / trapTriggered / actComplete / heartbeat / vaultOpen / victory / gameOver / hintRevealed / intercept / powerDown / ambient)</li>
+            <li>Cue-key allow-list &mdash; <code>captionFor()</code> silently no-ops on any unknown id (defends against a future caller passing user-supplied keys). <code>textContent</code> (never <code>innerHTML</code>) is the only write surface</li>
+            <li>11 existing cue functions (<code>playCorrect</code> / <code>playWrong</code> / <code>playSealOpen</code> / <code>playHintReveal</code> / <code>playTrapCode</code> / <code>playRadioIntercept</code> / <code>playHeartbeat</code> / <code>playVictory</code> / <code>playGameOver</code> / <code>playPowerDown</code>) all wired with try/catch around <code>AudioMix.captionFor('cueId')</code></li>
+          </ul>
+          <div class="rn-cat">Verification</div>
+          <ul>
+            <li>New <code>scripts/tests/test_audio_mix.js</code> &mdash; 122 assertions covering module surface, defaults, <code>clamp01()</code> edge cases, allow-list rejection (drive-by <code>__proto__</code>/<code>constructor</code>), persistence + telemetry, corrupt-JSON recovery, captions on/off/unknown-key, ACT_MOTIFS shape, Ode to Joy &rarr; music bus, lifecycle wiring</li>
+            <li>Combined regression suite now <strong>776 assertions across 9 modules</strong>, zero failures</li>
+            <li><code>app.conf</code> bumped to v2.14.0, build 34; no new indexes, sourcetypes, or KV Store collections &mdash; wholly additive minor bump per the project version policy</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.13.0</span>
+            <span class="rn-version-date">26 Apr 2026</span>
+            <span class="rn-version-tag">Conference-Booth Bundle (Phase 5a/5b/5c/5d/5e)</span>
+          </div>
+          <div class="rn-cat">Quickfire + Booth Heist short-form difficulties (Phase 5a/5b)</div>
+          <ul>
+            <li><strong>Quickfire</strong> (5 min / 2 tasks / 0.25&times; score) and <strong>Booth Heist</strong> (10 min / 3 tasks / 0.5&times; score) sit between the main 3-tier row and the 15-min Quick Demo / Iron Man row. Pre-filled SPL, no trap codes, fast 3-second BIOS boot</li>
+            <li>Both reuse the canonical 26-task campaign via <code>taskAllowlist</code>: Quickfire = 1.1 + 3.7 (finish on the iconic &ldquo;pull the power&rdquo;), Booth Heist = 1.1 + 3.3 + 3.7. <code>applyBoothMode()</code> walks the allowlist in <em>author</em> order so booth operators can stage easy-then-cinematic pacing</li>
+            <li><strong><code>BOOTH_FIXTURES</code> golden-path cache</strong> (~1 KB) renders sample SPL result rows alongside the pre-filled query in a <code>&lt;details&gt;</code> &ldquo;SAMPLE RESULT &mdash; offline fixture&rdquo; preview. Booth visitors with no live Splunk reach see the result <em>shape</em> and learn to read it</li>
+            <li><code>splunk_fallback</code> telemetry event allow-listed (reserved for the future Q3-refactor era when game.html actually round-trips queries to a live Splunk install)</li>
+          </ul>
+          <div class="rn-cat">Kiosk hardening (Phase 5c)</div>
+          <ul>
+            <li><code>?kiosk=1</code> activates the <code>Kiosk</code> IIFE module: full-screen request on first user gesture, right-click + dev-tools shortcut guard (Ctrl+S/P/U/Shift+I/J/C, F12 blocked; F11 + gameplay keys live), 90-second auto-return on victory/game-over (configurable via <code>?kiosk_idle=&lt;sec&gt;</code> clamped to 30s&ndash;10min), hourly watchdog reload (<code>?kiosk_watchdog=&lt;sec&gt;</code> clamped to 5min&ndash;8h)</li>
+            <li>Watchdog uses <code>location.replace()</code> so the back button can&rsquo;t walk visitors back to a stranger&rsquo;s victory screen. localStorage hygiene caps the leaderboard at 50 entries (UI render still shows top 10), with corruption-safe wipe-on-failed-parse</li>
+            <li><code>?queue=1</code> secondary-display mode: minimalist &ldquo;PLAYER IN SESSION&rdquo; / &ldquo;BOOTH OPEN&rdquo; panel for an iPad next to the booth TV. Refreshes every 5s from <code>NakaTelemetry</code>; never binds shortcut guard or idle reset (a queue display must never reset a player&rsquo;s session)</li>
+            <li>Three new event types &mdash; <code>kiosk_activated</code>, <code>kiosk_idle_reset</code>, <code>kiosk_watchdog_reload</code> &mdash; with five new <code>props.conf</code> extractions</li>
+          </ul>
+          <div class="rn-cat">Facilitator booth tab + Splunk linkout (Phase 5d)</div>
+          <ul>
+            <li><code>?facilitator=1</code> URL bypass auto-unlocks the existing <code>#facilitator</code> panel without the typed PIN prompt (UX, not security &mdash; PIN stays on every other route)</li>
+            <li>Live header inside the panel: <code>TEAM &lt;code&gt;</code> + <code>ELAPSED &lt;m:ss&gt;</code> + <code>PROGRESS &lt;done&gt;/&lt;total&gt;</code>, rebuilt every 1 s via a lightweight <code>setInterval</code> that&rsquo;s a no-op when the panel is hidden. All values pass through <code>escHTML()</code></li>
+            <li>Buttons renamed for booth clarity: &ldquo;Game Over&rdquo; &rarr; &ldquo;End Session&rdquo;, &ldquo;Reset&rdquo; &rarr; &ldquo;Reset for Next Visitor&rdquo;. Every facilitator click emits <code>facilitator_action</code> telemetry (allow-listed verb: complete | powercut | end_session | reset)</li>
+            <li><strong>&ldquo;View in Splunk &rarr;&rdquo; linkout</strong> on the victory screen. URL comes <em>only</em> from <code>NakatomiConfig.splunkLinkUrl</code> or the inline <code>#nakatomi-config</code> JSON (never URL params). Validated: type, length cap 512, control-char rejection, parses with <code>new URL()</code>, must be <code>https:</code>, no userinfo. <code>target="_blank" rel="noopener noreferrer"</code></li>
+          </ul>
+          <div class="rn-cat">1-question feedback widget + abandonment tracking (Phase 5e)</div>
+          <ul>
+            <li>Five-star rating + 120-char optional comment in the victory overlay. Only shown when telemetry is on or active difficulty is a booth tier; one-shot per session via <code>feedbackSubmitted</code> guard. <code>_sanitizeFeedbackText()</code> strips CR/LF/TAB/control + <code>&lt;</code>/<code>&gt;</code> and caps at 120 chars before emit; sanitized text is never echoed back to the DOM</li>
+            <li><code>session_feedback</code> event carries rating, comment_length, sanitized comment, elapsed_seconds, difficulty. &ldquo;Skip&rdquo; / dismiss path emits the same event with <code>rating: 0, skipped: true, reason: &ldquo;skip&rdquo;</code> so dashboards can compute genuine response rates</li>
+            <li><code>armAbandonmentTimer()</code> fires <code>session_abandoned</code> at <code>timer + 5 min</code> after <code>enterGame()</code>, capped at 4 h max for kiosk-watchdog safety. Cancelled on victory, game-over, and reset. Payload &mdash; exit_act, exit_task, last_seen_seconds, difficulty &mdash; lets the facilitator board show a &ldquo;where do players drop out?&rdquo; funnel</li>
+            <li>Eight new <code>props.conf</code> extractions: <code>rating</code>, <code>comment_length</code>, <code>feedback_comment</code> (capped at 200 Splunk-side as defence-in-depth against future client bypass), <code>skipped</code>, <code>exit_act</code>, <code>exit_task</code>, <code>last_seen_seconds</code>, <code>fac_action</code></li>
+          </ul>
+          <div class="rn-cat">Verification</div>
+          <ul>
+            <li>Three new unit-test harnesses &mdash; <code>test_booth_difficulties.js</code> (94 assertions), <code>test_kiosk.js</code> (89), <code>test_facilitator_booth.js</code> (61). Combined regression suite now <strong>654 assertions across 8 modules</strong> (Booth 94 + Endings 120 + Facilitator 61 + Hans 69 + Hub 68 + Investigation Board 69 + Kiosk 89 + Phone Calls 84), zero failures</li>
+            <li><code>app.conf</code> bumped to v2.13.0, build 33; no new indexes, sourcetypes, or KV Store collections &mdash; wholly additive minor bump per the project version policy</li>
+            <li>All changes opt-in via URL params (<code>?kiosk=1</code> / <code>?queue=1</code> / <code>?facilitator=1</code>) or NakatomiConfig (<code>splunkLinkUrl</code>). Existing solo / enablement runs unaffected</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.12.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag">Ending-Only Branches (Phase 7 Tier 1)</span>
+          </div>
+          <div class="rn-cat">Four tonal endings at victory</div>
+          <ul>
+            <li>Every successful heist now resolves into one of four Act-5 branches decided from cumulative performance, <em>not</em> a mid-game fork &mdash; zero change to the task order, zero extra runtime cost on the critical path</li>
+            <li><strong>Analyst</strong> &mdash; clean, curious play: <code>wrong_count &le; 1</code> AND <code>hint_tokens_spent &le; 1</code> AND <code>side_stories_discovered &ge; 3</code>. Carl Winslow / &ldquo;the Bureau is hiring&rdquo;</li>
+            <li><strong>Cowboy</strong> &mdash; messy but wins: <code>wrong_count &ge; 4</code>. Powell / &ldquo;how the hell did that work?&rdquo;</li>
+            <li><strong>Speedrunner</strong> &mdash; faster than a helicopter: <code>elapsed_seconds &lt; 0.5 &times; TIMER_SECONDS</code>. Theo / &ldquo;that's&hellip; not possible&rdquo;</li>
+            <li><strong>Default</strong> &mdash; &ldquo;Welcome to the party, pal.&rdquo; Fallback narrative for everyone else</li>
+            <li>Priority tested in order: speedrunner &rarr; analyst &rarr; cowboy &rarr; default. Only one ending ever assigned</li>
+          </ul>
+          <div class="rn-cat">Per-ending narrative, audio, and achievement</div>
+          <ul>
+            <li>Each branch injects a themed narrative block into the victory overlay (title, subtitle, paragraph) with ending-specific colour grading &mdash; Analyst amber, Cowboy red, Speedrunner ice-blue, Default green</li>
+            <li>Unique <strong>audio sting</strong> replaces the default victory arpeggio: <code>playVictoryAnalyst()</code> (reflective low-pad), <code>playVictoryCowboy()</code> (brash cowboy-brass), <code>playVictorySpeedrunner()</code> (compressed staccato)</li>
+            <li>Four new achievements &mdash; <code>ending_analyst</code>, <code>ending_cowboy</code>, <code>ending_speedrunner</code>, <code>ending_default</code> &mdash; fire alongside any other act-5 badges the team earned that run</li>
+            <li>All ending narrative rendered via module-local <code>_esc()</code> HTML-escape helper; no user-supplied text is ever painted unescaped</li>
+          </ul>
+          <div class="rn-cat">Dedicated telemetry and facilitator panel</div>
+          <ul>
+            <li>New <code>ending_classified</code> event on <code>nakatomi_sessions</code> sourcetype <code>nakatomi:session:event</code>, emitted <em>before</em> <code>session_end</code> so both share the same victory timestamp</li>
+            <li>Payload: <code>ending_id</code>, <code>elapsed_seconds</code>, <code>wrong_count</code>, <code>hint_tokens_spent</code>, <code>side_stories_discovered</code>, <code>difficulty</code>, <code>mode</code>, <code>act</code> &mdash; no PII, no raw SPL text, no DOM content</li>
+            <li>New <strong>Ending Branches</strong> row on the facilitator board (now 1920&times;2860): <code>Endings Today</code> KPI, <code>Ending Distribution</code> stacked column by difficulty, <code>Recent Endings</code> table</li>
+            <li><code>props.conf</code> adds a single new extraction (<code>ending_id</code>) &mdash; every other field already had <code>EXTRACT-</code> rules from v2.4 / v2.6 / v2.9</li>
+          </ul>
+          <div class="rn-cat">Regression coverage</div>
+          <ul>
+            <li>New <code>scripts/tests/test_endings.js</code> &mdash; <strong>120 assertions</strong> across registry shape, classification priority, threshold edges, XSS hygiene (<code>_esc</code>), overlay application, audio dispatch, and null-safety for headless contexts</li>
+            <li>Combined suite now asserts <strong>410 behaviours</strong> (Hans 69 + Phone 84 + Board 69 + Hub 68 + Endings 120), all passing</li>
+            <li><code>app.conf</code> bumped to v2.12.0, build 32; no new indexes, sourcetypes, or KV Store collections &mdash; wholly additive minor bump per the project version policy</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.11.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag">Free-Roam Floor-30 Hub (Phase 8a)</span>
+          </div>
+          <div class="rn-cat">HubOverlay module &amp; blueprint-style floor plan</div>
+          <ul>
+            <li>Full-screen Floor-30 hub overlay (<code>#overlay-hub</code>, <code>z-index:9450</code>) sits between the investigation board (9500) and the pause menu (9800)</li>
+            <li>Seven clickable stations: <strong>Security Terminal</strong>, <strong>Vault Keypad</strong>, <strong>Leads Ledger</strong>, <strong>Briefing Wall</strong>, <strong>Blueprint</strong>, <strong>Comms Intercepts</strong>, <strong>Investigation Board</strong></li>
+            <li>Per-act availability: <code>keypad</code> locks until Act&nbsp;&ge;&nbsp;3; <code>blueprint</code>/<code>comms</code> unlock after Act&nbsp;1; <code>board</code> hidden in <code>?booth=1</code> mode</li>
+            <li>Live status panel: current act, task, elapsed time, hint tokens, side stories, easter eggs, trap codes, investigation-board counts &mdash; sourced from <code>state.*</code> + <code>InvestigationBoard.stats()</code> (no duplicate state)</li>
+          </ul>
+          <div class="rn-cat">Three entry points, full telemetry</div>
+          <ul>
+            <li><strong>M hotkey</strong> (&ldquo;Map&rdquo;) toggles from anywhere except text inputs / active phone call</li>
+            <li><strong>FLOOR-30 MAP</strong> button added to the pause menu, auto-dismisses pause when clicked</li>
+            <li><strong>Programmatic</strong> <code>HubOverlay.open('autoload')</code> for future scenario-driven entry</li>
+            <li>Three new event types: <code>hub_opened</code>, <code>hub_closed</code> (with <code>elapsed_ms</code> &amp; <code>interactions</code>), <code>hub_station_clicked</code> (with <code>station_id</code> + <code>availability</code>)</li>
+            <li><code>station_id</code> validated against <code>STATION_IDS</code> allow-list at emit time &mdash; a compromised caller cannot spray telemetry at arbitrary IDs</li>
+          </ul>
+          <div class="rn-cat">Facilitator board (1920&times;2620)</div>
+          <ul>
+            <li>New <strong>Floor-30 Hub</strong> row: <code>Hub Sessions Today</code> KPI, <code>Station Click Mix</code> stacked column (split by <code>availability</code> &mdash; surfaces teams hammering locked stations, a strong &ldquo;they're stuck&rdquo; signal)</li>
+            <li><code>Hub Dwell Time</code> stats table grouped by close <code>trigger</code> &mdash; teaches facilitators how their cohort uses the hub (overview vs launchpad vs accidental dismiss)</li>
+            <li>All hub panels honour the per-booth <code>booth_token</code> input alongside the discovery, Hans, phone, and board panels</li>
+          </ul>
+          <div class="rn-cat">Regression coverage</div>
+          <ul>
+            <li>New <code>scripts/tests/test_hub_overlay.js</code> &mdash; <strong>68 assertions</strong> across module surface, event allow-list, STATION_IDS registry, default availability rules, open/close idempotency, toggle correctness, unknown-station safety, locked-station telemetry, setAvailability overrides, HEC-token hygiene, and pause-handoff</li>
+            <li>Combined suite now asserts <strong>290 behaviours</strong> (Hans 69 + Phone 84 + Board 69 + Hub 68), all passing</li>
+            <li><code>app.conf</code> bumped to v2.11.0, build 31; <code>props.conf</code> extended with 7 new <code>EXTRACT-</code> rules for <code>station_id</code>, <code>availability</code>, <code>elapsed_ms</code>, <code>interactions</code>, and the station-count metadata</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
+            <span class="rn-version-num">v2.10.0</span>
+            <span class="rn-version-date">18 Apr 2026</span>
+            <span class="rn-version-tag">Adaptive Hans + Phone Cinematic + Investigation Board (Phase 5i + 6g)</span>
+          </div>
+          <div class="rn-cat">Adaptive Hans antagonist</div>
+          <ul>
+            <li>36 hand-authored reactive antagonist lines fire on six telemetry triggers: idle teams, lazy broad queries, keypad spam, fast solves, side-story discoveries, Konami code</li>
+            <li>Tonal bias by act: light/taunting in Acts 1&ndash;2, sinister/intimate by Act 5</li>
+            <li>Dual-destination telemetry: raw KV intercept on <code>nakatomi_comms sourcetype=intercept:hans</code> (indistinguishable from hand-authored transcripts) + metadata on <code>nakatomi_sessions event_type=hans_reaction</code></li>
+            <li>Throttled to 1 line per 5 minutes per team; recent-window suppression avoids repeating any of the last 3 IDs</li>
+          </ul>
+          <div class="rn-cat">Facilitator phone-call cinematic</div>
+          <ul>
+            <li>Three preset callers &mdash; <strong>Sgt. Al Powell</strong>, <strong>Hans Gruber</strong>, <strong>Holly Gennero</strong> &mdash; triggered via <code>Ctrl+Shift+1/2/3</code> or URL hash (<code>#call=powell|hans|holly</code>)</li>
+            <li>Ringing overlay, voiced via <code>SpeechSynthesis</code> (per-caller voice profile), ambient-bed ducking to 30%</li>
+            <li>Three lifecycle events: <code>phone_call_incoming</code>, <code>phone_call_answered</code> (with <code>latency_ms</code>), <code>phone_call_missed</code> (with <code>ring_duration_ms</code>)</li>
+            <li>Ad-hoc facilitator text supported via <code>#call=hans:Listen+carefully</code> &mdash; raw transcripts are <strong>deliberately never emitted</strong> to telemetry</li>
+          </ul>
+          <div class="rn-cat">Investigation board</div>
+          <ul>
+            <li>Full-screen corkboard overlay (hotkey <code>B</code>): six pin categories (task, story, intercept, egg, lore, suspect), red-string connection threads, freehand notes, suspect flags</li>
+            <li>Six auto-pin hooks: task completion, side-story discovery, easter-egg discovery, answered phone call, trap-code lore, manual drag. Dedup by stable <code>sourceId</code> prevents duplicates across replays</li>
+            <li>Cap with eviction: 200 pins / 300 threads / 50 notes; oldest-first eviction prevents <code>localStorage</code>-quota DoS</li>
+            <li>1080p watermarked <strong>PNG export</strong> at session end (victory + pause menu); canvas rendering via module-local <code>esc()</code> prevents XSS</li>
+            <li>Booth mode ships a simplified pin-only variant; <code>?booth=1</code> hides threads and notes</li>
+            <li>Four new event types: <code>clue_pinned</code>, <code>thread_drawn</code>, <code>note_added</code> (body NOT emitted), <code>board_exported</code> (image NOT uploaded)</li>
+          </ul>
+          <div class="rn-cat">Facilitator board (1920&times;2360)</div>
+          <ul>
+            <li>New Adaptive Hans row: <code>Hans Reactions Today</code> KPI, <code>Recent Hans Reactions</code> table, <code>Trigger + Tone Mix</code> stacked column</li>
+            <li>New Facilitator Phone Calls row: <code>Phone Calls Today</code> KPI, <code>Recent Phone Calls</code> table, <code>Phone Mix</code> stacked column</li>
+            <li>New Investigation Board row: <code>Board Pins Today</code> KPI, <code>Pin Type Mix</code>, <code>Top Investigating Teams</code> leaderboard by <code>detective_score</code></li>
+          </ul>
+          <div class="rn-cat">Regression coverage</div>
+          <ul>
+            <li>Three new test harnesses: <code>test_hans_antagonist.js</code> (69 assertions), <code>test_phone_calls.js</code> (84), <code>test_investigation_board.js</code> (69)</li>
+            <li><strong>222 assertions total</strong> after v2.10 &mdash; zero-dependency Node runners using a sandboxed <code>vm</code> context with DOM + canvas stubs</li>
+            <li>HEC-token hygiene asserted in every harness: token NEVER appears in any queued event payload, even when telemetry is fully configured</li>
+          </ul>
+        </div>
+
+        <div class="rn-version">
+          <div class="rn-version-header">
             <span class="rn-version-num">v2.9.0</span>
             <span class="rn-version-date">18 Apr 2026</span>
-            <span class="rn-version-tag rn-tag-latest">NPC Population + Data Realism (Phase 6a)</span>
+            <span class="rn-version-tag">NPC Population + Data Realism (Phase 6a)</span>
           </div>
           <div class="rn-cat">NPC Baseline Population</div>
           <ul>

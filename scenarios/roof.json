@@ -1,0 +1,26 @@
+{
+  "$schema_version": 2,
+  "$id": "roof",
+  "$description": "Roof-edition reskin: same 26 tasks, same codes, same data layout — the heist now plays out on the helipad-and-rooftop track, with helicopter wind ambient and Karl-and-Theo rooftop chatter swapped in for the lobby intercepts.",
+  "metadata": {
+    "name": "Roof Edition",
+    "tone": "windy / exposed",
+    "duration_minutes": 90,
+    "version": "1.0.0",
+    "author": "Nakatomi Heist Project"
+  },
+  "ambient": {
+    "label": "Roof-wind + helicopter",
+    "description": "Higher-frequency wind noise + a periodic distant helicopter drone on the ambient bus. The default Christmas-bell overlay is suppressed."
+  },
+  "story_beats": {
+    "act_1_open": "It's Christmas Eve, 1988. The helicopter has just touched down on Nakatomi Plaza's roof. Hans Gruber's team is staging from the helipad — every move tonight starts with the rotor wash overhead.",
+    "act_5_intro": "The seventh seal is the last barrier between you and the helicopter. The C4 charges on the roof have a 12-minute fuse, and Hans wants to be in the air before the FBI arrives."
+  },
+  "intercepts": {
+    "lobby_alarm_replacement": "Theo on roof comms: \"Wind's picking up — keep the rotor warm. We move when the seventh seal opens.\""
+  },
+  "endings": {
+    "default_intro_override": "The seventh seal cracks. Wind howls past the open helipad door. \"Welcome to the rooftop, pal.\""
+  }
+}

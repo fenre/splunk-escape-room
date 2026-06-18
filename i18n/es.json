@@ -1,0 +1,46 @@
+{
+  "$lang": "es",
+  "$description": "Spanish locale pack — proof of concept for the v2.16 i18n loader. Translates the most-visible UI strings; bulk inline text remains in English until the v3.0 capstone refactor extracts every string. Quotes follow Spanish typographic conventions (\u00ABangle quotes\u00BB) where they replace English double quotes.",
+
+  "mode_select.title":         "B\u00D3VEDA NAKATOMI",
+  "mode_select.cta":           "PULSA UNA TECLA PARA EMPEZAR",
+  "mode_select.difficulty":    "DIFICULTAD",
+  "mode_select.difficulty.rookie":     "NOVATO",
+  "mode_select.difficulty.operative":  "OPERATIVO",
+  "mode_select.difficulty.mastermind": "MAESTRO",
+  "mode_select.difficulty.iron_man":   "HOMBRE DE HIERRO \u00B7 SIN PISTAS",
+  "mode_select.difficulty.demo":       "DEMO R\u00C1PIDA \u00B7 15 MIN",
+  "mode_select.difficulty.quickfire":  "RELAMPAGO \u00B7 5 MIN",
+  "mode_select.difficulty.booth_heist":"GOLPE EXPRES \u00B7 10 MIN",
+  "mode_select.theme":         "F\u00D3SFORO CRT",
+  "mode_select.choose_mode":   "ELIGE TU MODO",
+
+  "hud.team":                  "EQUIPO",
+  "hud.elapsed":               "TIEMPO",
+  "hud.progress":              "PROGRESO",
+  "hud.tokens":                "FICHAS",
+  "hud.hints":                 "PISTAS",
+
+  "pause.title":               "EN PAUSA",
+  "pause.subtitle":            "Cron\u00F3metro detenido. Tarea oculta.",
+  "pause.resume":              "REANUDAR [P]",
+  "pause.investigation_board": "TABLERO DE INVESTIGACI\u00D3N [B]",
+  "pause.floor_30":            "MAPA PISO-30 [M]",
+  "pause.audio_mix":           "MEZCLA DE AUDIO Y SUBT\u00CDTULOS",
+
+  "victory.title":             "GOLPE COMPLETADO",
+  "victory.amount":            "640.000.000 $ en Bonos al Portador",
+  "victory.yippee":            "\u00ABYippee-ki-yay.\u00BB",
+  "victory.play_again":        "Jugar Otra Vez",
+  "victory.bonus_objectives":  "Objetivos Extra",
+  "victory.copy_results":      "Copiar Resultados",
+  "victory.save_leaderboard":  "Guardar en Tabla de R\u00E9cords",
+  "victory.view_in_splunk":    "Ver en Splunk \u2192",
+
+  "victory.feedback.heading":  "\u00BFQU\u00C9 TE PARECI\u00D3?",
+  "victory.feedback.skip":     "Omitir",
+  "victory.feedback.submit":   "Enviar",
+  "victory.feedback.thanks":   "Gracias \u2014 registrado.",
+
+  "gameover.continue":         "\u00BFContinuar?"
+}

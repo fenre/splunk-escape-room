@@ -22,7 +22,10 @@ Prerequisites:
   1. Install the nakatomi_heist Splunk app (creates indexes + configurations)
   2. Enable HEC: Settings > Data Inputs > HTTP Event Collector > Global Settings > Enabled
   3. Create a HEC token: New Token > name it "nakatomi" > select these allowed indexes:
-       nakatomi_access, nakatomi_vault, nakatomi_building
+       nakatomi_access, nakatomi_vault, nakatomi_building, nakatomi_comms
+     (nakatomi_comms is required for the v2.9 easter-egg intercept trail —
+      without it, the HEC push of nakatomi_comms.json fails and the
+      yippee/ho-ho-ho/morse/argyle eggs are not SPL-discoverable.)
   4. Generate data first: cd generator && python3 generate.py
 
 Example:
@@ -56,9 +59,20 @@ ENDPOINT="$SPLUNK_URL/services/collector"
 echo "Loading data into Splunk via HEC at $SPLUNK_URL"
 echo ""
 
+CANONICAL_FILES=(
+    nakatomi_access.json
+    nakatomi_vault.json
+    nakatomi_building.json
+    nakatomi_comms.json
+)
+
 TOTAL=0
-for f in "$OUTPUT_DIR"/nakatomi_*.json; do
-    BASENAME=$(basename "$f")
+for BASENAME in "${CANONICAL_FILES[@]}"; do
+    f="$OUTPUT_DIR/$BASENAME"
+    if [[ ! -f "$f" ]]; then
+        echo "Error: missing $f — run: cd generator && python3 generate.py"
+        exit 1
+    fi
     COUNT=$(wc -l < "$f" | tr -d ' ')
     TOTAL=$((TOTAL + COUNT))
 
@@ -79,9 +93,10 @@ for f in "$OUTPUT_DIR"/nakatomi_*.json; do
 done
 
 echo ""
-echo "Done. $TOTAL events loaded across 3 indexes."
+echo "Done. $TOTAL events loaded across 4 indexes."
 echo ""
 echo "Verify in Splunk:"
 echo "  index=nakatomi_access | stats count"
 echo "  index=nakatomi_vault | stats count"
 echo "  index=nakatomi_building | stats count"
+echo "  index=nakatomi_comms | stats count   # v2.9: intercept trail (easter eggs)"

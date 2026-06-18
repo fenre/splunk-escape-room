@@ -1,10 +1,10 @@
 <dashboard version="2" theme="dark">
   <label>Facilitator Board</label>
-  <description>Live booth view (1920x1080) — active teams, leaderboard, act funnel, trap log, hint distribution. Drilldown opens per-team timeline.</description>
+  <description>Live booth view (1920x3600) — active teams, leaderboard, act funnel, trap log, hint distribution, v2.9 booth-wide discovery analytics (side stories / easter eggs / curiosity leaderboard), v2.10 Adaptive Hans telemetry, v2.10 facilitator phone-call cinematics, v2.10 investigation-board analytics, v2.11 Floor-30 hub analytics, v2.12 Phase 7 Tier 1 ending-branch distribution, v2.13 booth-kiosk operations (idle resets + watchdog reloads + reset reasons), v2.13 post-session feedback + abandonment funnel (avg rating, rating distribution, drop-off by act), and v2.14 operator activity (facilitator action verb mix + audio mix tweaks). Drilldown opens per-team timeline.</description>
   <definition><![CDATA[
 {
   "title": "Facilitator Board",
-  "description": "Live booth view (1920x1080) — active teams, leaderboard, act funnel, trap log, hint distribution. Drilldown opens per-team timeline.",
+  "description": "Live booth view (1920x3600) — active teams, leaderboard, act funnel, trap log, hint distribution, v2.9 booth-wide discovery analytics, v2.10 Adaptive Hans telemetry, v2.10 facilitator phone-call cinematics, v2.10 investigation-board analytics, v2.11 Floor-30 hub analytics, v2.12 Phase 7 Tier 1 ending-branch distribution, v2.13 booth-kiosk operations + post-session feedback + abandonment funnel, and v2.14 operator activity (facilitator action verb mix + audio mix tweaks). Drilldown opens per-team timeline.",
   "dataSources": {
     "ds_active_teams": {
       "type": "ds.search",
@@ -76,6 +76,195 @@
         "queryParameters": {"earliest": "@d", "latest": "now"}
       }
     },
+    "ds_side_story_discovery": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=side_story_discovered OR event_type=session_start) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eventstats dc(eval(if(event_type=\"session_start\", team_code, null()))) as total_teams | where event_type=\"side_story_discovered\" | stats dc(team_code) as teams_found, max(total_teams) as total_teams by story_id, story_title | eval pct=if(total_teams>0, round(teams_found/total_teams*100, 0), 0) | eval booth_share=pct.\"%\" | sort -teams_found | head 10 | rename story_title as side_story, teams_found as teams | table side_story, teams, booth_share",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_egg_discovery": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=easter_egg_found OR event_type=session_start) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eventstats dc(eval(if(event_type=\"session_start\", team_code, null()))) as total_teams | where event_type=\"easter_egg_found\" | stats dc(team_code) as teams_found, max(total_teams) as total_teams by egg_id, egg_title, trigger | eval pct=if(total_teams>0, round(teams_found/total_teams*100, 0), 0) | eval booth_share=pct.\"%\" | eval discovery=case(trigger=\"konami\", \"Konami code\", trigger=\"keypad\", \"keypad (6xxx)\", 1=1, trigger) | sort -teams_found | head 10 | rename egg_title as easter_egg, teams_found as teams | table easter_egg, teams, booth_share, discovery",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_discovery_top_teams": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=side_story_discovered OR event_type=easter_egg_found) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats dc(story_id) as stories, dc(egg_id) as eggs by team_code | eval stories=coalesce(stories,0), eggs=coalesce(eggs,0), total_discoveries=stories+eggs | sort -total_discoveries -stories -eggs | head 10 | streamstats count as rank | table rank, team_code, stories, eggs, total_discoveries",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_hans_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hans_reaction | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | sort -_time | head 25 | eval ts=strftime(_time,\"%H:%M:%S\"), trigger_label=case(trigger=\"idle\",\"Idle (2m quiet)\", trigger=\"lazy_queries\",\"Broad SPL\", trigger=\"keypad_spam\",\"Keypad spam\", trigger=\"fast_solves\",\"Fast solves\", trigger=\"side_story_discoveries\",\"Side story\", trigger=\"konami_code\",\"Konami\", 1=1, trigger) | table ts, team_code, act, trigger_label, tone, reaction_id",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_hans_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hans_reaction | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count by trigger, tone | eval trigger_label=case(trigger=\"idle\",\"Idle\", trigger=\"lazy_queries\",\"Lazy SPL\", trigger=\"keypad_spam\",\"Keypad\", trigger=\"fast_solves\",\"Fast\", trigger=\"side_story_discoveries\",\"Side\", trigger=\"konami_code\",\"Konami\", 1=1, trigger) | sort -count | table trigger_label, tone, count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_hans_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hans_reaction | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as hans_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_phone_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=phone_call_incoming OR event_type=phone_call_answered OR event_type=phone_call_missed) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | sort -_time | head 25 | eval ts=strftime(_time,\"%H:%M:%S\"), state=case(event_type=\"phone_call_incoming\",\"INCOMING\", event_type=\"phone_call_answered\",\"ANSWERED\", event_type=\"phone_call_missed\",\"MISSED\", 1=1, event_type), caller_label=case(caller=\"powell\",\"Sgt. Powell\", caller=\"hans\",\"Hans Gruber\", caller=\"holly\",\"Holly Gennero\", 1=1, caller) | table ts, team_code, state, caller_label, delivery_type, line_preset_id",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_phone_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=phone_call_incoming | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count by caller, delivery_type | eval caller_label=case(caller=\"powell\",\"Powell\", caller=\"hans\",\"Hans\", caller=\"holly\",\"Holly\", 1=1, caller) | sort -count | table caller_label, delivery_type, count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_phone_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=phone_call_incoming | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as phone_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_kpi_board_pins_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=clue_pinned | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as board_pins_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_board_pin_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=clue_pinned | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval pin_type=coalesce(pin_type, \"unknown\"), pin_label=case(pin_type=\"task\",\"Task\", pin_type=\"story\",\"Side Story\", pin_type=\"intercept\",\"Intercept\", pin_type=\"egg\",\"Easter Egg\", pin_type=\"lore\",\"Lore\", pin_type=\"suspect\",\"Suspect\", 1=1, pin_type) | stats count by pin_label, source | sort -count | head 30 | table pin_label, source, count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_board_top_teams": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=clue_pinned OR event_type=thread_drawn OR event_type=note_added OR event_type=board_exported) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count(eval(event_type=\"clue_pinned\")) as pins, count(eval(event_type=\"thread_drawn\")) as threads, count(eval(event_type=\"note_added\")) as notes, count(eval(event_type=\"board_exported\")) as exports by team_code | eval detective_score=pins + (threads * 2) + notes + (exports * 5) | where detective_score > 0 | sort -detective_score | head 10 | streamstats count as rank | table rank, team_code, pins, threads, notes, exports, detective_score",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_hub_sessions_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hub_opened | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats dc(team_code) as hub_teams_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_hub_station_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hub_station_clicked | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval station_id=coalesce(station_id,\"unknown\"), availability=coalesce(availability,\"unknown\"), station_label=case(station_id=\"terminal\",\"SPL Terminal\", station_id=\"keypad\",\"Vault Keypad\", station_id=\"leads\",\"Leads\", station_id=\"briefing\",\"Briefing Wall\", station_id=\"blueprint\",\"Blueprint\", station_id=\"comms\",\"Comms\", station_id=\"board\",\"Investigation\", 1=1, station_id) | stats count by station_label, availability | sort -count | head 30 | table station_label, availability, count",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_hub_dwell": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=hub_closed | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") elapsed_ms>0 | eval elapsed_s=round(elapsed_ms/1000, 1), trigger=coalesce(trigger,\"unknown\") | stats count, median(elapsed_s) as median_dwell_s, max(elapsed_s) as max_dwell_s by trigger | sort -count | table trigger, count, median_dwell_s, max_dwell_s",
+        "queryParameters": {"earliest": "-4h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_endings_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=ending_classified | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as endings_today",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_ending_distribution": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=ending_classified | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval ending_id=lower(coalesce(ending_id,\"unknown\")), ending_label=case(ending_id=\"analyst\",\"Analyst (clean + curious)\", ending_id=\"cowboy\",\"Cowboy (messy but wins)\", ending_id=\"speedrunner\",\"Speedrunner (< 50% timer)\", ending_id=\"default\",\"Default (vault opens)\", 1=1, \"Unknown\"), difficulty=coalesce(difficulty,\"unknown\") | stats count by ending_label, difficulty | sort ending_label difficulty | table ending_label, difficulty, count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_ending_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=ending_classified | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | sort -_time | head 20 | eval ts=strftime(_time,\"%H:%M:%S\"), elapsed=tostring(elapsed_seconds, \"duration\"), ending_id=lower(coalesce(ending_id,\"unknown\")) | table ts, team_code, ending_id, elapsed, wrong_count, hint_tokens_spent, side_stories_discovered, difficulty",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_kiosk_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=kiosk_activated | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval kiosk_mode=lower(coalesce(kiosk_mode,\"gameplay\")) | stats dc(team_code) as kiosk_sessions",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_kiosk_reset_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=kiosk_idle_reset | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval reason=lower(coalesce(kiosk_reason,\"timeout\")) | stats count by reason | sort -count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kiosk_recent": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event (event_type=kiosk_idle_reset OR event_type=kiosk_watchdog_reload) | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | sort -_time | head 20 | eval ts=strftime(_time,\"%H:%M:%S\"), uptime=if(isnum(uptime_ms),tostring(round(uptime_ms/1000,0),\"duration\"),\"-\"), reason=coalesce(kiosk_reason,\"-\") | table ts, team_code, event_type, uptime, reason",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_feedback_avg": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_feedback | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval r=tonumber(rating) | where r>0 | stats avg(r) as avg_rating | eval avg_rating=round(avg_rating,2)",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_feedback_distribution": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_feedback | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval r=tonumber(rating), bucket=case(r=1,\"1 star\",r=2,\"2 stars\",r=3,\"3 stars\",r=4,\"4 stars\",r=5,\"5 stars\",skipped=\"true\",\"Skipped\",1=1,\"Skipped\") | stats count by bucket | sort bucket",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_abandon_by_act": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=session_abandoned | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval a=tonumber(exit_act), act_label=case(a=0,\"Act 1\",a=1,\"Act 2\",a=2,\"Act 3\",a=3,\"Act 4\",a=4,\"Act 5\",1=1,\"Unknown\") | stats count by act_label | sort act_label",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_kpi_operator_today": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=facilitator_action | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | stats count as facilitator_clicks",
+        "queryParameters": {"earliest": "@d", "latest": "now"}
+      }
+    },
+    "ds_facilitator_action_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=facilitator_action | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval verb=lower(coalesce(fac_action,\"unknown\")) | stats count by verb | sort -count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
+    "ds_audio_setting_mix": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=nakatomi_sessions sourcetype=nakatomi:session:event event_type=audio_setting_changed | where (\"$booth_token$\"=\"\" OR booth_id=\"$booth_token$\") | eval setting=coalesce(audio_setting,\"unknown\") | stats count by setting | sort -count",
+        "queryParameters": {"earliest": "-24h@h", "latest": "now"}
+      }
+    },
     "ds_setup": {
       "type": "ds.test",
       "options": {
@@ -101,7 +290,7 @@
     "viz_header": {
       "type": "splunk.markdown",
       "options": {
-        "markdown": "```\n> NAKATOMI HEIST  ·  FACILITATOR BOARD  ·  v2.4.0\n> LIVE BOOTH OVERVIEW  ·  AUTO-REFRESH 15s  ·  EXPECT ~10s LAG FROM HEC\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "markdown": "```\n> NAKATOMI HEIST  ·  FACILITATOR BOARD  ·  v2.10.0\n> LIVE BOOTH OVERVIEW  ·  AUTO-REFRESH 15s  ·  EXPECT ~10s LAG FROM HEC\n> SCROLL FOR DISCOVERY ANALYTICS + ADAPTIVE HANS LOG →\n> ────────────────────────────────────────────────────────────────────────────\n```",
         "fontColor": "#33ff33",
         "backgroundColor": "#000d00"
       }
@@ -257,6 +446,479 @@
       "type": "splunk.table",
       "dataSources": {"primary": "ds_setup"},
       "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_discovery_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> DISCOVERY ANALYTICS  ·  WHICH SIDE STORIES AND EASTER EGGS ARE PLAYERS FINDING?\n> Great post-conference talking point: \"At .conf26, 73% of teams found The Affair; only 4% found Ghost Account.\"\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#b380ff",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_side_story_discovery_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > MOST-FOUND SIDE STORIES  ·  9xxx NAMESPACE  ·  LAST 24H",
+        "fontColor": "#d4a843",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_side_story_discovery": {
+      "type": "splunk.table",
+      "title": "Booth-wide side-story discovery rates (of 8 total stories)",
+      "dataSources": {"primary": "ds_side_story_discovery"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_egg_discovery_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > MOST-FOUND EASTER EGGS  ·  6xxx + KONAMI  ·  LAST 24H",
+        "fontColor": "#b380ff",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_egg_discovery": {
+      "type": "splunk.table",
+      "title": "Booth-wide easter-egg discovery rates (of 15 total eggs)",
+      "dataSources": {"primary": "ds_egg_discovery"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_discovery_top_teams_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > TOP DISCOVERY TEAMS  ·  CURIOSITY LEADERBOARD",
+        "fontColor": "#66ff66",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_discovery_top_teams": {
+      "type": "splunk.table",
+      "title": "Teams ranked by unique side stories + easter eggs found",
+      "dataSources": {"primary": "ds_discovery_top_teams"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
+    },
+    "viz_hans_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> ADAPTIVE HANS  ·  v2.10 PHASE 5i  ·  INDEX=nakatomi_comms SOURCETYPE=intercept:hans\n> Full transcripts live on nakatomi_comms. Metadata on nakatomi_sessions drives the panels below.\n> Tone bias: act 1-2 favors LIGHT taunts, act 4-5 favors SINISTER. Throttle: max 1 reaction / 5 min / team.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#ff7043",
+        "backgroundColor": "#0d0000"
+      }
+    },
+    "viz_kpi_hans_today": {
+      "type": "splunk.singlevalue",
+      "title": "Hans Reactions Today",
+      "dataSources": {"primary": "ds_kpi_hans_today"},
+      "options": {
+        "majorColor": "#ff7043",
+        "backgroundColor": "#0d0000",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_hans_recent_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > RECENT HANS REACTIONS  ·  LAST 4H",
+        "fontColor": "#ff7043",
+        "backgroundColor": "#0d0000"
+      }
+    },
+    "viz_hans_recent": {
+      "type": "splunk.table",
+      "title": "Last 25 adaptive-antagonist lines across all teams",
+      "dataSources": {"primary": "ds_hans_recent"},
+      "options": {"count": 25, "backgroundColor": "#0d0000"}
+    },
+    "viz_hans_mix_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > HANS TRIGGER + TONE MIX  ·  LAST 24H",
+        "fontColor": "#ff7043",
+        "backgroundColor": "#0d0000"
+      }
+    },
+    "viz_hans_mix": {
+      "type": "splunk.column",
+      "title": "Count by trigger, split by tone",
+      "dataSources": {"primary": "ds_hans_mix"},
+      "options": {
+        "xAxisTitleText": "Trigger",
+        "yAxisTitleText": "Reactions",
+        "backgroundColor": "#0d0000",
+        "seriesColors": ["#ffb74d", "#ff5555"],
+        "stackMode": "stacked"
+      }
+    },
+    "viz_phone_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> FACILITATOR PHONE CALLS  ·  v2.10 PHASE 5i  ·  EVENT_TYPE=phone_call_*\n> Cinematic moments queued by hotkey (Ctrl+Shift+1/2/3) or URL hash (#call=powell|hans|holly).\n> Delivery: 'preset' = in-character rotation line; 'adhoc' = live facilitator input (text never wired).\n> Three lifecycle events per call: incoming → answered | missed. Ad-hoc transcripts are not emitted.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#4dd0e1",
+        "backgroundColor": "#00111a"
+      }
+    },
+    "viz_kpi_phone_today": {
+      "type": "splunk.singlevalue",
+      "title": "Phone Calls Today",
+      "dataSources": {"primary": "ds_kpi_phone_today"},
+      "options": {
+        "majorColor": "#4dd0e1",
+        "backgroundColor": "#00111a",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_phone_recent_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > RECENT PHONE CALLS  ·  LAST 4H",
+        "fontColor": "#4dd0e1",
+        "backgroundColor": "#00111a"
+      }
+    },
+    "viz_phone_recent": {
+      "type": "splunk.table",
+      "title": "Last 25 facilitator-triggered phone events across all teams",
+      "dataSources": {"primary": "ds_phone_recent"},
+      "options": {"count": 25, "backgroundColor": "#00111a"}
+    },
+    "viz_phone_mix_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > PHONE MIX  ·  CALLER × DELIVERY  ·  LAST 24H",
+        "fontColor": "#4dd0e1",
+        "backgroundColor": "#00111a"
+      }
+    },
+    "viz_phone_mix": {
+      "type": "splunk.column",
+      "title": "Incoming calls by caller, split by delivery type",
+      "dataSources": {"primary": "ds_phone_mix"},
+      "options": {
+        "xAxisTitleText": "Caller",
+        "yAxisTitleText": "Calls",
+        "backgroundColor": "#00111a",
+        "seriesColors": ["#4dd0e1", "#ffb74d"],
+        "stackMode": "stacked"
+      }
+    },
+    "viz_board_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> INVESTIGATION BOARD  ·  v2.10 PHASE 6g  ·  EVENT_TYPE=clue_pinned,thread_drawn,note_added,board_exported\n> Players pin clues (tasks, side stories, intercepts, eggs, lore, suspects) and draw red-string threads.\n> Six auto-pin sources: task_complete / side_story / easter_egg / phone_call / trap_code / drag_drop.\n> Note bodies are NOT emitted. PNG export fires board_exported with counts but not the image itself.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#ffcc66",
+        "backgroundColor": "#1a1200"
+      }
+    },
+    "viz_kpi_board_pins_today": {
+      "type": "splunk.singlevalue",
+      "title": "Board pins today (all teams)",
+      "dataSources": {"primary": "ds_kpi_board_pins_today"},
+      "options": {
+        "majorColor": "#ffcc66",
+        "backgroundColor": "#1a1200",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_board_mix_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > PIN TYPE MIX  ·  BY SOURCE  ·  LAST 24H",
+        "fontColor": "#ffcc66",
+        "backgroundColor": "#1a1200"
+      }
+    },
+    "viz_board_mix": {
+      "type": "splunk.column",
+      "title": "Pins by type, split by auto-pin source",
+      "dataSources": {"primary": "ds_board_pin_mix"},
+      "options": {
+        "xAxisTitleText": "Pin type",
+        "yAxisTitleText": "Pins",
+        "backgroundColor": "#1a1200",
+        "seriesColors": ["#ffcc66", "#4dd0e1", "#ff7043", "#81c784", "#ba68c8", "#f06292"],
+        "stackMode": "stacked"
+      }
+    },
+    "viz_board_top_teams_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > TOP INVESTIGATING TEAMS  ·  LAST 24H  ·  DETECTIVE SCORE = PINS + THREADS×2 + NOTES + EXPORTS×5",
+        "fontColor": "#ffcc66",
+        "backgroundColor": "#1a1200"
+      }
+    },
+    "viz_board_top_teams": {
+      "type": "splunk.table",
+      "title": "Teams who invested most in the meta-puzzle",
+      "dataSources": {"primary": "ds_board_top_teams"},
+      "options": {"count": 10, "backgroundColor": "#1a1200"}
+    },
+    "viz_hub_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> FLOOR-30 HUB  ·  v2.11 PHASE 8a  ·  EVENT_TYPE=hub_opened,hub_closed,hub_station_clicked\n> Visual blueprint UI layer with seven clickable stations (terminal / keypad / leads / briefing / blueprint / comms / board).\n> Opt-in: ?hub=1 URL param, M hotkey, or pause-menu button. Never forced on linear players.\n> Availability derived from state.actIdx (Phase 8b will drive from scenario schema v2 hub_layout/available_when).\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#9ad8ff",
+        "backgroundColor": "#001428"
+      }
+    },
+    "viz_kpi_hub_sessions_today": {
+      "type": "splunk.singlevalue",
+      "title": "Distinct teams using hub today",
+      "dataSources": {"primary": "ds_kpi_hub_sessions_today"},
+      "options": {
+        "majorColor": "#9ad8ff",
+        "backgroundColor": "#001428",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_hub_station_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > STATION CLICKS  ·  BY AVAILABILITY  ·  LAST 4H",
+        "fontColor": "#9ad8ff",
+        "backgroundColor": "#001428"
+      }
+    },
+    "viz_hub_station_mix": {
+      "type": "splunk.column",
+      "title": "Station activations, split by open vs. locked",
+      "dataSources": {"primary": "ds_hub_station_mix"},
+      "options": {
+        "xAxisTitleText": "Station",
+        "yAxisTitleText": "Clicks",
+        "backgroundColor": "#001428",
+        "seriesColors": ["#9ad8ff", "#ff7043"],
+        "stackMode": "stacked"
+      }
+    },
+    "viz_hub_dwell_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > HUB DWELL TIME  ·  BY CLOSE TRIGGER  ·  LAST 4H",
+        "fontColor": "#9ad8ff",
+        "backgroundColor": "#001428"
+      }
+    },
+    "viz_hub_dwell": {
+      "type": "splunk.table",
+      "title": "Median and max seconds spent in hub before closing, per trigger",
+      "dataSources": {"primary": "ds_hub_dwell"},
+      "options": {"count": 10, "backgroundColor": "#001428"}
+    },
+    "viz_ending_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> ENDING BRANCHES  ·  v2.12 PHASE 7 TIER 1  ·  EVENT_TYPE=ending_classified\n> Four branches — ANALYST (clean + curious), COWBOY (messy but wins), SPEEDRUNNER (< 50% timer), DEFAULT (fallback).\n> Classification runs once per victory. Priority: speedrunner > analyst > cowboy > default.\n> Payload is sanitized (no PII, no raw SPL text). Achievement badge earned at same time.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#ffd27a",
+        "backgroundColor": "#201600"
+      }
+    },
+    "viz_kpi_endings_today": {
+      "type": "splunk.singlevalue",
+      "title": "Endings classified today",
+      "dataSources": {"primary": "ds_kpi_endings_today"},
+      "options": {
+        "majorColor": "#ffd27a",
+        "backgroundColor": "#201600",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_ending_distribution_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > ENDING DISTRIBUTION  ·  BY DIFFICULTY  ·  LAST 24H",
+        "fontColor": "#ffd27a",
+        "backgroundColor": "#201600"
+      }
+    },
+    "viz_ending_distribution": {
+      "type": "splunk.column",
+      "title": "Ending branches, stacked by difficulty",
+      "dataSources": {"primary": "ds_ending_distribution"},
+      "options": {
+        "xAxisTitleText": "Ending",
+        "yAxisTitleText": "Count",
+        "backgroundColor": "#201600",
+        "seriesColors": ["#ffd27a", "#ff5555", "#66aaff", "#33ff33"],
+        "stackMode": "stacked"
+      }
+    },
+    "viz_ending_recent_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > RECENT ENDINGS  ·  LAST 24H",
+        "fontColor": "#ffd27a",
+        "backgroundColor": "#201600"
+      }
+    },
+    "viz_ending_recent": {
+      "type": "splunk.table",
+      "title": "20 most recent ending classifications — ts, team, branch, elapsed, key signals",
+      "dataSources": {"primary": "ds_ending_recent"},
+      "options": {"count": 20, "backgroundColor": "#201600"}
+    },
+    "viz_kiosk_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> BOOTH KIOSK OPERATIONS  ·  v2.13 PHASE 5c  ·  EVENT_TYPE=kiosk_activated,kiosk_idle_reset,kiosk_watchdog_reload\n> ?kiosk=1 activates lockdown mode (full-screen, shortcut guard, idle reset, hourly watchdog reload).\n> ?queue=1 spins up the secondary-display variant (\"PLAYER IN SESSION\" / \"BOOTH OPEN\").\n> Payload is non-PII: kiosk_mode, idle_ms, watchdog_ms, kiosk_reason, uptime_ms — no team_code echo beyond the standard envelope.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#aaeeff",
+        "backgroundColor": "#001a1a"
+      }
+    },
+    "viz_kpi_kiosk_today": {
+      "type": "splunk.singlevalue",
+      "title": "Distinct kiosk teams today",
+      "dataSources": {"primary": "ds_kpi_kiosk_today"},
+      "options": {
+        "majorColor": "#aaeeff",
+        "backgroundColor": "#001a1a",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_kiosk_reset_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > IDLE RESET REASONS  ·  LAST 24H",
+        "fontColor": "#aaeeff",
+        "backgroundColor": "#001a1a"
+      }
+    },
+    "viz_kiosk_reset_mix": {
+      "type": "splunk.column",
+      "title": "kiosk_idle_reset events by reason",
+      "dataSources": {"primary": "ds_kiosk_reset_mix"},
+      "options": {
+        "xAxisTitleText": "Reason",
+        "yAxisTitleText": "Resets",
+        "backgroundColor": "#001a1a",
+        "seriesColors": ["#aaeeff", "#ff7043"]
+      }
+    },
+    "viz_kiosk_recent_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > RECENT KIOSK RESETS + WATCHDOG RELOADS  ·  LAST 24H",
+        "fontColor": "#aaeeff",
+        "backgroundColor": "#001a1a"
+      }
+    },
+    "viz_kiosk_recent": {
+      "type": "splunk.table",
+      "title": "ts, team, event_type, uptime, reason — last 20",
+      "dataSources": {"primary": "ds_kiosk_recent"},
+      "options": {"count": 20, "backgroundColor": "#001a1a"}
+    },
+    "viz_feedback_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> POST-SESSION FEEDBACK + ABANDONMENT  ·  v2.13 PHASE 5e  ·  EVENT_TYPE=session_feedback,session_abandoned\n> 1-question rating (1-5 stars) + 120-char optional comment, sanitised of CR/LF/control/<>; one-shot per session.\n> session_abandoned fires timer+5min after enterGame() if neither victory nor game-over resolved.\n> Drop-off act funnel reveals where booth visitors lose interest most often.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#ffe66d",
+        "backgroundColor": "#1a1500"
+      }
+    },
+    "viz_kpi_feedback_avg": {
+      "type": "splunk.singlevalue",
+      "title": "Avg rating today (1-5)",
+      "dataSources": {"primary": "ds_kpi_feedback_avg"},
+      "options": {
+        "majorColor": "#ffe66d",
+        "backgroundColor": "#1a1500",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_feedback_dist_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > FEEDBACK DISTRIBUTION  ·  RATING + SKIPPED  ·  LAST 24H",
+        "fontColor": "#ffe66d",
+        "backgroundColor": "#1a1500"
+      }
+    },
+    "viz_feedback_distribution": {
+      "type": "splunk.column",
+      "title": "Star ratings + skip count",
+      "dataSources": {"primary": "ds_feedback_distribution"},
+      "options": {
+        "xAxisTitleText": "Bucket",
+        "yAxisTitleText": "Responses",
+        "backgroundColor": "#1a1500",
+        "seriesColors": ["#ffe66d"]
+      }
+    },
+    "viz_abandon_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > ABANDONMENT BY EXIT ACT  ·  LAST 24H",
+        "fontColor": "#ffe66d",
+        "backgroundColor": "#1a1500"
+      }
+    },
+    "viz_abandon_by_act": {
+      "type": "splunk.column",
+      "title": "Where players walked away",
+      "dataSources": {"primary": "ds_abandon_by_act"},
+      "options": {
+        "xAxisTitleText": "Act at exit",
+        "yAxisTitleText": "Abandonments",
+        "backgroundColor": "#1a1500",
+        "seriesColors": ["#ff7043"]
+      }
+    },
+    "viz_operator_header": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "```\n> OPERATOR ACTIVITY  ·  v2.13 PHASE 5d + v2.14 PHASE 5h  ·  EVENT_TYPE=facilitator_action,audio_setting_changed\n> facilitator_action verbs: complete | powercut | end_session | reset (allow-listed at emit time, never user-controlled).\n> audio_setting_changed setting names: master | music | sfx | ambient | mono | reducedIntensity | captions.\n> Both are non-PII; no comment text, no DOM content, no SPL fragments.\n> ────────────────────────────────────────────────────────────────────────────\n```",
+        "fontColor": "#d4a8ff",
+        "backgroundColor": "#15001a"
+      }
+    },
+    "viz_kpi_operator_today": {
+      "type": "splunk.singlevalue",
+      "title": "Facilitator clicks today",
+      "dataSources": {"primary": "ds_kpi_operator_today"},
+      "options": {
+        "majorColor": "#d4a8ff",
+        "backgroundColor": "#15001a",
+        "trendDisplay": "off"
+      }
+    },
+    "viz_facilitator_action_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > FACILITATOR ACTION VERB MIX  ·  LAST 24H",
+        "fontColor": "#d4a8ff",
+        "backgroundColor": "#15001a"
+      }
+    },
+    "viz_facilitator_action_mix": {
+      "type": "splunk.column",
+      "title": "Operator interventions by verb",
+      "dataSources": {"primary": "ds_facilitator_action_mix"},
+      "options": {
+        "xAxisTitleText": "Action",
+        "yAxisTitleText": "Clicks",
+        "backgroundColor": "#15001a",
+        "seriesColors": ["#d4a8ff", "#ff7043", "#ffd27a", "#9ad8ff"]
+      }
+    },
+    "viz_audio_setting_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > AUDIO MIX TWEAKS  ·  BY SETTING  ·  LAST 24H",
+        "fontColor": "#d4a8ff",
+        "backgroundColor": "#15001a"
+      }
+    },
+    "viz_audio_setting_mix": {
+      "type": "splunk.column",
+      "title": "Did anyone find the controls?",
+      "dataSources": {"primary": "ds_audio_setting_mix"},
+      "options": {
+        "xAxisTitleText": "Setting",
+        "yAxisTitleText": "Changes",
+        "backgroundColor": "#15001a",
+        "seriesColors": ["#d4a8ff"]
+      }
     }
   },
   "inputs": {
@@ -273,7 +935,7 @@
     "type": "absolute",
     "options": {
       "width": 1920,
-      "height": 1080,
+      "height": 3600,
       "display": "auto-scale"
     },
     "globalInputs": ["input_booth"],
@@ -303,7 +965,71 @@
       {"item": "viz_outcome_pie",     "type": "block", "position": {"x":   0, "y": 950, "w":  640, "h": 120}},
 
       {"item": "viz_setup_label",     "type": "block", "position": {"x": 650, "y": 920, "w": 1260, "h":  30}},
-      {"item": "viz_setup",           "type": "block", "position": {"x": 650, "y": 950, "w": 1260, "h": 120}}
+      {"item": "viz_setup",           "type": "block", "position": {"x": 650, "y": 950, "w": 1260, "h": 120}},
+
+      {"item": "viz_discovery_header",          "type": "block", "position": {"x":   0, "y":1085, "w": 1920, "h":  80}},
+      {"item": "viz_side_story_discovery_label","type": "block", "position": {"x":   0, "y":1170, "w":  640, "h":  30}},
+      {"item": "viz_side_story_discovery",      "type": "block", "position": {"x":   0, "y":1200, "w":  640, "h": 240}},
+      {"item": "viz_egg_discovery_label",       "type": "block", "position": {"x": 650, "y":1170, "w":  640, "h":  30}},
+      {"item": "viz_egg_discovery",             "type": "block", "position": {"x": 650, "y":1200, "w":  640, "h": 240}},
+      {"item": "viz_discovery_top_teams_label", "type": "block", "position": {"x":1300, "y":1170, "w":  610, "h":  30}},
+      {"item": "viz_discovery_top_teams",       "type": "block", "position": {"x":1300, "y":1200, "w":  610, "h": 240}},
+
+      {"item": "viz_hans_header",        "type": "block", "position": {"x":   0, "y":1460, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_hans_today",     "type": "block", "position": {"x":1550, "y":1545, "w":  360, "h": 100}},
+      {"item": "viz_hans_recent_label",  "type": "block", "position": {"x":   0, "y":1545, "w": 1000, "h":  30}},
+      {"item": "viz_hans_recent",        "type": "block", "position": {"x":   0, "y":1575, "w": 1000, "h": 200}},
+      {"item": "viz_hans_mix_label",     "type": "block", "position": {"x":1010, "y":1545, "w":  530, "h":  30}},
+      {"item": "viz_hans_mix",           "type": "block", "position": {"x":1010, "y":1575, "w":  530, "h": 200}},
+
+      {"item": "viz_phone_header",        "type": "block", "position": {"x":   0, "y":1790, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_phone_today",     "type": "block", "position": {"x":1550, "y":1880, "w":  360, "h": 100}},
+      {"item": "viz_phone_recent_label",  "type": "block", "position": {"x":   0, "y":1880, "w": 1000, "h":  30}},
+      {"item": "viz_phone_recent",        "type": "block", "position": {"x":   0, "y":1910, "w": 1000, "h": 200}},
+      {"item": "viz_phone_mix_label",     "type": "block", "position": {"x":1010, "y":1880, "w":  530, "h":  30}},
+      {"item": "viz_phone_mix",           "type": "block", "position": {"x":1010, "y":1910, "w":  530, "h": 200}},
+
+      {"item": "viz_board_header",         "type": "block", "position": {"x":   0, "y":2125, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_board_pins_today", "type": "block", "position": {"x":1550, "y":2215, "w":  360, "h": 100}},
+      {"item": "viz_board_mix_label",      "type": "block", "position": {"x":   0, "y":2215, "w": 1000, "h":  30}},
+      {"item": "viz_board_mix",            "type": "block", "position": {"x":   0, "y":2245, "w": 1000, "h": 105}},
+      {"item": "viz_board_top_teams_label","type": "block", "position": {"x":1010, "y":2215, "w":  530, "h":  30}},
+      {"item": "viz_board_top_teams",      "type": "block", "position": {"x":1010, "y":2245, "w":  530, "h": 105}},
+
+      {"item": "viz_hub_header",           "type": "block", "position": {"x":   0, "y":2365, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_hub_sessions_today","type":"block", "position": {"x":1550, "y":2455, "w":  360, "h": 100}},
+      {"item": "viz_hub_station_label",    "type": "block", "position": {"x":   0, "y":2455, "w": 1000, "h":  30}},
+      {"item": "viz_hub_station_mix",      "type": "block", "position": {"x":   0, "y":2485, "w": 1000, "h": 120}},
+      {"item": "viz_hub_dwell_label",      "type": "block", "position": {"x":1010, "y":2455, "w":  530, "h":  30}},
+      {"item": "viz_hub_dwell",            "type": "block", "position": {"x":1010, "y":2485, "w":  530, "h": 120}},
+
+      {"item": "viz_ending_header",             "type": "block", "position": {"x":   0, "y":2615, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_endings_today",         "type": "block", "position": {"x":1550, "y":2705, "w":  360, "h": 140}},
+      {"item": "viz_ending_distribution_label", "type": "block", "position": {"x":   0, "y":2705, "w":  760, "h":  30}},
+      {"item": "viz_ending_distribution",       "type": "block", "position": {"x":   0, "y":2735, "w":  760, "h": 110}},
+      {"item": "viz_ending_recent_label",       "type": "block", "position": {"x": 770, "y":2705, "w":  770, "h":  30}},
+      {"item": "viz_ending_recent",             "type": "block", "position": {"x": 770, "y":2735, "w":  770, "h": 110}},
+
+      {"item": "viz_kiosk_header",              "type": "block", "position": {"x":   0, "y":2860, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_kiosk_today",           "type": "block", "position": {"x":1550, "y":2950, "w":  360, "h": 140}},
+      {"item": "viz_kiosk_reset_label",         "type": "block", "position": {"x":   0, "y":2950, "w":  760, "h":  30}},
+      {"item": "viz_kiosk_reset_mix",           "type": "block", "position": {"x":   0, "y":2980, "w":  760, "h": 110}},
+      {"item": "viz_kiosk_recent_label",        "type": "block", "position": {"x": 770, "y":2950, "w":  770, "h":  30}},
+      {"item": "viz_kiosk_recent",              "type": "block", "position": {"x": 770, "y":2980, "w":  770, "h": 110}},
+
+      {"item": "viz_feedback_header",           "type": "block", "position": {"x":   0, "y":3110, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_feedback_avg",          "type": "block", "position": {"x":1550, "y":3200, "w":  360, "h": 140}},
+      {"item": "viz_feedback_dist_label",       "type": "block", "position": {"x":   0, "y":3200, "w":  760, "h":  30}},
+      {"item": "viz_feedback_distribution",     "type": "block", "position": {"x":   0, "y":3230, "w":  760, "h": 110}},
+      {"item": "viz_abandon_label",             "type": "block", "position": {"x": 770, "y":3200, "w":  770, "h":  30}},
+      {"item": "viz_abandon_by_act",            "type": "block", "position": {"x": 770, "y":3230, "w":  770, "h": 110}},
+
+      {"item": "viz_operator_header",           "type": "block", "position": {"x":   0, "y":3360, "w": 1920, "h":  80}},
+      {"item": "viz_kpi_operator_today",        "type": "block", "position": {"x":1550, "y":3450, "w":  360, "h": 140}},
+      {"item": "viz_facilitator_action_label",  "type": "block", "position": {"x":   0, "y":3450, "w":  760, "h":  30}},
+      {"item": "viz_facilitator_action_mix",    "type": "block", "position": {"x":   0, "y":3480, "w":  760, "h": 110}},
+      {"item": "viz_audio_setting_label",       "type": "block", "position": {"x": 770, "y":3450, "w":  770, "h":  30}},
+      {"item": "viz_audio_setting_mix",         "type": "block", "position": {"x": 770, "y":3480, "w":  770, "h": 110}}
     ]
   }
 }

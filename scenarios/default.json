@@ -1,0 +1,24 @@
+{
+  "$schema_version": 2,
+  "$id": "default",
+  "$description": "Canonical Christmas-noir Nakatomi heist. The default story already shipped in game.html since v1.0; this scenario pack is a no-op overlay supplied for round-trip safety with the v2.16 ?scenario=<name> loader.",
+  "metadata": {
+    "name": "Default — Christmas Eve 1988",
+    "tone": "noir",
+    "duration_minutes": 90,
+    "version": "1.0.0",
+    "author": "Nakatomi Heist Project"
+  },
+  "ambient": {
+    "label": "Christmas-noir",
+    "description": "Default low-pad drone with a hint of distant sleigh-bell sparkle on the ambient bus."
+  },
+  "story_beats": {
+    "act_1_open": "It's Christmas Eve, 1988. Nakatomi Plaza's holiday party is in full swing on the 30th floor. Hans Gruber's tech crew has just taken the building.",
+    "act_5_intro": "The seventh seal is the last barrier. Beyond it, $640M in bearer bonds. The FBI cuts power in 12 minutes."
+  },
+  "intercepts": {
+  },
+  "endings": {
+  }
+}

@@ -17,6 +17,7 @@ import csv
 import json
 import os
 import random
+import re
 import string
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -399,7 +400,7 @@ def generate_badge_events(cfg, rng):
 
     # ── Christmas-party guest crowd (Phase 6a / v2.9) ─────────────
     # Seal 2 ("Hostage Floor") query is:
-    #   index=nakatomi_access earliest=2025-12-24T20:00:00 ...
+    #   index=nakatomi_access earliest=1988-12-24T20:00:00 ...
     #   | stats dc(badge_id) by floor | sort -dc(badge_id)
     # Floor 30 must beat every other floor by `dc(badge_id)`. The
     # legacy 200-event block above only guarantees ~12 distinct
@@ -491,7 +492,7 @@ def generate_badge_events(cfg, rng):
         department="CEO", floor=30,
         room="Conference Room B", action="swipe",
         outcome="allow",
-        detail=f"exec_calendar: vault maintenance cycle {seal2_code} — rotation scheduled 2025-12-25T02:00",
+        detail=f"exec_calendar: vault maintenance cycle {seal2_code} — rotation scheduled 1988-12-25T02:00",
     ))
 
     # ── Seal 1 red herrings ──────────────────────────────────────
@@ -1017,6 +1018,617 @@ def generate_building_events(cfg, rng):
     return events
 
 
+# ── side-story emitters (v2.9 / Phase 6 — id: p6-side-stories) ───
+#
+# Each function below seeds a narrative trail for one side mystery.
+# They share a convention: put the 4-digit `discovery_code` into a
+# unique `detail=` or `message=` field so a focused SPL query will
+# surface it, but keep the seeded events low-volume so they don't
+# distort the puzzle day. The in-game keypad listens for those
+# codes (see game.html SIDE_STORIES) and fires the reveal toast.
+#
+# Helpers:
+#   side_story_by_id(cfg, story_id) → dict lookup with id/code/etc.
+#   _ss_code_for(cfg, story_id)     → just the 4-digit discovery code
+# These are safe no-ops when scenario.yaml has no side_stories
+# block (e.g. a legacy config loaded against a newer generator).
+
+def _side_story_by_id(cfg, story_id):
+    for s in cfg.get("side_stories") or []:
+        if s.get("id") == story_id:
+            return s
+    return None
+
+
+def _ss_code_for(cfg, story_id):
+    s = _side_story_by_id(cfg, story_id)
+    return (s or {}).get("discovery_code", "0000")
+
+
+def generate_side_story_events(cfg, rng):
+    """
+    Emit the event trail for each of the Phase-6 side mysteries.
+
+    Returns ``{"access": [...], "vault": [...], "building": [...]}``.
+    Safe to run in both full and booth modes — the total event
+    footprint is well under 200 events, so even booth demos carry
+    the full curated side-story set. No-op when scenario.yaml has
+    no ``side_stories:`` block.
+    """
+    if not cfg.get("side_stories"):
+        return {"access": [], "vault": [], "building": []}
+
+    access_events = []
+    building_events = []
+
+    tl = cfg["timeline"]
+    party_setup = parse_iso(tl["party_setup"])
+    heist_day = party_setup.date()
+
+    def _days_before(days, hour, minute=0):
+        """Timestamp ``days`` days before heist day at given H:M."""
+        base = party_setup - timedelta(days=days)
+        return base.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+    def _emit_access(ts, **fields):
+        access_events.append(make_event(
+            ts, "nakatomi_access", "nakatomi:access:badge", **fields
+        ))
+
+    def _emit_building(ts, sourcetype, **fields):
+        building_events.append(make_event(
+            ts, "nakatomi_building", sourcetype, **fields
+        ))
+
+    # ── 1) The Affair ────────────────────────────────────────────
+    # Harry Ellis pops up on floor 30 after hours Dec 17, 19, 20
+    # (Holly's office). Discovery code 9012 goes in the last
+    # "rose delivery log" reference.
+    aff_code = _ss_code_for(cfg, "affair")
+    affair_visits = [
+        (_days_before(7, 21, 14), "late-night check-in to floor 30"),
+        (_days_before(5, 22, 47), "after-hours floor 30 — exec suite"),
+        (_days_before(4, 23, 3),  f"late-night visit to floor 30 (rose delivery log ref={aff_code})"),
+    ]
+    for ts, detail in affair_visits:
+        _emit_access(
+            ts, badge_id="HE-3301", name="Harry Ellis",
+            department="International Trade", floor=30,
+            room="Corner Office", action="swipe", outcome="allow",
+            detail=detail,
+        )
+
+    # ── 2) Petty Cash Skim ───────────────────────────────────────
+    # 6 small finance transactions by NP-2802 over a month,
+    # summary memo with the discovery code.
+    pc_code = _ss_code_for(cfg, "petty_cash")
+    skim_amounts = [42.18, 51.04, 38.75, 47.50, 49.92, 45.33]
+    for idx, amt in enumerate(skim_amounts):
+        ts = party_setup - timedelta(days=30 - idx * 5, hours=rng.randint(10, 16))
+        _emit_building(
+            ts, "intranet:finance",
+            system="expense_report", event_type="submission",
+            requester="NP-2802", requester_name="Ulysses Bekele",
+            department="Admin", floor=28,
+            amount=amt, category="office supplies",
+            memo="coffee fund replenishment",
+        )
+    _emit_building(
+        _days_before(1, 14, 32),
+        "intranet:finance",
+        system="audit_queue", event_type="flag",
+        requester="NP-2802", requester_name="Ulysses Bekele",
+        flag_reason=f"pattern_small_amount_repeat threshold={pc_code}",
+        total_flagged=4892.11,
+        memo=f"Q4 audit preview: 6-month skim pattern detected on NP-2802 (threshold ref={pc_code}).",
+    )
+
+    # ── 3) Ghost Account ─────────────────────────────────────────
+    # Terminated badge XG-9999 still used for server-room access
+    # on floor 25 at night. The discovery code is embedded in the
+    # swipe's detail field.
+    ga_code = _ss_code_for(cfg, "ghost_account")
+    ghost_nights = [_days_before(6, 1, 12), _days_before(3, 2, 41), _days_before(1, 1, 58)]
+    for ts in ghost_nights:
+        _emit_access(
+            ts, badge_id="XG-9999", name="Evan Rutherford",
+            department="(terminated)", floor=25,
+            room="Server Room", action="swipe", outcome="allow",
+            detail=f"terminated_badge_active ref={ga_code} — badge not revoked",
+        )
+
+    # ── 4) Y2K Test ──────────────────────────────────────────────
+    y2k_code = _ss_code_for(cfg, "y2k")
+    _emit_building(
+        _days_before(2, 9, 17),
+        "intranet:it",
+        system="it_ops", event_type="scheduled_test",
+        ticket=f"IT-{y2k_code}",
+        affected_hosts=14, duration_seconds=40,
+        message=f'Y2K date-rollover test on legacy fleet: system_time forced to "1900-01-01T00:00:00" — do NOT tell the auditors (ticket={y2k_code}).',
+    )
+    _emit_building(
+        _days_before(2, 9, 17) + timedelta(seconds=40),
+        "intranet:it",
+        system="it_ops", event_type="rollback",
+        ticket=f"IT-{y2k_code}",
+        message="Rollback complete — system_time restored. Memo follows.",
+    )
+
+    # ── 5) Disgruntled Sysadmin ──────────────────────────────────
+    # Robert Chen (NP-4471) with after-hours swipes on floors 25
+    # and B1 across the week. HR PIP memo ties it together.
+    dis_code = _ss_code_for(cfg, "disgruntled_it")
+    late_swipes = [
+        (_days_before(6, 22, 14), 25, "R&D Lab"),
+        (_days_before(6, 23, 47), "B1", "Vault Anteroom"),
+        (_days_before(4, 22, 12), 25, "Server Room"),
+        (_days_before(4, 23, 58), "B1", "Vault Anteroom"),
+        (_days_before(2, 22, 33), 25, "Server Room"),
+    ]
+    for ts, floor, room in late_swipes:
+        _emit_access(
+            ts, badge_id="NP-4471", name="Robert Chen",
+            department="IT Operations", floor=floor, room=room,
+            action="swipe", outcome="allow",
+            detail="after-hours admin access",
+        )
+    _emit_building(
+        _days_before(5, 10, 20),
+        "intranet:hr",
+        system="hr_memo", event_type="pip_opened",
+        case_id=f"HR-{dis_code}",
+        subject="NP-4471",
+        subject_name="Robert Chen",
+        message=f"PIP opened (case={dis_code}) — employee passed over for VP slot in October; behaviour under review. See drafted-then-deleted email at timestamp.",
+    )
+
+    # ── 6) Pineapple Incident ────────────────────────────────────
+    pz_code = _ss_code_for(cfg, "pizza")
+    pizza_ts = _days_before(1, 13, 14)
+    _emit_building(
+        pizza_ts, "intranet:catering",
+        system="catering", event_type="delivery",
+        order_id=f"CAT-{pz_code}",
+        destination_floor=15, destination_room="Trading Floor",
+        items="12 pizzas (1 Hawaiian)",
+        message=f"Delivery confirmed — pineapple detected on order {pz_code}.",
+    )
+    rant_times = [pizza_ts + timedelta(minutes=m) for m in (3, 7, 11, 18, 24, 33, 39)]
+    rant_lines = [
+        "Whoever ordered Hawaiian for the trading floor: explain yourself.",
+        "Pineapple does not belong on pizza. This is a boundary issue.",
+        "I specifically flagged no pineapple in the email last week. EVERY week.",
+        "It's fine. It's ALL fine. We can just eat around the pineapple.",
+        "IT just muted the channel. Fascist response.",
+        "Update: the Hawaiian was eaten. By Kevin. Obviously.",
+        "Thread closed. Pineapple is a workplace hazard. — Compliance",
+    ]
+    for ts, line in zip(rant_times, rant_lines):
+        _emit_building(
+            ts, "intranet:chat",
+            system="intranet", event_type="chat_message",
+            channel="floor-15-general",
+            author=f"NP-{1500 + rng.randint(1, 10)}",
+            message=line,
+        )
+
+    # ── 7) Theo's Homework ───────────────────────────────────────
+    th_code = _ss_code_for(cfg, "theo_browser")
+    proxy_pages = [
+        ("security-research", "whitepaper: Physical vault failure modes (NIST)"),
+        ("security-research", "paper: Seismic demolition & controlled collapse"),
+        ("financial-filings", "SEC EDGAR: Nakatomi Trading 10-K (2023)"),
+        ("security-research", "whitepaper: Electromagnetic locks — failure modes"),
+        ("financial-filings", "SEC EDGAR: bearer-bond custody disclosure"),
+        ("news", "LATimes: Nakatomi plaza Christmas party guest list leaks (1987)"),
+        ("security-research", "video: Vault drill bit specifications"),
+        ("technical-support", "forum: Mitsubishi 2600 elevator override"),
+    ]
+    start_ts = _days_before(21, 2, 0)
+    for idx, (cat, title) in enumerate(proxy_pages):
+        ts = start_ts + timedelta(days=idx * 2, hours=rng.randint(0, 3), minutes=rng.randint(0, 59))
+        _emit_building(
+            ts, "proxy:http",
+            system="proxy", event_type="http_request",
+            user_badge="TH-0099", user_name="Theo",
+            url_category=cat,
+            url_title=title,
+            ticket=f"PX-{th_code}",
+        )
+    _emit_building(
+        _days_before(1, 18, 5),
+        "proxy:http",
+        system="proxy", event_type="summary",
+        user_badge="TH-0099", user_name="Theo",
+        request_count=147,
+        categories="security-research,financial-filings,news,technical-support",
+        message=f"3-week summary — 147 hits concentrated on vault research (ref={th_code}).",
+    )
+
+    # ── 8) Bypassed Camera ───────────────────────────────────────
+    cam_code = _ss_code_for(cfg, "bypassed_camera")
+    takeover = parse_iso(tl["takeover"])
+    # "Scheduled maintenance" 18 minutes before the takeover.
+    cam_down = takeover - timedelta(minutes=18)
+    _emit_building(
+        cam_down, "nakatomi:building:security",
+        system="security", event_type="camera_offline",
+        floor=25, camera_id="CAM-25-NORTH",
+        zone="north_loading",
+        severity="low",
+        scheduled_by="UNKNOWN",
+        ticket=f"MAINT-{cam_code}",
+        message=f"Scheduled maintenance — CAM-25-NORTH offline (ticket={cam_code}). No scheduler on record.",
+    )
+    _emit_building(
+        cam_down + timedelta(minutes=18),
+        "nakatomi:building:security",
+        system="security", event_type="camera_offline_continued",
+        floor=25, camera_id="CAM-25-NORTH",
+        zone="north_loading",
+        severity="medium",
+        message="Crew movement detected in loading dock — no video coverage.",
+    )
+
+    return {
+        "access": access_events,
+        "vault": [],
+        "building": building_events,
+    }
+
+
+def generate_red_herring_events(cfg, rng):
+    """
+    v2.9 / Phase 6 — promote red herrings to full teaching moments.
+
+    Returns ``{"access": [...], "building": [...]}``.
+
+    Emits two families of events:
+
+    1. **Dedup traps** — near-duplicate badge swipes (0.4–0.8s apart)
+       on known-glitchy readers. Teaches players that raw
+       ``| stats count by badge_id`` can overcount when a reader
+       debounces; correct technique is ``| dedup _time badge_id``
+       or ``| bin _time span=2s | stats …``.
+
+    2. **Cross-index echoes** — events in nakatomi_building whose
+       MESSAGE text references a puzzle-critical badge ID but whose
+       source is intranet:it / intranet:hr / proxy:http, NOT
+       nakatomi:access:*. Teaches proper index + sourcetype scoping.
+
+    Both are deliberately low-volume (~30 events total) so they add
+    realism without drowning the main puzzle queries. Scope of the
+    scenario.yaml driver section:
+
+        red_herrings:
+          dedup_traps:        [ … per-badge config … ]
+          cross_index_echoes: [ … per-badge config … ]
+
+    Missing config => empty result. Safe to call in both booth and
+    full modes.
+    """
+    rh = (cfg.get("red_herrings") or {})
+    access_events = []
+    building_events = []
+
+    tl = cfg["timeline"]
+    party_start = parse_iso(tl["party_start"])
+    takeover = parse_iso(tl["takeover"])
+
+    # Employee directory lookup for ``name``/``department`` fields on
+    # the duplicate badge reads. Small O(N) helper — N ≤ ~90.
+    all_chars = (
+        (cfg.get("characters", {}).get("key_employees") or [])
+        + (cfg.get("characters", {}).get("supporting") or [])
+    )
+    by_badge = {c.get("badge_id"): c for c in all_chars if c.get("badge_id")}
+
+    # ── Dedup traps ──────────────────────────────────────────────
+    for cfg_row in (rh.get("dedup_traps") or []):
+        badge = cfg_row.get("badge_id")
+        if not badge:
+            continue
+        emp = by_badge.get(badge, {})
+        count = int(cfg_row.get("count", 6))
+        floor = cfg_row.get("floor", 1)
+        room = cfg_row.get("room", "Unknown")
+        reader = cfg_row.get("reader", "RDR-UNKNOWN")
+        detail = cfg_row.get("detail", "badge reader glitch")
+        ghost_min = float(cfg_row.get("ghost_delay_seconds_min", 0.4))
+        ghost_max = float(cfg_row.get("ghost_delay_seconds_max", 0.8))
+
+        # Spread the primary swipes across the party window so they
+        # blend into the rest of the dataset. Each primary swipe gets
+        # a "ghost" duplicate 0.4-0.8s later from the same reader.
+        for _ in range(count):
+            ts_primary = rand_ts(rng, party_start, takeover)
+            ghost_offset = rng.uniform(ghost_min, ghost_max)
+            ts_ghost = ts_primary + timedelta(seconds=ghost_offset)
+
+            base_kwargs = dict(
+                badge_id=badge,
+                name=emp.get("name", ""),
+                department=emp.get("department", ""),
+                floor=floor,
+                room=room,
+                reader=reader,
+                action="swipe",
+                outcome="allow",
+                detail=detail,
+            )
+            access_events.append(make_event(
+                ts_primary, "nakatomi_access", "nakatomi:access:badge",
+                **base_kwargs
+            ))
+            # Second (ghost) read — same payload, later timestamp. The
+            # reader is identical, so a correctly scoped dedup by
+            # (_time bucket, badge_id, reader) collapses both into
+            # one. Marking it ``ghost_read=true`` gives facilitators
+            # a clean back-channel to debug and doesn't appear in the
+            # puzzle hints.
+            access_events.append(make_event(
+                ts_ghost, "nakatomi_access", "nakatomi:access:badge",
+                ghost_read="true",
+                **base_kwargs
+            ))
+
+    # ── Cross-index echoes ───────────────────────────────────────
+    # These are deliberately in nakatomi_building so a player doing
+    # `index=* badge_id=…` sees them and has to learn to scope.
+    # 300-number monotonic ticket IDs so they stand out from the
+    # real nakatomi_access events (which carry no ``ticket_id``).
+    next_tid = 3101
+    for cfg_row in (rh.get("cross_index_echoes") or []):
+        badge = cfg_row.get("badge_id")
+        count = int(cfg_row.get("count", 3))
+        source = cfg_row.get("source", "intranet:it")
+        tmpl = cfg_row.get("message_template", "ref badge={badge}")
+        for _ in range(count):
+            tid = next_tid
+            next_tid += 1
+            ts = rand_ts(rng, party_start, takeover)
+            msg = tmpl.format(tid=tid, badge=badge)
+            building_events.append(make_event(
+                ts, "nakatomi_building", source,
+                ticket_id=str(tid),
+                ref_badge=badge,
+                message=msg,
+            ))
+
+    return {
+        "access": access_events,
+        "building": building_events,
+    }
+
+
+def generate_easter_egg_events(cfg, rng):
+    """
+    v2.9 / Phase 6d — emit one data anchor per keypad-triggerable
+    easter egg.
+
+    The UI-side registry (``game.html`` → ``EASTER_EGGS``) is the
+    source of truth for narrative text, ordering, and keypad codes.
+    This function reads ``cfg["easter_eggs"]`` (see ``scenario.yaml``)
+    and emits a single event per egg into the matching index so that
+    a curious analyst can find it via SPL rather than brute-forcing
+    the ``6xxx`` keypad namespace.
+
+    Invariants:
+      * Every discovery_code MUST be unique across the file.
+      * Every discovery_code MUST live in the ``6xxx`` range (the
+        UI-side namespace for easter eggs) and must NOT collide with
+        vault seals (2512/7439/4291/8086/5765/3940), trap codes
+        (1990/0911/1666/1988/1215), or side-story codes (9xxx).
+      * The Konami-code egg has ``discovery_code: null`` / missing
+        and is skipped here (it's a pure UI gesture, no data anchor).
+      * Timestamps in YAML are naive ISO strings in PST; they are
+        rehydrated with the TZ_OFFSET used across the rest of the
+        generator so downstream ``_time`` queries stay consistent.
+
+    Returns ``{"access": [...], "building": [...], "vault": [...],
+    "comms": [...]}`` so ``main()`` can append to each per-index
+    bucket. Missing config => empty buckets.
+
+    Low-volume: exactly 14 events for the shipping v2.9 scenario.
+    Cheap to generate in both booth and full modes.
+    """
+    eggs = (cfg.get("easter_eggs") or [])
+    buckets = {
+        "access": [],
+        "building": [],
+        "vault": [],
+        "comms": [],
+    }
+    if not eggs:
+        return buckets
+
+    # Index → bucket routing. Keep the mapping explicit so a typo in
+    # YAML surfaces as a KeyError at generation time rather than
+    # silently dropping events.
+    index_bucket = {
+        "nakatomi_access": "access",
+        "nakatomi_building": "building",
+        "nakatomi_vault": "vault",
+        "nakatomi_comms": "comms",
+    }
+
+    # Sync-check against vault/trap/side-story codes so we fail loud
+    # if a future edit to scenario.yaml introduces a collision. This
+    # is cheap (O(eggs * seals)) and keeps the generator honest.
+    # ``seals`` in scenario.yaml is a dict keyed 1..6, not a list.
+    seal_codes = {
+        s["code"] for s in (cfg.get("seals") or {}).values()
+        if isinstance(s, dict) and s.get("code")
+    }
+    side_codes = {s["discovery_code"] for s in (cfg.get("side_stories") or [])
+                  if s.get("discovery_code")}
+    trap_codes = set((cfg.get("trap_code_lore") or {}).keys())
+
+    seen_codes = set()
+    for egg in eggs:
+        eid = egg.get("id", "<unknown>")
+        code = egg.get("discovery_code")
+        # Konami-style eggs (no discovery_code) have no data anchor.
+        if not code:
+            continue
+
+        if code in seen_codes:
+            raise ValueError(f"easter_eggs: duplicate discovery_code {code} (id={eid})")
+        seen_codes.add(code)
+
+        if not (code.isdigit() and len(code) == 4 and code.startswith("6")):
+            raise ValueError(
+                f"easter_eggs: discovery_code {code!r} (id={eid}) must be a 4-digit "
+                f"value in the 6xxx namespace (see game.html EASTER_EGGS)."
+            )
+        if code in seal_codes:
+            raise ValueError(f"easter_eggs: code {code} (id={eid}) collides with a vault seal.")
+        if code in side_codes:
+            raise ValueError(f"easter_eggs: code {code} (id={eid}) collides with a side story.")
+        if code in trap_codes:
+            raise ValueError(f"easter_eggs: code {code} (id={eid}) collides with a trap code.")
+
+        index = egg.get("index", "nakatomi_building")
+        sourcetype = egg.get("sourcetype", "intranet:it")
+        bucket_name = index_bucket.get(index)
+        if bucket_name is None:
+            raise ValueError(
+                f"easter_eggs: unknown index {index!r} for egg {eid}; "
+                f"expected one of {sorted(index_bucket)}"
+            )
+
+        ts_hint = egg.get("timestamp_hint")
+        if not ts_hint:
+            raise ValueError(f"easter_eggs: missing timestamp_hint for egg {eid}")
+        try:
+            # Authored as naive ISO in PST; attach TZ_OFFSET so the
+            # resulting _time lines up with the rest of the scenario.
+            ts = datetime.fromisoformat(ts_hint).replace(tzinfo=TZ_OFFSET)
+        except ValueError as exc:
+            raise ValueError(
+                f"easter_eggs: invalid timestamp_hint {ts_hint!r} for egg {eid}"
+            ) from exc
+
+        # Build the event payload. Always tag it with ``egg_id`` and
+        # the discovery code so facilitators can audit which eggs
+        # actually shipped in the dataset without scraping text —
+        # but keep user-facing fields (message, etc.) free of any
+        # literal "easter egg" markers so the mystery stays intact.
+        fields = dict(egg.get("fields") or {})
+        fields.setdefault("egg_id", eid)
+        fields.setdefault("egg_code", code)
+
+        ev = make_event(ts, index, sourcetype, **fields)
+        buckets[bucket_name].append(ev)
+
+    return buckets
+
+
+def generate_intranet_announcements(cfg, rng):
+    """
+    v2.9 / Phase 6e — emit the lore bulletin board.
+
+    Reads ``cfg["announcements"]`` (see ``scenario.yaml``) and emits
+    one event per bulletin into ``nakatomi_building`` with sourcetype
+    ``intranet:announcements``. Pure texture — the bulletins build
+    out the Nakatomi Plaza world referenced by
+    ``docs/NAKATOMI_LORE.md`` and give a curious analyst something
+    to find outside the main puzzle chain.
+
+    Invariants (enforced here so a future lore edit can't silently
+    clash with a puzzle answer):
+
+      * Every ``bulletin_id`` MUST be unique across the file.
+      * Every text field (``subject``, ``message``) is scanned for
+        4-digit numbers; if ANY 4-digit substring matches a live
+        seal code, trap code, side-story code, or easter-egg code
+        the generator raises ``ValueError``.
+      * Timestamps are naive PST ISO strings. They are rehydrated
+        with ``TZ_OFFSET`` so the ``_time`` field lines up with
+        the rest of the scenario.
+
+    Returns a list of events. Always safe to call in booth mode —
+    the total volume is ~7 events and booth visitors benefit from
+    seeing the bulletin board even in a 5-minute slot.
+    """
+    ann_cfg = cfg.get("announcements") or []
+    if not ann_cfg:
+        return []
+
+    events = []
+
+    # Build a guard-rail set of all 4-digit codes that ALREADY have
+    # a puzzle meaning. If an author accidentally drops "2512" or
+    # "6024" into a bulletin message, discovery SPL queries would
+    # return the wrong anchor event. Fail loud at generation time.
+    # ``seals`` in scenario.yaml is a dict keyed 1..6.
+    seal_codes = {
+        s["code"] for s in (cfg.get("seals") or {}).values()
+        if isinstance(s, dict) and s.get("code")
+    }
+    side_codes = {s["discovery_code"] for s in (cfg.get("side_stories") or [])
+                  if s.get("discovery_code")}
+    trap_codes = set((cfg.get("trap_code_lore") or {}).keys())
+    egg_codes = {e["discovery_code"] for e in (cfg.get("easter_eggs") or [])
+                 if e.get("discovery_code")}
+    reserved_codes = seal_codes | side_codes | trap_codes | egg_codes
+
+    # Pattern is intentionally strict: any isolated 4-digit run in
+    # the bulletin text must not collide. We allow the codes to
+    # appear inside longer digit strings (5+ digits are usually
+    # dates or ticket IDs, which we don't reserve) — the check is
+    # for standalone 4-digit tokens that an analyst would punch
+    # into the keypad.
+    four_digit_re = re.compile(r"(?<!\d)\d{4}(?!\d)")
+
+    seen_ids = set()
+    for ann in ann_cfg:
+        aid = ann.get("bulletin_id")
+        if not aid:
+            raise ValueError(
+                f"announcements: entry is missing required 'bulletin_id' field: {ann!r}"
+            )
+        if aid in seen_ids:
+            raise ValueError(f"announcements: duplicate bulletin_id {aid}")
+        seen_ids.add(aid)
+
+        ts_hint = ann.get("timestamp")
+        if not ts_hint:
+            raise ValueError(f"announcements: missing timestamp for {aid}")
+        try:
+            ts = datetime.fromisoformat(ts_hint).replace(tzinfo=TZ_OFFSET)
+        except ValueError as exc:
+            raise ValueError(
+                f"announcements: invalid timestamp {ts_hint!r} for {aid}"
+            ) from exc
+
+        subject = ann.get("subject", "")
+        message = ann.get("message", "")
+        for field_name, field_value in (("subject", subject), ("message", message)):
+            for hit in four_digit_re.findall(field_value or ""):
+                if hit in reserved_codes:
+                    raise ValueError(
+                        f"announcements: bulletin {aid} {field_name!r} contains "
+                        f"reserved 4-digit code {hit!r} — collides with a seal, "
+                        f"trap, side-story, or easter-egg answer. Rewrite the "
+                        f"copy to avoid that number."
+                    )
+
+        events.append(make_event(
+            ts, "nakatomi_building", "intranet:announcements",
+            bulletin_id=aid,
+            author=ann.get("author", "intranet.system"),
+            author_name=ann.get("author_name", ""),
+            author_title=ann.get("author_title", ""),
+            department=ann.get("department", "General"),
+            subject=subject,
+            message=message,
+        ))
+
+    return events
+
+
 # ── lookup generators ────────────────────────────────────────────
 
 def generate_floor_directory(cfg):
@@ -1074,6 +1686,15 @@ def generate_employee_directory(cfg, rng):
             guest.get("clearance", "LEVEL-1"), status="visitor",
         )
 
+    # v2.9 / Phase 6 — side-story extras. The Ghost Account story
+    # (id: ghost_account) needs a *terminated* lookup hit for
+    # badge XG-9999 so the join in the SPL hint actually surfaces
+    # the discovery. All other side-story actors already live in
+    # characters / npcs, so they're registered above.
+    if any((s.get("id") == "ghost_account") for s in (cfg.get("side_stories") or [])):
+        _add("XG-9999", "Evan Rutherford", "IT Operations", "LEVEL-3",
+             status="terminated")
+
     # Tail of legacy random fillers (kept so existing SPL queries
     # that count "≥40 fillers" still hold). New badges are unique.
     for _ in range(40):
@@ -1098,6 +1719,47 @@ def generate_system_codes(cfg):
         {"system_id": "SYS-VAULT", "description": "Vault Primary Authorization", "clearance_level": "LEVEL-5", "vault_auth_code": cfg["seals"][6]["code"], "location": "B1"},
         {"system_id": "SYS-EXEC", "description": "Executive Override", "clearance_level": "LEVEL-6", "vault_auth_code": "6102", "location": "Floor 35"},
     ]
+
+
+# ── infrastructure seed (puzzle-critical sourcetypes) ─────────────
+#
+# Phone, radio, camera, elevator, and power-grid events are authored
+# as curated seed files under generator/infrastructure/. They are
+# merged into the canonical HEC outputs on every run so
+# load_data.sh / batch inputs always carry Act 2–5 puzzle data even
+# though the procedural generators above only emit access/vault/hvac.
+
+INFRA_SEED_DIR = SCRIPT_DIR / "infrastructure"
+
+
+def load_infrastructure_seed_events():
+    """Return (building_events, comms_events) from infrastructure/*.json."""
+    building: list[dict] = []
+    comms: list[dict] = []
+    if not INFRA_SEED_DIR.is_dir():
+        return building, comms
+    for path in sorted(INFRA_SEED_DIR.glob("*.json")):
+        with path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                ev = json.loads(line)
+                idx = ev.get("index")
+                if idx == "nakatomi_building":
+                    building.append(ev)
+                elif idx == "nakatomi_comms":
+                    comms.append(ev)
+    return building, comms
+
+
+def purge_legacy_output_shards(out_dir: Path) -> int:
+    """Remove per-sourcetype shard JSON files superseded by canonical outputs."""
+    removed = 0
+    for path in out_dir.glob("nakatomi_*_*.json"):
+        path.unlink()
+        removed += 1
+    return removed
 
 
 # ── write helpers ────────────────────────────────────────────────
@@ -1156,15 +1818,80 @@ def main():
         building_events.extend(npc_buckets["building"])
         npc_added = sum(len(v) for v in npc_buckets.values())
 
+    # Side-story trails run in BOTH modes — the curated set is only
+    # ~60 events total, so booth demos still get the full mystery
+    # roster (players rarely discover these in a 15-min slot, but
+    # facilitators and reruns benefit from them).
+    side_buckets = generate_side_story_events(cfg, rng)
+    access_events.extend(side_buckets["access"])
+    vault_events.extend(side_buckets["vault"])
+    building_events.extend(side_buckets["building"])
+    side_added = sum(len(v) for v in side_buckets.values())
+
+    # Red-herrings (dedup traps + cross-index echoes) run in both
+    # booth and full modes — ~30 events total, cheap.
+    rh_buckets = generate_red_herring_events(cfg, rng)
+    access_events.extend(rh_buckets["access"])
+    building_events.extend(rh_buckets["building"])
+    rh_added = sum(len(v) for v in rh_buckets.values())
+
+    # Easter eggs (v2.9 / Phase 6d) — 14 data-anchor events across
+    # four indexes. Always generated: the volume is trivial and
+    # booth players benefit from the same discovery surface as full
+    # scenarios. The nakatomi_comms output file is NEW in v2.9 (no
+    # existing generator writes to comms today) and only emitted
+    # when at least one egg lands in that bucket.
+    egg_buckets = generate_easter_egg_events(cfg, rng)
+    access_events.extend(egg_buckets["access"])
+    vault_events.extend(egg_buckets["vault"])
+    building_events.extend(egg_buckets["building"])
+    comms_events = list(egg_buckets["comms"])
+    egg_added = (
+        len(egg_buckets["access"])
+        + len(egg_buckets["vault"])
+        + len(egg_buckets["building"])
+        + len(comms_events)
+    )
+
+    # Intranet announcements (v2.9 / Phase 6e) — ~7 bulletin-board
+    # events in index=nakatomi_building sourcetype=intranet:announcements.
+    # Pure world-building texture (see docs/NAKATOMI_LORE.md § 5.1).
+    # Always generated — trivial volume, booth demos still get the
+    # lore layer on floor 1.
+    ann_events = generate_intranet_announcements(cfg, rng)
+    building_events.extend(ann_events)
+    ann_added = len(ann_events)
+
+    infra_b, infra_c = load_infrastructure_seed_events()
+    building_events.extend(infra_b)
+    comms_events.extend(infra_c)
+    infra_added = len(infra_b) + len(infra_c)
+    shards_removed = purge_legacy_output_shards(out_dir)
+
     n1 = write_events(access_events, out_dir / "nakatomi_access.json")
     n2 = write_events(vault_events, out_dir / "nakatomi_vault.json")
     n3 = write_events(building_events, out_dir / "nakatomi_building.json")
+    n4 = write_events(comms_events, out_dir / "nakatomi_comms.json") if comms_events else 0
 
     print(f"nakatomi_access.json : {n1} events")
     print(f"nakatomi_vault.json  : {n2} events")
     print(f"nakatomi_building.json: {n3} events")
+    if n4:
+        print(f"nakatomi_comms.json  : {n4} events")
     if npc_added:
         print(f"  (includes {npc_added} NPC baseline events)")
+    if side_added:
+        print(f"  (includes {side_added} side-story events)")
+    if rh_added:
+        print(f"  (includes {rh_added} red-herring events)")
+    if egg_added:
+        print(f"  (includes {egg_added} easter-egg events)")
+    if ann_added:
+        print(f"  (includes {ann_added} intranet-announcement events)")
+    if infra_added:
+        print(f"  (includes {infra_added} infrastructure seed events)")
+    if shards_removed:
+        print(f"  (removed {shards_removed} legacy output shard file(s))")
 
     # ── generate lookups ─────────────────────────────────────────
     floors = generate_floor_directory(cfg)
@@ -1183,7 +1910,7 @@ def main():
     print(f"employee_directory.csv: {len(employees)} rows")
     print(f"system_codes.csv     : {len(codes)} rows")
 
-    total = n1 + n2 + n3
+    total = n1 + n2 + n3 + n4
     print(f"\nTotal: {total} events + 3 lookups → {out_dir}/")
 
 

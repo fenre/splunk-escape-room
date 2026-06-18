@@ -1,0 +1,25 @@
+# v2.15 / Q2 — Dependabot configuration.
+#
+# The project intentionally has no runtime JS dependencies — every
+# test_*.js runs under plain Node + the standard library, and the
+# game ships as a single self-contained game.html with no vendored
+# CDN scripts. Dependabot is configured here for the GitHub Actions
+# update channel only, so the CI workflow stays current with security
+# patches to actions/checkout, actions/setup-node, and similar.
+#
+# When the Q3 refactor lands and introduces a package.json (esbuild
+# build pipeline) or a vendor/ folder (qrcode-generator), add the
+# matching ecosystems below.
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: [ "dependencies", "ci" ]
+    commit-message:
+      prefix: "ci"
+      include: "scope"

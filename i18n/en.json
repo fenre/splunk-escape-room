@@ -1,0 +1,46 @@
+{
+  "$lang": "en",
+  "$description": "Canonical English UI strings. Mirrors the DEFAULTS dictionary inside the I18n module so a local-fetch override can hot-replace any subset without touching the inline default table.",
+
+  "mode_select.title":         "NAKATOMI VAULT",
+  "mode_select.cta":           "PRESS ANY KEY TO BEGIN",
+  "mode_select.difficulty":    "DIFFICULTY",
+  "mode_select.difficulty.rookie":     "ROOKIE",
+  "mode_select.difficulty.operative":  "OPERATIVE",
+  "mode_select.difficulty.mastermind": "MASTERMIND",
+  "mode_select.difficulty.iron_man":   "IRON MAN \u00B7 NO HINTS",
+  "mode_select.difficulty.demo":       "QUICK DEMO \u00B7 15 MIN",
+  "mode_select.difficulty.quickfire":  "QUICKFIRE \u00B7 5 MIN",
+  "mode_select.difficulty.booth_heist":"BOOTH HEIST \u00B7 10 MIN",
+  "mode_select.theme":         "CRT PHOSPHOR",
+  "mode_select.choose_mode":   "SELECT YOUR MODE",
+
+  "hud.team":                  "TEAM",
+  "hud.elapsed":               "ELAPSED",
+  "hud.progress":              "PROGRESS",
+  "hud.tokens":                "TOK",
+  "hud.hints":                 "HINTS",
+
+  "pause.title":               "PAUSED",
+  "pause.subtitle":            "Timer frozen. Task hidden.",
+  "pause.resume":              "RESUME [P]",
+  "pause.investigation_board": "INVESTIGATION BOARD [B]",
+  "pause.floor_30":            "FLOOR-30 MAP [M]",
+  "pause.audio_mix":           "AUDIO MIX & CAPTIONS",
+
+  "victory.title":             "HEIST COMPLETE",
+  "victory.amount":            "$640,000,000 in Bearer Bonds",
+  "victory.yippee":            "\"Yippee-ki-yay.\"",
+  "victory.play_again":        "Play Again",
+  "victory.bonus_objectives":  "Bonus Objectives",
+  "victory.copy_results":      "Copy Results",
+  "victory.save_leaderboard":  "Save to Leaderboard",
+  "victory.view_in_splunk":    "View in Splunk \u2192",
+
+  "victory.feedback.heading":  "HOW WAS IT?",
+  "victory.feedback.skip":     "Skip",
+  "victory.feedback.submit":   "Submit",
+  "victory.feedback.thanks":   "Thanks \u2014 logged.",
+
+  "gameover.continue":         "Continue?"
+}

@@ -32,7 +32,7 @@
           ],
           "columns": [
             ["1.1 Guest List", "1.2 Find Takagi", "1.3 Security Gaps", "1.4 Parking Garage", "1.5 Party Recon"],
-            ["index=nakatomi_access action=swipe | stats dc(badge_id)", "index=nakatomi_access badge_id=\"JT-0001\" | sort -_time | head 1", "| inputlookup floor_directory.csv | lookup camera_coverage floor", "index=nakatomi_comms channel=freq_18 argyle", "| inputlookup employee_directory.csv | search status=active | sort -clearance_level"],
+            ["index=nakatomi_access sourcetype=\"nakatomi:access:badge\" action=swipe detail=\"*party*\" | stats dc(badge_id)", "index=nakatomi_access badge_id=\"JT-0001\" | sort -_time | head 1", "| inputlookup floor_directory.csv | lookup camera_coverage floor OUTPUT camera_id | where isnull(camera_id)", "index=nakatomi_comms channel=freq_18 argyle", "| inputlookup employee_directory.csv | search status=active clearance_level=\"LEVEL-5\" | sort -clearance_level"],
             ["Count UNIQUE badges, not total swipes", "Takagi's badge starts with JT", "Cross-reference two lookups — find the missing floor", "The message is encoded — use the cipher toolkit", "Look for the highest clearance among ACTIVE employees"]
           ]
         }
@@ -64,7 +64,7 @@
           ],
           "columns": [
             ["2.1 Cut Comms", "2.2 Elevator Lock", "2.3 Guard Rotation", "2.4 Hostage Floor", "2.5 Intercept Call"],
-            ["index=nakatomi_comms trunk_type=external | stats count by trunk_id", "index=nakatomi_building sourcetype=\"nakatomi:building:elevator\" action=override", "index=nakatomi_building floor=30 event_type=guard_patrol | sort _time | delta _time as gap", "index=nakatomi_access earliest=\"2025-12-24T20:00:00\" latest=\"2025-12-24T22:00:00\" | stats dc(badge_id) by floor | sort -dc(badge_id)", "index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" status=intercepted"],
+            ["index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" trunk_type=external | stats count by trunk_id", "index=nakatomi_building sourcetype=\"nakatomi:building:elevator\" override_code=*", "index=nakatomi_building sourcetype=\"nakatomi:security:camera\" floor=30 event_type=guard_patrol | sort _time | delta _time as gap", "index=nakatomi_access earliest=\"12/24/1988:20:00:00\" latest=\"12/24/1988:22:00:00\" | stats dc(badge_id) by floor | sort -dc(badge_id)", "index=nakatomi_comms sourcetype=\"nakatomi:comms:phone\" status=intercepted"],
             ["This is now a TEXT code — enter the full line ID with letters", "Look for override events in the elevator system", "Use delta to compute time gaps between patrol timestamps", "Filter badge activity to party hours only", "Find who tried to call outside"]
           ]
         }
@@ -128,6 +128,40 @@
           "columns": [
             ["nakatomi_building", "nakatomi_comms"],
             ["Power grid status, SWAT coverage via camera feeds", "FBI deadline negotiations, radio channels"]
+          ]
+        }
+      }
+    },
+    "ds_act4_searches": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "TASK", "type": "string"},
+            {"name": "SUGGESTED_SPL", "type": "string"},
+            {"name": "TIP", "type": "string"}
+          ],
+          "columns": [
+            ["4.1 Fire Alarm", "4.2 The C4", "4.3 Powell's Radio", "4.4 Detonators", "4.5 Roof Timing"],
+            ["index=nakatomi_building event_type=alarm_trigger | sort -_time | head 1", "index=nakatomi_building sourcetype=\"nakatomi:building:hvac\" floor=roof value>95 | stats count", "index=nakatomi_comms channel=freq_12 | search powell", "index=nakatomi_vault sourcetype=\"nakatomi:vault:system\" system=detonator_inventory", "index=nakatomi_comms channel=freq_14 | search helicopter"],
+            ["Latest alarm_trigger is McClane on floor 25", "Filter roof HVAC to value>95 — not every anomaly is C4", "Powell's badge is in the freq_12 dispatch", "Compare expected vs counted detonators", "Helicopter ETA is a 4-digit HHMM time"]
+          ]
+        }
+      }
+    },
+    "ds_act5_searches": {
+      "type": "ds.test",
+      "options": {
+        "data": {
+          "fields": [
+            {"name": "TASK", "type": "string"},
+            {"name": "SUGGESTED_SPL", "type": "string"},
+            {"name": "TIP", "type": "string"}
+          ],
+          "columns": [
+            ["5.1 Ambulance", "5.2 Bond Transfer", "5.3 Exit Route", "5.4 Final Extraction"],
+            ["| inputlookup vehicle_registry.csv | search vehicle_type=ambulance", "| inputlookup bearer_bonds.csv | stats dc(bond_series)", "index=nakatomi_building sourcetype=\"nakatomi:building:power\" earliest=\"12/24/1988:23:20:00\" latest=\"12/24/1988:23:25:00\" status=active | lookup camera_coverage floor OUTPUT swat_coverage | where swat_coverage!=\"yes\"", "index=nakatomi_comms channel=freq_14 | search deadline"],
+            ["TEXT code — enter full vehicle ID without dashes", "Count distinct bond series in the lookup", "Scope to FBI power-cut window — only floor 2 stays active", "Hans's deadline is HHMM on freq_14"]
           ]
         }
       }
@@ -252,10 +286,31 @@
         "backgroundColor": "#000d00"
       }
     },
+    "viz_act4_data_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > DATA SOURCES FOR ACT 4",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
     "viz_act4_data": {
       "type": "splunk.table",
       "dataSources": {"primary": "ds_act4_sources"},
       "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act4_search_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SUGGESTED STARTING SEARCHES",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act4_searches": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act4_searches"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
     },
     "viz_act5_title": {
       "type": "splunk.markdown",
@@ -265,10 +320,31 @@
         "backgroundColor": "#000d00"
       }
     },
+    "viz_act5_data_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > DATA SOURCES FOR ACT 5",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
     "viz_act5_data": {
       "type": "splunk.table",
       "dataSources": {"primary": "ds_act5_sources"},
       "options": {"count": 5, "backgroundColor": "#000d00"}
+    },
+    "viz_act5_search_label": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### > SUGGESTED STARTING SEARCHES",
+        "fontColor": "#33ff33",
+        "backgroundColor": "#000d00"
+      }
+    },
+    "viz_act5_searches": {
+      "type": "splunk.table",
+      "dataSources": {"primary": "ds_act5_searches"},
+      "options": {"count": 10, "backgroundColor": "#000d00"}
     },
     "viz_lookups_ref": {
       "type": "splunk.markdown",
@@ -301,11 +377,17 @@
       {"item": "viz_act3_data", "type": "block", "position": {"x": 0, "y": 865, "w": 400, "h": 130}},
       {"item": "viz_act3_search_label", "type": "block", "position": {"x": 400, "y": 830, "w": 800, "h": 35}},
       {"item": "viz_act3_searches", "type": "block", "position": {"x": 400, "y": 865, "w": 800, "h": 340}},
-      {"item": "viz_act4_title", "type": "block", "position": {"x": 0, "y": 1205, "w": 600, "h": 60}},
-      {"item": "viz_act4_data", "type": "block", "position": {"x": 0, "y": 1265, "w": 600, "h": 130}},
-      {"item": "viz_act5_title", "type": "block", "position": {"x": 600, "y": 1205, "w": 600, "h": 60}},
-      {"item": "viz_act5_data", "type": "block", "position": {"x": 600, "y": 1265, "w": 600, "h": 130}},
-      {"item": "viz_lookups_ref", "type": "block", "position": {"x": 0, "y": 1395, "w": 1200, "h": 230}}
+      {"item": "viz_act4_title", "type": "block", "position": {"x": 0, "y": 1205, "w": 1200, "h": 60}},
+      {"item": "viz_act4_data_label", "type": "block", "position": {"x": 0, "y": 1265, "w": 400, "h": 35}},
+      {"item": "viz_act4_data", "type": "block", "position": {"x": 0, "y": 1300, "w": 400, "h": 130}},
+      {"item": "viz_act4_search_label", "type": "block", "position": {"x": 400, "y": 1265, "w": 800, "h": 35}},
+      {"item": "viz_act4_searches", "type": "block", "position": {"x": 400, "y": 1300, "w": 800, "h": 250}},
+      {"item": "viz_act5_title", "type": "block", "position": {"x": 0, "y": 1550, "w": 1200, "h": 60}},
+      {"item": "viz_act5_data_label", "type": "block", "position": {"x": 0, "y": 1610, "w": 400, "h": 35}},
+      {"item": "viz_act5_data", "type": "block", "position": {"x": 0, "y": 1645, "w": 400, "h": 130}},
+      {"item": "viz_act5_search_label", "type": "block", "position": {"x": 400, "y": 1610, "w": 800, "h": 35}},
+      {"item": "viz_act5_searches", "type": "block", "position": {"x": 400, "y": 1645, "w": 800, "h": 220}},
+      {"item": "viz_lookups_ref", "type": "block", "position": {"x": 0, "y": 1875, "w": 1200, "h": 230}}
     ]
   }
 }

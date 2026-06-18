@@ -118,7 +118,7 @@ The seals must be opened in order. Each compartment contains a physical object t
    Returns exactly **one** event — the moment security was overridden at 22:02:
 
    ```
-   2025-12-24T22:02:47.000-0800 badge_id=HG-1988 floor=1
+   1988-12-24T22:02:47.000-0800 badge_id=HG-1988 floor=1
    room="Security Office" action=override outcome=success
    detail="security override engaged, vault protocol initiated,
    access_code=2512"
@@ -181,7 +181,7 @@ The seals must be opened in order. Each compartment contains a physical object t
    Among the results, one event from Takagi's terminal (19:45, before the takeover):
    ```
    detail="exec_calendar: vault maintenance cycle 7439
-   — rotation scheduled 2025-12-25T02:00"
+   — rotation scheduled 1988-12-25T02:00"
    ```
 
 4. The code is: **7439**
@@ -448,7 +448,7 @@ index=nakatomi_vault "failsafe" OR "secondary release" OR "power loss"
 ```
 One event, buried deep in the vault logs:
 ```
-2025-12-24T14:30:00.000-0800 system=vault_protocol
+1988-12-24T14:30:00.000-0800 system=vault_protocol
 event=documentation action=system_note
 message="VAULT PROTOCOL 7: Secondary release —
 electromagnetic failsafe. Final lock disengages on power loss.
@@ -488,9 +488,9 @@ This confirms: the seventh lock opens when power is lost. The player must physic
 
 ---
 
-## Part 3 — Branching Storylines *(planned: v2.10 + v2.11)*
+## Part 3 — Branching Storylines
 
-The seven-seal core remains the canonical play, but two upcoming releases introduce branching paths that re-shape how a session is remembered (Tier 1) and how a session unfolds (Tier 2). The branch tree below is the design target for those releases.
+The seven-seal core remains the canonical play, but branching paths re-shape how a session is remembered (Tier 1, **shipped in v2.12**) and — in a future release — how a session unfolds (Tier 2, still gated). The branch tree below is the canonical reference for both tiers.
 
 ### Branching policy (locked)
 
@@ -499,9 +499,9 @@ The seven-seal core remains the canonical play, but two upcoming releases introd
 - **All branches ship as scenario JSON v2** — the schema gains `branch_point`, `leads_to`, and `available_when` keys; v1 scenarios continue to play without modification.
 - **Per-branch achievements** — each ending and fork unlocks a distinct achievement so completionists have a reason to replay.
 
-### Tier 1 — Ending branches (v2.10.0, `p7-branching-tier1`)
+### Tier 1 — Ending branches *(shipped in v2.12.0, `p7-branching-tier1`)*
 
-Driven by cumulative performance signals already tracked by `NakaTelemetry`:
+Driven by cumulative performance signals tracked by `NakaTelemetry`. The classifier runs exactly once inside `triggerVictory()`, before `session_end` is emitted, so every downstream effect (achievement, overlay, audio sting, telemetry) reads the same `state.endingId` value.
 
 ```
 Seal 1 ─ Seal 2 ─ Seal 3 ─ Seal 4 ─ Seal 5 ─ Seal 6 ─ Seal 7 ─┐
@@ -510,25 +510,62 @@ Seal 1 ─ Seal 2 ─ Seal 3 ─ Seal 4 ─ Seal 5 ─ Seal 6 ─ Seal 7 ─┐
                                               │ Ending branch │
                                               └───┬───────────┘
                                                   │
-                  ┌───────────────────────────────┼───────────────────────────────┐
-                  │                               │                               │
-              Analyst                         Cowboy                         Speedrunner
-        (≥80% no-hint solves,           (≥3 trap codes hit,             (sub-30 min on Operative,
-         ≥6 first-try entries)           still won)                       ≤2 hints)
-                  │                               │                               │
-       Holly's calm exfiltration       McClane's wisecrack              FBI helicopters arrive
-       monologue + bond-room            radio swap + getaway             5 seconds late + skyline
-       handoff with Powell              with the limo                    sting on the roof
-                  │                               │                               │
-                  └───────────────────────────────┼───────────────────────────────┘
+                                         classify() — priority order:
+                                       (1) speedrunner → (2) analyst →
+                                        (3) cowboy → (4) default
                                                   │
-                                            Default ending
-                                  ("Yippee-ki-yay" + standard victory)
+                  ┌───────────────────┬───────────┴──────────┬───────────────────┐
+                  │                   │                      │                   │
+              Speedrunner          Analyst                Cowboy              Default
+         elapsed < 0.5 ×     wrong_count ≤ 1          wrong_count ≥ 4       (fallback)
+         TIMER_SECONDS       ∧ hint_tokens ≤ 1        — "messy but wins"
+         — any time cap      ∧ side_stories ≥ 3       — colour: red-orange  — "Welcome
+           beats everything  — colour: amber                                   to the party,
+           else, colour:                                                        pal." Default
+           ice-blue                                                             green theme
+                  │                   │                      │                   │
+       "Faster than a       "The Quiet             "Yippee-ki-yay"      "The Vault
+        Helicopter           Professional"         ("How the hell        Opens"
+        Gunship"             — Carl Winslow:       did that work?")      ($640M bearer
+       — Theo: "That's…      "FBI finally          — Powell: "A cop      bonds; Powell
+       not possible." ─┐     showed up.            does not open         and McClane
+       playVictory-     │    Tell 'em the          seven wrong codes     find each other
+       Speedrunner()    │    Bureau's hiring." ─┐  before finding the   through the
+       staccato         │    playVictory-        │ right one." ─┐        wreckage on
+       pulse            │    Analyst()           │ playVictory-  │       the plaza) ─┐
+                        │    reflective pad      │ Cowboy()      │       playVictory()
+                        │                        │ cowboy-brass  │       default
+                        │                        │               │       arpeggio
+                        │                        │               │           │
+          Achievement:  │          Achievement:  │  Achievement: │  Achievement:
+          ending_      └─┐         ending_      │  ending_      │  ending_
+          speedrunner ⚡    ending_analyst 🕵    cowboy 🤠       │  default 🎁
+                                                                │
+                          All four branches converge on the same core payoff:
+                                  $640M bearer bonds in the vault.
+                      Per-ending narrative block + CSS theme + audio sting +
+                              achievement — nothing else is changed.
 ```
 
-Each ending swaps the Act 5 narrative beat, plays a unique audio sting, and unlocks a per-branch achievement. Telemetry emits `branch_chosen { branch_id, signals }` so the facilitator board's "Endings tonight" panel can show the spread.
+Each ending swaps the Act 5 narrative beat (title + subtitle + paragraph painted into `#victory-ending`), applies an ending-specific CSS colour theme, plays a unique audio sting, and unlocks a per-branch achievement. Telemetry emits `ending_classified { ending_id, elapsed_seconds, wrong_count, hint_tokens_spent, side_stories_discovered, difficulty, mode, act }` on `nakatomi_sessions` so the facilitator board's v2.12 "Ending Branches" row can show the spread — distribution stacked by difficulty, recent endings table, and a daily KPI.
 
-### Tier 2 — Mid-game fork (v2.11.0, `p7-branching-tier2`, gated on Tier 1 telemetry)
+**Classifier pseudocode** (the actual implementation is in the `Endings.classify()` pure function in `game.html`):
+
+```
+function classify(inputs):
+    if inputs.elapsedSeconds < 0.5 * inputs.timerSeconds:
+        return 'speedrunner'               # rule 1 — any time-cap wins
+    if inputs.wrongCount <= 1 and inputs.hintTokensSpent <= 1 \
+       and inputs.sideStoriesDiscovered >= 3:
+        return 'analyst'                   # rule 2 — clean + curious
+    if inputs.wrongCount >= 4:
+        return 'cowboy'                    # rule 3 — messy but wins
+    return 'default'                       # rule 4 — fallback
+```
+
+The classifier is deliberately pure (no DOM reads, no `localStorage`, no audio, no telemetry). Side effects all drive off the returned `ending_id` a few lines down in `triggerVictory()`.
+
+### Tier 2 — Mid-game fork *(planned, gated on Tier 1 telemetry adoption)*
 
 Surfaces at the close of Seal 3 (Takagi's Refusal):
 
