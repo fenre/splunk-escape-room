@@ -23,6 +23,17 @@ REQUIRED_BUNDLES = (
     "appserver/static/visualizations/nakatomi_terminal/visualization.js",
     "appserver/static/visualizations/nakatomi_vault_display/visualization.js",
 )
+REQUIRED_PARSING_KEYS = {
+    "SHOULD_LINEMERGE",
+    "LINE_BREAKER",
+    "TIME_PREFIX",
+    "MAX_TIMESTAMP_LOOKAHEAD",
+    "TIME_FORMAT",
+    "TRUNCATE",
+    "EVENT_BREAKER_ENABLE",
+    "EVENT_BREAKER",
+    "KV_MODE",
+}
 FORBIDDEN_PARTS = {"node_modules", "__pycache__", "local", ".git", "src"}
 FORBIDDEN_NAMES = {"package.json", "package-lock.json", "webpack.config.js"}
 FORBIDDEN_SUFFIXES = {".pyc", ".pyo", ".pem", ".key", ".crt", ".cer", ".der"}
@@ -188,6 +199,13 @@ def validate_app(app: Path) -> list[str]:
                 errors.append(f"seed input is not one-shot sinkhole: {filename}")
         if sourcetype not in props:
             errors.append(f"missing props stanza for seed sourcetype: {sourcetype}")
+        else:
+            missing_keys = REQUIRED_PARSING_KEYS - set(props[sourcetype])
+            if missing_keys:
+                errors.append(
+                    f"incomplete props stanza for {sourcetype}: "
+                    + ", ".join(sorted(missing_keys))
+                )
         counted_total += expected_events
         counted_indexes[index] = counted_indexes.get(index, 0) + expected_events
         counted_sourcetypes[sourcetype] = (
