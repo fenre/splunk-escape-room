@@ -171,6 +171,22 @@ class StaticPackageValidatorTests(unittest.TestCase):
             any("forbidden" in error for error in validator.validate_archive(self.make_archive(app)))
         )
 
+    def test_install_guide_and_ci_use_static_package_contract(self) -> None:
+        install_path = REPO_ROOT / "nakatomi_heist" / "README" / "INSTALL.md"
+        self.assertTrue(install_path.is_file())
+        install_text = install_path.read_text(encoding="utf-8")
+        self.assertIn("Manage apps", install_text)
+        self.assertIn("Server controls", install_text)
+        self.assertIn("All time", install_text)
+        self.assertNotIn("$SPLUNK_HOME/bin/splunk", install_text)
+
+        ci_text = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+        package_job = ci_text.split("  package:", 1)[1]
+        self.assertIn("build-static-package.sh", package_job)
+        self.assertNotIn("tar -czf", package_job)
+
 
 if __name__ == "__main__":
     unittest.main()

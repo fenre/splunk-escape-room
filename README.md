@@ -144,73 +144,45 @@ Open **[index.html](index.html)** in a browser for a full visual overview of the
 
 ## Quick Start — Install and Play
 
-### 1. Generate the dataset
+### 1. Install the complete static Splunk app
+
+The release `.spl` contains the app and complete pre-generated puzzle dataset.
+It requires no HEC token, Python, or shell access on the Splunk host.
+
+1. In Splunk Web, open **Apps → Manage Apps → Install app from file**.
+2. Upload `nakatomi_heist-2.17.1.spl`.
+3. Restart from **Settings → Server controls**.
+4. Open **Nakatomi Heist** and set the time picker to **All time** because the
+   game events are dated December 1988.
+
+See [`nakatomi_heist/README/INSTALL.md`](nakatomi_heist/README/INSTALL.md) for
+the complete Web-only installation and verification procedure.
+
+To build the release artifact from source on a development machine:
 
 ```bash
-cd generator
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python3 generate.py
+python3 -m pip install -r generator/requirements.txt
+bash scripts/build-static-package.sh
 ```
 
-Output lands in `generator/output/` — three JSON event files and three CSV lookup tables (~47k events including NPC baseline). Change the `seed` in `scenario.yaml` to produce a fresh dataset with different codes for each game session.
+The build writes the `.spl`, `SHA256SUMS`, and full seed-data manifest to
+`dist/`.
 
-For conference demos with minimal data, use booth mode:
-
-```bash
-python3 generate.py --booth-mode
-```
-
-This produces ~750 critical-path events only (no NPC baseline) for fast 5-minute sessions.
-
-### 2. Install the Splunk app
-
-**Option A** — Upload via Splunk Web:
-
-Apps > Install app from file > select `nakatomi_heist.spl`
-
-**Option B** — Copy directly:
-
-```bash
-cp -r nakatomi_heist/ $SPLUNK_HOME/etc/apps/nakatomi_heist/
-$SPLUNK_HOME/bin/splunk restart
-```
-
-This creates the three indexes (`nakatomi_access`, `nakatomi_vault`, `nakatomi_building`), configures all sourcetypes, installs lookup tables, and deploys the Mission Brief dashboard.
-
-### 3. Load the data
-
-Enable HTTP Event Collector (HEC) in Splunk, create a token with access to the `nakatomi_*` indexes, then run the loader:
-
-```bash
-scripts/load_data.sh --token YOUR_HEC_TOKEN
-```
-
-Or manually with curl:
-
-```bash
-TOKEN="your-hec-token"
-for f in generator/output/nakatomi_*.json; do
-    curl -k "https://localhost:8088/services/collector" \
-        -H "Authorization: Splunk $TOKEN" \
-        -d @"$f"
-done
-```
-
-### 4. Play
+### 2. Play
 
 Open **Nakatomi Heist** in Splunk. The Mission Brief dashboard is your starting point. Open `game.html` in a browser for the vault keypad (digital mode) or connect the physical vault model.
 
-#### Booth / multi-team deployment *(new in 2.4)*
+#### Booth / multi-team deployment *(Event Mode)*
 
-For conference booths or facilitated multi-team sessions, see [`docs/DEPLOY.md`](docs/DEPLOY.md). It covers:
+For a live race on one laptop/NUC (game + Splunk + public scoreboard):
 
-- The recommended same-origin reverse-proxy pattern (with a working nginx example) so HEC tokens stay secret.
-- Configuring opt-in telemetry to feed the live facilitator board (`Facilitator Board` in the Splunk app nav).
-- Per-team handoff URLs and QR codes from the mode-select screen.
-- A 15-minute Quick Demo mode (`?demo=1`) for short booth sessions.
-- An attract loop for unattended kiosks (idle ≥60 s on the mode-select screen).
-- A spectator second-screen view (`?spectator=1`) for a public-facing monitor next to the player.
+- Operator manual: [`event-mode/ADMIN.md`](event-mode/ADMIN.md)
+- Stack: [`event-mode/README.md`](event-mode/README.md) (`./scripts/boot.sh`)
+- Security model / HEC: [`docs/DEPLOY.md`](docs/DEPLOY.md)
+
+**GitHub Pages** (if enabled) hosts `game.html` for **offline / solo** play only. It cannot host Splunk or the live scoreboard.
+
+For conference booths without Docker, see [`docs/DEPLOY.md`](docs/DEPLOY.md) for the reverse-proxy pattern.
 
 ### Verify data loaded correctly
 
@@ -227,7 +199,9 @@ splunk-escape-room/
 ├── RELEASE_NOTES.md                # Full version history
 ├── index.html                      # Visual project overview (open in browser)
 ├── index.svg                       # Nakatomi Plaza tower illustration
-├── game.html                       # Game UI v2.4 — dual-mode (physical / digital), telemetry, multi-team, accessibility
+├── event-mode/                     # Docker Event Mode (Splunk + game proxy + public scoreboard)
+│   └── ADMIN.md                    # Operator manual
+├── game.html                       # Game UI — dual-mode (physical / digital), telemetry, multi-team, accessibility
 ├── nakatomi-plaza.jpg              # Nakatomi Plaza photo (mode select background)
 ├── docs/
 │   ├── DESIGN.md                   # Game mechanics, architecture, puzzles

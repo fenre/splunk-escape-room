@@ -162,8 +162,8 @@ jobs:
           sys.exit(rc)
           "
 
-      - name: Generator scenario consistency
-        run: node scripts/tests/test_scenario_consistency.js
+      - name: Event Mode Docker policy
+        run: bash event-mode/scripts/validate-docker-policy.sh
 
       - name: Verify no secrets in repo
         run: |
@@ -203,19 +203,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build .spl tarball
-        run: |
-          set -euo pipefail
-          mkdir -p dist
-          # The Splunk app lives at nakatomi_heist/. .spl is just a
-          # gzipped tarball with a fixed top-level directory name.
-          tar -czf "dist/nakatomi_heist-${{ github.ref_name }}.spl" nakatomi_heist
-          ls -lh dist/
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-      - name: Compute SHA-256
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install generator dependencies
+        run: python3 -m pip install -r generator/requirements.txt
+
+      - name: Build and validate complete static .spl
         run: |
           set -euo pipefail
-          shasum -a 256 dist/*.spl | tee dist/SHA256SUMS
+          bash scripts/build-static-package.sh
+          ls -lh dist/
 
       - name: Upload .spl as workflow artifact
         uses: actions/upload-artifact@v4
@@ -224,6 +229,7 @@ jobs:
           path: |
             dist/*.spl
             dist/SHA256SUMS
+            dist/seed-data-manifest.json
           retention-days: 30
 
       - name: Attach to draft release
@@ -236,6 +242,7 @@ jobs:
           files: |
             dist/*.spl
             dist/SHA256SUMS
+            dist/seed-data-manifest.json
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           generate_release_notes: false
