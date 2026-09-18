@@ -6935,11 +6935,10 @@ function runBoot(onComplete) {
    (still tracked). The 3-task subset is synthesized into a single act in
    `applyDemoMode()` below, so all the existing act-progression code keeps
    working unchanged. */
-/* hintTokens (v2.6): a finite, scenario-wide pool replacing the old
-   "unlimited per-task hints, just take the score penalty" model. The score
-   penalty stays — tokens stack on top so a careless team still has to use
-   them deliberately. Per-difficulty starting count, per the v2.6 plan:
-     rookie: 5 (forgiving, room to learn)
+/* hintTokens (v2.6): a scenario-wide pool layered on top of the existing
+   score penalty. A value of -1 is the explicit unlimited sentinel; undefined
+   never means unlimited. Per-difficulty starting count:
+     rookie: unlimited (learners can always ask, but lose points)
      operative: 3 (default — encourages thinking before asking)
      mastermind: 1 (matches the existing 1-hint-level cap; spend it well)
      iron_man: 0 (no hints at all — Pacifist Run is the only outcome)
@@ -6959,7 +6958,7 @@ function runBoot(onComplete) {
    applyTaskAllowlistMode() builds a single fake act with just those tasks.
    `isBooth` short-circuits pause / scoring UI flourishes that don't fit
    a 5-minute conference dwell time. Token counts match the Phase 4
-   hint-economy spec from the plan: 5/3/1/0 across rookie/operative/
+   hint-economy spec: unlimited/3/1/0 across rookie/operative/
    mastermind/iron_man, with booth tiers carrying 0 (Quickfire) and 1
    (Booth Heist) — the SPL is pre-filled, so the token is a "I want a
    nudge" affordance, not a primary mechanic. */
@@ -6967,7 +6966,7 @@ var DIFFICULTY_PRESETS = {
   demo:        { timer:  900, maxWrong: 5,  hintLevels: 4, hintTokens: 5, trapCodes: false, scoreMultiplier: 0.5,  splHelp: 'always', label: 'Demo',        isDemo: true },
   quickfire:   { timer:  300, maxWrong: 3,  hintLevels: 4, hintTokens: 0, trapCodes: false, scoreMultiplier: 0.25, splHelp: 'always', label: 'Quickfire',   isBooth: true, taskAllowlist: ['1.1','3.7'] },
   booth_heist: { timer:  600, maxWrong: 5,  hintLevels: 4, hintTokens: 1, trapCodes: false, scoreMultiplier: 0.5,  splHelp: 'always', label: 'Booth Heist', isBooth: true, taskAllowlist: ['1.1','3.3','3.7'] },
-  rookie:      { timer: 7200, maxWrong: 10, hintLevels: 4, hintTokens: 5, trapCodes: false, scoreMultiplier: 0.5,  splHelp: 'always', label: 'Rookie' },
+  rookie:      { timer: 7200, maxWrong: 10, hintLevels: 4, hintTokens: -1, trapCodes: false, scoreMultiplier: 0.5,  splHelp: 'always', label: 'Rookie' },
   operative:   { timer: 5400, maxWrong: 7,  hintLevels: 3, hintTokens: 3, trapCodes: true,  scoreMultiplier: 1,    splHelp: 'act2',   label: 'Operative' },
   mastermind:  { timer: 3600, maxWrong: 4,  hintLevels: 1, hintTokens: 1, trapCodes: true,  scoreMultiplier: 2,    splHelp: 'never',  label: 'Mastermind' },
   iron_man:    { timer: 3000, maxWrong: 3,  hintLevels: 0, hintTokens: 0, trapCodes: true,  scoreMultiplier: 3,    splHelp: 'never',  label: 'Iron Man' }
@@ -7038,7 +7037,8 @@ function setDifficulty(diff) {
   var p = DIFFICULTY_PRESETS[diff];
   var info = '<b>' + (p.timer / 60) + ' min</b> &middot; ' + p.maxWrong + ' errors &middot; ';
   var tokenLabel;
-  if (p.hintTokens === 0) tokenLabel = '<span style="color:var(--red)">no hints</span>';
+  if (p.hintTokens === -1) tokenLabel = 'unlimited hint tokens';
+  else if (p.hintTokens === 0) tokenLabel = '<span style="color:var(--red)">no hints</span>';
   else if (p.hintTokens === 1) tokenLabel = '1 hint token total';
   else tokenLabel = p.hintTokens + ' hint tokens total';
   if (p.hintLevels === 0) info += tokenLabel;
@@ -7151,7 +7151,7 @@ function applyDifficulty() {
      game playable even if a future preset is added without updating this
      section. Never assume undefined === unlimited; that would silently
      reintroduce v2.5 behaviour. */
-  HINT_TOKENS_INITIAL = (typeof p.hintTokens === 'number' && p.hintTokens >= 0) ? p.hintTokens : 3;
+  HINT_TOKENS_INITIAL = (typeof p.hintTokens === 'number' && p.hintTokens >= -1) ? p.hintTokens : 3;
   TRAP_CODES_ENABLED = p.trapCodes;
   SCORE_MULTIPLIER = p.scoreMultiplier;
   SPL_HELP_MODE = p.splHelp;
@@ -11947,7 +11947,9 @@ var HubOverlay = (function() {
     if (dom.kvTokens) {
       var max = (typeof HINT_TOKENS_INITIAL === 'number') ? HINT_TOKENS_INITIAL : 0;
       var rem = (s.hintTokensRemaining != null) ? s.hintTokensRemaining : max;
-      dom.kvTokens.textContent = (s.gameState === 'playing') ? (rem + ' / ' + max) : '—';
+      dom.kvTokens.textContent = (s.gameState === 'playing')
+        ? (max === -1 ? '\u221e (unlimited)' : (rem + ' / ' + max))
+        : '—';
     }
     if (dom.kvElapsed) {
       if (s.gameState === 'playing' && s.startTime) {
@@ -12803,6 +12805,9 @@ function triggerVictory() {
     var tokSpent = state.hintTokensSpent || 0;
     var tokInit = state.hintTokensInitial || 0;
     var tokRemain = state.hintTokensRemaining || 0;
+    var tokSummary = tokInit === -1
+      ? (tokSpent + ' (unlimited)')
+      : (tokSpent + ' / ' + tokInit + (tokRemain > 0 ? ' (' + tokRemain + ' unused)' : ''));
     /* v2.9 / Phase 6 — side-story tally in the post-game breakdown.
        This is cosmetic (stories don't affect the score), but tells the
        team "you found 3/8 mysteries — come back and dig deeper next
@@ -12824,7 +12829,7 @@ function triggerVictory() {
       '<div class="vb-row"><span class="vb-label">Speed bonuses</span><span class="vb-value">+' + totalTimeBonus + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Hint penalties (' + totalHints + ' used)</span><span class="vb-value penalty">-' + totalHintPen + '</span></div>' +
       '<div class="vb-row"><span class="vb-label">Error penalties (' + totalWrongs + ' wrong)</span><span class="vb-value penalty">-' + totalWrongPen + '</span></div>' +
-      '<div class="vb-row"><span class="vb-label">Hint tokens spent</span><span class="vb-value">' + tokSpent + ' / ' + tokInit + (tokRemain > 0 ? ' (' + tokRemain + ' unused)' : '') + (tokSpent === 0 && tokInit > 0 ? ' \u2014 <b>Pacifist Run</b>' : '') + '</span></div>' +
+      '<div class="vb-row"><span class="vb-label">Hint tokens spent</span><span class="vb-value">' + tokSummary + (tokSpent === 0 && tokInit !== 0 ? ' \u2014 <b>Pacifist Run</b>' : '') + '</span></div>' +
       ssLabel +
       (SCORE_MULTIPLIER !== 1 ? '<div class="vb-row"><span class="vb-label">Difficulty multiplier</span><span class="vb-value">\u00d7' + SCORE_MULTIPLIER + '</span></div>' : '') +
       '<div class="vb-row vb-total"><span class="vb-label">TOTAL</span><span class="vb-value">' + finalScore + '</span></div>' +
@@ -12997,7 +13002,8 @@ function requestHint() {
      before showing the score-penalty confirm dialog so the player never sees
      "Reveal hint? (-50)" for a hint they can't actually buy. Out-of-tokens
      messaging is announced + flashed in the HUD so it's not silent. */
-  if ((state.hintTokensRemaining || 0) <= 0) {
+  var unlimitedTokens = state.hintTokensRemaining === -1;
+  if (!unlimitedTokens && (state.hintTokensRemaining || 0) <= 0) {
     state.hintConfirmPending = false;
     flashHintTokenChip('exhausted');
     a11yAnnounce('No hint tokens remaining.', true);
@@ -13014,7 +13020,9 @@ function requestHint() {
   /* Spend the token AFTER the score penalty + confirm flow but BEFORE the
      telemetry emit so the emitted `tokens_remaining` reflects the post-spend
      balance the player now sees in the HUD. */
-  state.hintTokensRemaining = Math.max(0, (state.hintTokensRemaining || 0) - 1);
+  if (!unlimitedTokens) {
+    state.hintTokensRemaining = Math.max(0, (state.hintTokensRemaining || 0) - 1);
+  }
   state.hintTokensSpent = (state.hintTokensSpent || 0) + 1;
   if (SCORING_ENABLED && penalty > 0) {
     state.score = Math.max(0, state.score - penalty);
@@ -13052,8 +13060,9 @@ function requestHint() {
   /* Polite SR announcement: include the new hint count + remaining token
      pool so blind players get the same running tally sighted players see. */
   a11yAnnounce('Hint ' + (used + 1) + ' of ' + maxAvail + ' revealed. ' +
-    state.hintTokensRemaining + ' tokens remaining.');
-  flashHintTokenChip(state.hintTokensRemaining === 0 ? 'exhausted' : 'spent');
+    (unlimitedTokens ? 'Unlimited hint tokens available.' :
+      state.hintTokensRemaining + ' tokens remaining.'));
+  flashHintTokenChip(!unlimitedTokens && state.hintTokensRemaining === 0 ? 'exhausted' : 'spent');
   renderHints();
   render();
 }
@@ -13097,7 +13106,8 @@ function renderHints() {
      `exhausted` keeps its old meaning ("all hints for THIS task already
      shown") so the existing CSS for that state still applies; out-of-tokens
      gets a distinct treatment so the player can tell the two apart. */
-  var outOfTokens = (state.hintTokensRemaining || 0) <= 0;
+  var unlimitedTokens = state.hintTokensRemaining === -1;
+  var outOfTokens = !unlimitedTokens && (state.hintTokensRemaining || 0) <= 0;
   btn.style.display = '';
   var levelClasses = ['hint-free', 'hint-lv2', 'hint-lv3', 'hint-answer'];
   if (used === 0) {
@@ -13132,10 +13142,11 @@ function renderHints() {
     if (nextPen === 0 && !isNextAnswer) costLabel = ' (free pts)';
     else if (isNextAnswer) costLabel = ' (0 pts for task)';
     else costLabel = ' (-' + nextPen + ' pts)';
-    /* Always include "1 token" in the cost so the economy is visible at
-     the point of decision, not buried in the HUD chip. */
+    /* Keep the point-of-decision cost visible. Rookie has no finite token
+       charge; other modes retain the existing one-token label. */
+    var tokenCostLabel = unlimitedTokens ? ' \u00b7 UNLIMITED' : ' \u00b7 1 TOKEN';
     var label = (isNextAnswer ? 'ANSWER' : 'HINT ' + (used + 1)) + '/' + maxAvail +
-      costLabel + ' \u00b7 1 TOKEN (H)';
+      costLabel + tokenCostLabel + ' (H)';
     btn.textContent = label;
     btn.classList.remove('exhausted', 'no-tokens');
     btn.disabled = false;
@@ -13965,13 +13976,15 @@ function render() {
     if (tokEl) {
       var rem = state.hintTokensRemaining || 0;
       var init = state.hintTokensInitial || 0;
-      document.getElementById('hint-tokens-count').textContent = rem;
-      document.getElementById('hint-tokens-max').textContent = init;
-      tokEl.classList.toggle('depleted', rem === 0);
+      var unlimitedTokens = init === -1;
+      document.getElementById('hint-tokens-count').textContent = unlimitedTokens ? '\u221e' : rem;
+      document.getElementById('hint-tokens-max').textContent = unlimitedTokens ? '\u221e' : init;
+      tokEl.classList.toggle('depleted', !unlimitedTokens && rem === 0);
       tokEl.classList.toggle('iron-man', init === 0);
       /* aria-label changes per state so a screen reader announces the right
          meaning (depleted vs no-hints-mode) when the player tabs to it. */
-      if (init === 0) tokEl.setAttribute('aria-label', 'No hints available — Iron Man mode');
+      if (unlimitedTokens) tokEl.setAttribute('aria-label', 'Unlimited hint tokens available');
+      else if (init === 0) tokEl.setAttribute('aria-label', 'No hints available — Iron Man mode');
       else if (rem === 0) tokEl.setAttribute('aria-label', 'No hint tokens remaining');
       else tokEl.setAttribute('aria-label', rem + ' of ' + init + ' hint tokens remaining');
       tokEl.style.display = '';

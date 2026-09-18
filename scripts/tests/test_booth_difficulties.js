@@ -163,6 +163,7 @@ assertEq('booth_heist taskAllowlist[2]', bh.taskAllowlist[2], '3.7');
 /* Existing presets must still be present and unchanged in shape. */
 assertEq('demo timer unchanged', presets.demo && presets.demo.timer, 900);
 assertEq('rookie timer unchanged', presets.rookie && presets.rookie.timer, 7200);
+assertEq('rookie uses unlimited hint-token sentinel', presets.rookie && presets.rookie.hintTokens, -1);
 assertEq('operative timer unchanged', presets.operative && presets.operative.timer, 5400);
 assertEq('mastermind timer unchanged', presets.mastermind && presets.mastermind.timer, 3600);
 assertEq('iron_man timer unchanged', presets.iron_man && presets.iron_man.timer, 3000);

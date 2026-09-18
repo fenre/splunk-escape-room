@@ -2165,9 +2165,9 @@ flowchart LR
           </div>
           <div class="rn-cat">Hint-Token Economy</div>
           <ul>
-            <li>Per-difficulty starting count: <code>rookie</code> 5, <code>operative</code> 3, <code>mastermind</code> 1, <code>iron_man</code> 0, <code>demo</code> 5</li>
-            <li>HUD chip <code>TOK: 2/3</code> with spend-flash animations and <code>prefers-reduced-motion</code> fallbacks</li>
-            <li>Hint button reads <code>HINT 2/3 (-150 pts) &middot; 1 TOKEN (H)</code> &mdash; dual cost visible at decision time</li>
+            <li>Per-difficulty starting count: <code>rookie</code> unlimited (point penalties still apply), <code>operative</code> 3, <code>mastermind</code> 1, <code>iron_man</code> 0, <code>demo</code> 5</li>
+            <li>HUD chip shows <code>TOK: &infin;/&infin;</code> on Rookie or a finite balance such as <code>TOK: 2/3</code>, with spend-flash animations and <code>prefers-reduced-motion</code> fallbacks</li>
+            <li>Hint button keeps the score penalty visible and shows <code>UNLIMITED</code> on Rookie or <code>1 TOKEN</code> on finite modes</li>
             <li>Three terminal states: <code>ALL HINTS REVEALED</code>, <code>NO TOKENS LEFT</code>, normal &mdash; CSS distinguishes the two disabled states for colour-blind players</li>
             <li>Post-game breakdown surfaces tokens spent + Pacifist Run callout</li>
           </ul>

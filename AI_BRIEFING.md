@@ -240,7 +240,7 @@ splunk-escape-room/
 
 | Mode | Time | Token budget | Wrong-codes allowed | Notes |
 |---|---|---|---|---|
-| Rookie | 120 min | 5 hint tokens | forgiving | tutorial-friendly |
+| Rookie | 120 min | unlimited hints (point penalties apply) | forgiving | tutorial-friendly |
 | Operative | 90 min | 3 hint tokens | standard | "default" experience |
 | Mastermind | 60 min | 1 hint token | brutal | original target time |
 | **Iron Man** | **50 min** | **0 hint tokens** | **3 errors** | 3× score multiplier |
@@ -257,11 +257,12 @@ Selected via the mode-select screen at game start, or via URL.
 
 ### 5.3 Hint-token economy (v2.6)
 
-Replaces the old "unlimited hints, just take a score penalty" model.
-Each scenario has a finite token pool. Spending a token reveals the next
-escalation tier of the active hint. Out of tokens → no more hints.
+Most modes use a finite token pool. Rookie is the learning exception: it has
+unlimited tokens, while every reveal still applies the normal score penalty.
+Spending reveals the next escalation tier of the active hint; finite modes
+disable further reveals when their pool reaches zero.
 
-- HUD chip `TOK: 2/3` next to the hints counter.
+- HUD chip `TOK: ∞/∞` on Rookie or a finite balance such as `TOK: 2/3`.
 - Telemetry: `hint_token_spent` per spend, `pacifist_run_completed` if the
   team beats the campaign without spending any.
 - **Pacifist Run achievement** (🕊️) — zero spends across the run.

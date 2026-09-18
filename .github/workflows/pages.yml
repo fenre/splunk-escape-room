@@ -1,0 +1,50 @@
+# Publish offline game.html + static assets. This is NOT Event Mode.
+# No HEC tokens. Live scoreboard and Splunk require event-mode Docker.
+name: GitHub Pages (offline game)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'game.html'
+      - 'index.html'
+      - 'index.svg'
+      - 'nakatomi-plaza.jpg'
+      - 'scenarios/**'
+      - 'i18n/**'
+      - '.github/workflows/pages.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp game.html index.html index.svg nakatomi-plaza.jpg _site/
+          cp -R scenarios i18n _site/
+          # Offline play: empty telemetry config (already in game.html).
+          printf '%s\n' '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Nakatomi Heist</title></head><body><p>Offline game: <a href="game.html">game.html</a>. Live multiplayer scoreboard requires Event Mode (Docker + Splunk), not GitHub Pages.</p></body></html>' > _site/PLAY.txt.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
