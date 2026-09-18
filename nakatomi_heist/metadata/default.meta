@@ -6,6 +6,10 @@ export = system
 access = read : [ * ], write : [ admin ]
 export = system
 
+[views/facilitator_board]
+access = read : [ admin ], write : [ admin ]
+export = system
+
 [indexes]
 export = system
 
@@ -23,4 +27,12 @@ access = read : [ * ], write : [ admin ]
 export = system
 
 [visualizations]
+export = system
+
+[visualizations/nakatomi_terminal]
+access = read : [ * ], write : [ admin ]
+export = system
+
+[visualizations/nakatomi_vault_display]
+access = read : [ * ], write : [ admin ]
 export = system

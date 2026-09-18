@@ -1,6 +1,7 @@
 import importlib.util
 import io
 import json
+import re
 import tarfile
 import tempfile
 import unittest
@@ -186,6 +187,32 @@ class StaticPackageValidatorTests(unittest.TestCase):
         package_job = ci_text.split("  package:", 1)[1]
         self.assertIn("build-static-package.sh", package_job)
         self.assertNotIn("tar -czf", package_job)
+
+    def test_custom_visualizations_use_splunk_compatible_contract(self) -> None:
+        viz_root = (
+            REPO_ROOT
+            / "nakatomi_heist"
+            / "appserver"
+            / "static"
+            / "visualizations"
+        )
+        for name in ("nakatomi_terminal", "nakatomi_vault_display"):
+            with self.subTest(viz=name):
+                directory = viz_root / name
+                source = (directory / "src" / "visualization_source.js").read_text(
+                    encoding="utf-8"
+                )
+                config = (directory / "webpack.config.js").read_text(encoding="utf-8")
+                formatter = (directory / "formatter.html").read_text(encoding="utf-8")
+                self.assertIn("function getOption(", source)
+                self.assertIn("function fitText(", source)
+                self.assertEqual(source.count("config[ns +"), 1)
+                self.assertIn("target: ['web', 'es5']", config)
+                self.assertIn("arrowFunction: false", config)
+                self.assertEqual(
+                    re.findall(r'section-label="([^"]+)"', formatter),
+                    ["Data configurations", "Data display", "Color and style"],
+                )
 
 
 if __name__ == "__main__":

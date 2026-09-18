@@ -13,6 +13,25 @@ define([
     'api/SplunkVisualizationUtils'
 ], function(SplunkVisualizationBase, SplunkVisualizationUtils) {
 
+    function getOption(config, ns, key, defaultValue) {
+        var value = config[ns + key];
+        if (value !== undefined && value !== null) return value;
+        value = config[key];
+        if (value !== undefined && value !== null) return value;
+        return defaultValue;
+    }
+
+    function fitText(ctx, text, maxWidth, startSize, minSize) {
+        var size = startSize;
+        var minimum = minSize || 8;
+        ctx.font = 'bold ' + size + 'px monospace';
+        while (ctx.measureText(text).width > maxWidth && size > minimum) {
+            size -= 1;
+            ctx.font = 'bold ' + size + 'px monospace';
+        }
+        return size;
+    }
+
     var SCHEMES = {
         green: {
             bg:      '#000d00',
@@ -137,10 +156,10 @@ define([
             var h = rect.height;
 
             var ns = this.getPropertyNamespaceInfo().propertyNamespace;
-            var schemeName = config[ns + 'colorScheme'] || 'green';
-            var showScanlines = (config[ns + 'showScanlines'] || 'true') === 'true';
-            var showTimestamp = (config[ns + 'showTimestamp'] || 'true') === 'true';
-            var maxLines = parseInt(config[ns + 'maxLines'] || '50', 10);
+            var schemeName = getOption(config, ns, 'colorScheme', 'green');
+            var showScanlines = getOption(config, ns, 'showScanlines', 'true') === 'true';
+            var showTimestamp = getOption(config, ns, 'showTimestamp', 'true') === 'true';
+            var maxLines = parseInt(getOption(config, ns, 'maxLines', '50'), 10);
             if (isNaN(maxLines) || maxLines < 1) maxLines = 50;
 
             var scheme = SCHEMES[schemeName] || SCHEMES.green;
@@ -179,8 +198,9 @@ define([
             ctx.shadowColor = scheme.primary;
             ctx.shadowBlur = 6;
             ctx.fillStyle = scheme.primary;
-            ctx.font = (fontSize * 1.1) + 'px monospace';
-            ctx.fillText('NAKATOMI PLAZA \u2014 TERMINAL OUTPUT', pad * 2, pad + fontSize * 1.4);
+            var title = 'NAKATOMI PLAZA \u2014 TERMINAL OUTPUT';
+            var titleSize = fitText(ctx, title, w - pad * 4, fontSize * 1.1, 8);
+            ctx.fillText(title, pad * 2, pad + titleSize * 1.4);
             ctx.shadowBlur = 0;
             ctx.restore();
 

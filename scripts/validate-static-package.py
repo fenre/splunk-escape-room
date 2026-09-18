@@ -23,7 +23,8 @@ REQUIRED_BUNDLES = (
     "appserver/static/visualizations/nakatomi_terminal/visualization.js",
     "appserver/static/visualizations/nakatomi_vault_display/visualization.js",
 )
-FORBIDDEN_PARTS = {"node_modules", "__pycache__", "local", ".git"}
+FORBIDDEN_PARTS = {"node_modules", "__pycache__", "local", ".git", "src"}
+FORBIDDEN_NAMES = {"package.json", "package-lock.json", "webpack.config.js"}
 FORBIDDEN_SUFFIXES = {".pyc", ".pyo", ".pem", ".key", ".crt", ".cer", ".der"}
 SECRET_PATTERNS = (
     re.compile(rb"AKIA[0-9A-Z]{16}"),
@@ -57,6 +58,7 @@ def parse_conf(path: Path) -> tuple[dict[str, dict[str, str]], list[str]]:
 def _forbidden_path(relative: Path) -> bool:
     return (
         bool(FORBIDDEN_PARTS.intersection(relative.parts))
+        or relative.name in FORBIDDEN_NAMES
         or relative.name == ".DS_Store"
         or relative.name.startswith("._")
         or relative.suffix.lower() in FORBIDDEN_SUFFIXES
@@ -99,6 +101,10 @@ def validate_app(app: Path) -> list[str]:
         bundle = app / relative
         if not bundle.is_file() or bundle.stat().st_size == 0:
             errors.append(f"missing bundle: {relative}")
+        elif "visualization.js" in relative:
+            prefix = bundle.read_text(encoding="utf-8")[:200]
+            if not re.match(r"^define\(\[.*\],\s*function\s*\(", prefix):
+                errors.append(f"custom visualization bundle is not ES5 AMD: {relative}")
 
     conf_dir = app / "default"
     required_conf = ("app.conf", "indexes.conf", "inputs.conf", "props.conf")

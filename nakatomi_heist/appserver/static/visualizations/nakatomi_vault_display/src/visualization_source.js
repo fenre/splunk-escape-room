@@ -13,6 +13,25 @@ define([
     'api/SplunkVisualizationUtils'
 ], function(SplunkVisualizationBase, SplunkVisualizationUtils) {
 
+    function getOption(config, ns, key, defaultValue) {
+        var value = config[ns + key];
+        if (value !== undefined && value !== null) return value;
+        value = config[key];
+        if (value !== undefined && value !== null) return value;
+        return defaultValue;
+    }
+
+    function fitText(ctx, text, maxWidth, startSize, minSize) {
+        var size = startSize;
+        var minimum = minSize || 8;
+        ctx.font = 'bold ' + size + 'px monospace';
+        while (ctx.measureText(text).width > maxWidth && size > minimum) {
+            size -= 1;
+            ctx.font = 'bold ' + size + 'px monospace';
+        }
+        return size;
+    }
+
     var SCHEMES = {
         green: {
             bg:       '#000d00',
@@ -190,9 +209,9 @@ define([
             var h = rect.height;
 
             var ns = this.getPropertyNamespaceInfo().propertyNamespace;
-            var schemeName = config[ns + 'colorScheme'] || 'green';
-            var showScanlines = (config[ns + 'showScanlines'] || 'true') === 'true';
-            var animate = (config[ns + 'animate'] || 'true') === 'true';
+            var schemeName = getOption(config, ns, 'colorScheme', 'green');
+            var showScanlines = getOption(config, ns, 'showScanlines', 'true') === 'true';
+            var animate = getOption(config, ns, 'animate', 'true') === 'true';
 
             if (animate && !this._blinkInterval) {
                 var self = this;
@@ -281,16 +300,9 @@ define([
                 var nameColor = seal.status === 'ACTIVE' ? scheme.amber : scheme.dim;
                 var displayName = seal.name;
                 var maxNameW = (w * 0.5) - nameX;
-                ctx.font = (fontSize * 0.9) + 'px monospace';
-                if (ctx.measureText(displayName).width > maxNameW && maxNameW > 0) {
-                    while (ctx.measureText(displayName + '..').width > maxNameW &&
-                           displayName.length > 3) {
-                        displayName = displayName.substring(0, displayName.length - 1);
-                    }
-                    displayName = displayName + '..';
-                }
+                var nameSize = fitText(ctx, displayName, maxNameW, fontSize * 0.9, 8);
                 drawGlowText(ctx, displayName, nameX, rowY + fontSize * 0.35,
-                    nameColor, fontSize * 0.9, 2);
+                    nameColor, nameSize, 2);
 
                 var statusColor;
                 if (seal.status === 'OPEN') statusColor = scheme.primary;
