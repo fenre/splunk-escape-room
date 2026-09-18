@@ -35,9 +35,9 @@ The game supports **dual mode**: play with the physical vault model, or go fully
 - **Tiered hints** — Free first hint, escalating penalties, optional answer reveal at 0 points
 - **Trap codes** — Specific wrong answers trigger extra penalties or instant game over
 
-### Hint-token economy *(new in 2.6)*
-- **Finite token pool** — Replaces "unlimited hints, just take the score penalty" with a per-scenario budget: `rookie: 5`, `operative: 3`, `mastermind: 1`, `iron_man: 0`, `demo: 5`. Spend wisely.
-- **HUD chip** — `TOK: 2/3` next to the hints counter; flashes on every spend, goes red when depleted, distinct boxed-red style for Iron Man's permanent `0/0`.
+### Hint-token economy *(new in 2.6; Rookie unlimited in 2.17.2)*
+- **Difficulty-aware token pool** — Rookie has unlimited hints for learning, with the existing point deduction on every reveal. Other budgets remain `operative: 3`, `mastermind: 1`, `iron_man: 0`, `demo: 5`.
+- **HUD chip** — Shows `TOK: ∞/∞` on Rookie or the finite balance (for example `TOK: 2/3`) elsewhere; finite pools flash on every spend and go red when depleted.
 - **Pacifist Run achievement** *(🕊️)* — Complete the campaign without spending a single token.
 - **Iron Man achievement** *(🧍)* — Survive the no-hints, 50-min, 3-error gauntlet. Yippee-ki-yay also fires on Iron Man clears.
 - **Telemetry** — `hint_token_spent` per spend + `pacifist_run_completed` on victory; `session_end` includes the token roll-up so the facilitator board can plot spending velocity.

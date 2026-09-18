@@ -523,15 +523,15 @@ Tokens are **never** accepted via URL params (would land in browser history, Ref
 
 ---
 
-## 8. Hint-Token Economy (v2.6)
+## 8. Hint-Token Economy (v2.6; Rookie update in v2.17.2)
 
-v2.6 replaces the previous "unlimited hints, just take the score penalty" model with a **finite, scenario-wide token pool**. Every revealed hint costs one token, and tokens never refill mid-game. The score penalty stacks on top — so a careless team has to *both* spend a token *and* eat the points hit. Tokens are decremented when a hint level is actually revealed, **not** when the hint button is clicked but the player aborts the confirmation.
+Most difficulties use a **finite, scenario-wide token pool**. Every revealed hint spends one token and applies the existing score penalty. Rookie is intentionally unlimited as of v2.17.2: learners can reveal every available hint, but each reveal still reduces their score. Usage is counted in every mode when a hint level is actually revealed, **not** when the player opens and cancels the confirmation.
 
 ### Per-difficulty starting count
 
 | Difficulty | Tokens | Hint levels per task | Notes |
 |---|---|---|---|
-| `rookie` | 5 | all 4 | forgiving, room to learn |
+| `rookie` | Unlimited (`∞`) | all 4 | learners are never locked out; point penalties still apply |
 | `operative` | 3 | 3 | default — encourages thinking before asking |
 | `mastermind` | 1 | 1 | matches the existing 1-hint-level cap; spend it well |
 | `iron_man` | **0** | 0 | no hints at all — Pacifist Run is the only outcome |
@@ -539,12 +539,12 @@ v2.6 replaces the previous "unlimited hints, just take the score penalty" model 
 
 ### On-screen UI
 
-- **HUD chip** (`#hint-tokens`) — Renders `TOK: 2/3` next to the existing `HINTS:` counter. Goes red and styled as a depleted box when the pool reaches zero. For Iron Man, the chip stays visible at `0/0` with a distinct red-bordered "iron-man" treatment so the player can tell at a glance this is the no-hints mode rather than mid-game exhaustion.
+- **HUD chip** (`#hint-tokens`) — Renders `TOK: ∞/∞` for Rookie or a finite balance such as `TOK: 2/3`. Finite pools go red when depleted. Iron Man stays visible at `0/0` with a distinct red-bordered treatment.
 - **Spend animation** — On every successful spend, the chip pulses (or, for `prefers-reduced-motion`, briefly changes border colour). On exhaustion, a longer red flash + screen-reader-assertive announcement.
-- **Hint button label** — Now reads `HINT 2/3 (-150 pts) · 1 TOKEN (H)` so the dual cost (score penalty + token spend) is visible at the point of decision.
+- **Hint button label** — Reads `HINT 2/3 (-150 pts) · UNLIMITED (H)` on Rookie or `· 1 TOKEN (H)` for finite modes, keeping the point cost visible.
 - **Three terminal states** — `ALL HINTS REVEALED` (per-task limit hit), `NO TOKENS LEFT` (global pool exhausted), or the normal active prompt. CSS distinguishes the two disabled states so colour-blind players can tell them apart.
 - **Iron Man** — Hint button is hidden entirely; the chip alone communicates the no-hints contract.
-- **Post-game breakdown** — The victory overlay surfaces `Hint tokens spent: 2 / 3 (1 unused)`, or `0 / 3 — Pacifist Run` when nothing was spent.
+- **Post-game breakdown** — The victory overlay surfaces `Hint tokens spent: 2 (unlimited)` for Rookie or the finite spent/starting balance elsewhere.
 
 ### Achievements
 

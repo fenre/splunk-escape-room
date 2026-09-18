@@ -10,6 +10,25 @@ Versioning follows [Semantic Versioning](https://semver.org/): **MAJOR.MINOR.PAT
 
 ---
 
+## 2.17.2 — 2026-09-18
+
+**Theme: Rookie players can learn without exhausting their hints.**
+
+- Rookie now has unlimited hint tokens while retaining all existing
+  level-specific point deductions and its four-hints-per-task limit.
+- The difficulty selector, HUD, accessibility announcement, facilitator hub,
+  and post-game breakdown display the unlimited pool explicitly.
+- Hint usage telemetry and ending/achievement classification continue to count
+  every reveal. Operative, Mastermind, Iron Man, Demo, Quickfire, and Booth
+  Heist retain their existing finite or zero-token behaviour.
+
+### Tests
+
+- Added a regression harness covering unlimited repeated reveals, point
+  deductions, usage telemetry, selector copy, and finite-pool exhaustion.
+
+---
+
 ## 2.17.1 — 2026-06-17
 
 **Theme: Playability patch — keypad display and guard-patrol puzzle parity.**
